@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "500931788508",
+    "project_id": "teluguties-777",
+    "storage_bucket": "teluguties-777.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500931788508:android:d0708f552390110c363e19",
+        "android_client_info": {
+          "package_name": "com.teluguties"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKxwmLaDaQl82hw0Zl3xt_26PJ850Q86k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
