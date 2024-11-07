@@ -8,16 +8,43 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import React from 'react';
-import auth from '@react-native-firebase/auth'
+import React, { useEffect, useState } from 'react';
+import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Header from '../Header/Header';
+import firestore from '@react-native-firebase/firestore';
+import firebase from '@react-native-firebase/app';
+import { collection, getDocs } from 'firebase/firestore';
 
 const { width, height } = Dimensions.get('window');
 
 const ProfileDetails: React.FC = ({ navigation }) => {
-    const { displayName, dob, email, phoneNumber, phoneCode } = auth().currentUser;
-    console.log(auth().currentUser)
+    const [userData, setUserData] = useState({});
+
+    const getCurrentUserDetails = async () => {
+        const currentUser = auth().currentUser;
+
+        if (currentUser) {
+            try {
+                const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
+
+                if (userDoc.exists) {
+                    const userDataFirestore = userDoc.data();
+                   setUserData(userDataFirestore)
+                } else {
+                    console.log("No user data found for this UID"); 
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        } else {
+            console.log("No user is currently authenticated.");
+        }
+    }
+
+    useEffect(() => {
+        getCurrentUserDetails();
+    }, [])
 
     return (
         <SafeAreaView style={styles.safearea}>
@@ -46,30 +73,30 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                             <View>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder={displayName}
+                                    placeholder={userData.name}
                                     placeholderTextColor="#EBC7B1"
                                 />
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={dob}
+                                    placeholder={userData.dob}
                                     style={styles.input}
                                     placeholderTextColor="#EBC7B1"
                                 />
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={email}
+                                    placeholder={''}
                                     style={styles.input}
                                     placeholderTextColor="#EBC7B1"
                                 />
                             </View>
                             <View style={styles.phonecontainer}>
                                 <View style={styles.code}>
-                                    <TextInput placeholder={phoneCode}/>
+                                    <TextInput placeholder={userData.phoneCode} />
                                 </View>
                                 <View style={styles.phone}>
-                                    <TextInput placeholder={phoneNumber}/>
+                                    <TextInput placeholder={userData.phoneNumber} />
                                 </View>
                             </View>
 
@@ -131,26 +158,26 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
     },
     formcontainer: {
-        paddingHorizontal: 12
+        paddingHorizontal: 12,
     },
     container: {
         backgroundColor: 'white',
         borderRadius: 25,
         paddingVertical: 20,
-        paddingHorizontal: 12
+        paddingHorizontal: 12,
     },
     profile: {
         alignItems: 'center',
         padding: 20,
-        paddingTop: 0
+        paddingTop: 0,
     },
     profiletext: {
         fontSize: 25,
-        color: '#792A37'
+        color: '#792A37',
     },
     formbody: {
         display: 'flex',
-        gap: width / 30
+        gap: width / 30,
     },
     input: {
         borderColor: '#EBC7B1',
@@ -196,6 +223,6 @@ const styles = StyleSheet.create({
     },
     footertext: {
         textAlign: 'center',
-        color:'black'
+        color: 'black',
     },
 });

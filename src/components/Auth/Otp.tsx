@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Dimensions,
   SafeAreaView,
   StyleSheet,
@@ -12,8 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { OtpInput } from 'react-native-otp-entry';
 import SmsRetriever from 'react-native-sms-retriever';
 import auth from '@react-native-firebase/auth'
-import firestore from '@react-native-firebase/firestore';
-import { getFirestore } from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore'
 
 import useAuth from '../../hooks/useAuth';
 import { removeListener, startOtpListener } from 'react-native-otp-verify';
@@ -22,6 +22,7 @@ const { width, height } = Dimensions.get('window');
 
 const Otp = ({ navigation, route }) => {
   const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false)
   const { verificationId, confirmation, formData } = route.params
   const { verifyOtp } = useAuth();
 
@@ -31,33 +32,24 @@ const Otp = ({ navigation, route }) => {
       console.error('No user is logged in');
       return;
     }
-    const userRef = firestore().collection('users').doc(user.uid);
-    console.log(firestore(), userRef)
-
     try {
-      await user.updateProfile({
-        displayName: formData.fullname,
+      const userData = await firestore().collection('users').doc(user.uid).set({
+        name: formData.fullname,
+        phoneNumber: formData.phoneNumber,
+        dob: formData.dob,
+        phoneCode: formData.selectedCode,
+        createdAt: firestore.FieldValue.serverTimestamp()
       });
-
-      await userRef.set(
-        {
-          displayName: formData.fullname,
-          dob: new Date(formData.dob),
-          phoneCode: formData.selectedCode,
-          phoneNumber: user.phoneNumber,
-          createdAt: firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      );
-
-      console.log('Profile updated in Firestore');
-      navigation.navigate('Success');
+      
+      setLoading(false)
+      navigation.navigate("Success");
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.log(error)
     }
   }
 
   const confirmOtp = async (otp) => {
+    setLoading(true);
     if (confirmation) {
       try {
         await confirmation.confirm(otp);
@@ -68,14 +60,10 @@ const Otp = ({ navigation, route }) => {
     }
   };
 
-
   const handleSubmit = (otp) => {
     console.log(`Submitting OTP: ${otp}`);
     confirmOtp(otp);
   };
-
-
-
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -134,6 +122,10 @@ const Otp = ({ navigation, route }) => {
           </View>
         </View>
 
+      </View>
+
+      <View style={loading ? styles.loadingContainer : null}>
+        {loading && <ActivityIndicator size="large" color="#a4737b" />}
       </View>
     </SafeAreaView>
   );
@@ -224,5 +216,15 @@ const styles = StyleSheet.create({
   footertext: {
     textAlign: 'center',
     color: 'black'
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 });

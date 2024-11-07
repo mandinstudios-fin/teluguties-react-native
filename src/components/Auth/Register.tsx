@@ -17,14 +17,15 @@ import {Picker} from '@react-native-picker/picker';
 import phoneCodesData from '../../assets/CountryCodes.json';
 import useAuth from '../../hooks/useAuth';
 import auth from '@react-native-firebase/auth';
+import { TRegisterFormData } from '../../types';
 
 const {width, height} = Dimensions.get('window');
 
 const Register = ({navigation}) => {
-  const {userRegister, loading, error} = useAuth();
+  const [loading, setLoading] = useState(false)
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TRegisterFormData>({
     fullname: '',
     dob: '',
     phoneNumber: '',
@@ -46,21 +47,18 @@ const Register = ({navigation}) => {
   };
 
   const handleRegister = async () => {
+    setLoading(true)
     try {
       const confirmation = await auth().signInWithPhoneNumber(formData.selectedCode + formData.phoneNumber);
       const verificationId = confirmation.verificationId;
+
+      setLoading(false)
       navigation.navigate("Otp", { verificationId, confirmation, formData })
     } catch (error) {
       console.error(error)
     }
     
   };
-
-  useEffect(() => {
-  if (error) {
-    Alert.alert("Error", error.message, [{ text: "OK" }]);
-  }
-}, [error]);
 
   return (
     <SafeAreaView style={styles.safearea}>
