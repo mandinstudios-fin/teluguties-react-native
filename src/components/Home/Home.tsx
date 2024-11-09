@@ -1,5 +1,5 @@
 import {SafeAreaView, StyleSheet, Text, View, Image, TouchableOpacity, Dimensions} from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { DATA } from '../../utils';
@@ -7,13 +7,44 @@ import ProfileGrid from '../Profiles/ProfileGrid';
 import { BottomTabBar, useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import Header from '../Header/Header';
 
+import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore'
+
 const Stack = createStackNavigator();
 const { width } = Dimensions.get('window')
 let bottomPadding = 0;
 
 const Home = ({ navigation }) => {
   const tabBarHeight = useBottomTabBarHeight(); 
-  bottomPadding = tabBarHeight
+  bottomPadding = tabBarHeight;
+
+  const [data, setData] = useState<any>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const currentUser = auth().currentUser;
+        if (!currentUser) {
+          console.log('No user is logged in');
+          return;
+        }
+
+        const snapshot = await firestore().collection('users').get();
+        const usersList = snapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter(user => user.id !== currentUser.uid);
+
+        setData(usersList);
+      } catch (error) {
+        console.error('Error getting users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -43,7 +74,7 @@ const Home = ({ navigation }) => {
           </View>
         </View>
 
-        <View style={styles.profilegridcontainer}><ProfileGrid data={DATA}/></View>
+        <ProfileGrid navigation={navigation} data={data}/>
       </View>
     </SafeAreaView>
   );

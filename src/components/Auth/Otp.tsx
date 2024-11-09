@@ -23,7 +23,7 @@ const { width, height } = Dimensions.get('window');
 const Otp = ({ navigation, route }) => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false)
-  const { verificationId, confirmation, formData } = route.params
+  const { confirmation, isRegistration, formData } = route.params
   const { verifyOtp } = useAuth();
 
   const updateUserDetails = async () => {
@@ -41,7 +41,6 @@ const Otp = ({ navigation, route }) => {
         createdAt: firestore.FieldValue.serverTimestamp()
       });
       
-      setLoading(false)
       navigation.navigate("Success");
     } catch (error) {
       console.log(error)
@@ -53,15 +52,20 @@ const Otp = ({ navigation, route }) => {
     if (confirmation) {
       try {
         await confirmation.confirm(otp);
-        await updateUserDetails();
+
+        if(isRegistration) {
+          await updateUserDetails();
+        }
       } catch (error) {
         console.error('Invalid code.', error);
+      } finally {
+        setLoading(false);
+        navigation.navigate("Success");
       }
     }
   };
 
   const handleSubmit = (otp) => {
-    console.log(`Submitting OTP: ${otp}`);
     confirmOtp(otp);
   };
 

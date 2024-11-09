@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
@@ -19,14 +20,44 @@ import firestore from '@react-native-firebase/firestore';
 const { width, height } = Dimensions.get('window');
 
 const Login = ({ navigation }) => {
+  const [loading, setLoading] = useState(false);
   const [selectedCode, setSelectedCode] = useState('+91'); // Default code
   const [phoneNumber, setPhoneNumber] = useState('');
 
-  const handleSendOtp = async () => {
+  const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
+    try {
+      const userSnapshot = await firestore()
+        .collection('users')
+        .where('phoneCode', '==', selectedCode)
+        .where('phoneNumber', '==', phoneNumber)
+        .get();
+
+      if (userSnapshot.empty) {
+        return false; 
+      } else {
+        return true; 
+      }
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const handleLogin = async () => {
     const fullPhoneNumber = selectedCode + phoneNumber;
+    const phoneExists = await checkPhoneNumberExists(selectedCode, phoneNumber);
+
+    if(!phoneExists) {
+      navigation.navigate("Register");
+      return;
+    }
+
+    setLoading(true);
     try {
       const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
       
+      const isRegistration = false;
+      setLoading(false);
+      navigation.navigate("Otp", { confirmation, isRegistration })
     } catch (error) {
       console.error(error);
     }
@@ -80,12 +111,13 @@ const Login = ({ navigation }) => {
                 <TextInput
                   style={styles.phoneno}
                   keyboardType="number-pad"
+                  maxLength={10}
                   onChangeText={setPhoneNumber}
                   value={phoneNumber}></TextInput>
               </View>
             </View>
             <View>
-              <TouchableOpacity style={styles.otpbox} onPress={handleSendOtp}>
+              <TouchableOpacity style={styles.otpbox} onPress={handleLogin}>
                 <Text style={styles.otp}>Send OTP</Text>
               </TouchableOpacity>
             </View>
@@ -111,6 +143,10 @@ const Login = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
+
+      <View style={loading ? styles.loadingContainer : null}>
+        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+      </View>
     </SafeAreaView>
   );
 };
@@ -232,5 +268,15 @@ const styles = StyleSheet.create({
   footertext: {
     textAlign: 'center',
     color: 'black',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 });

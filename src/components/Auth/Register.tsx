@@ -50,10 +50,10 @@ const Register = ({navigation}) => {
     setLoading(true)
     try {
       const confirmation = await auth().signInWithPhoneNumber(formData.selectedCode + formData.phoneNumber);
-      const verificationId = confirmation.verificationId;
 
+      const isRegistration = true;
       setLoading(false)
-      navigation.navigate("Otp", { verificationId, confirmation, formData })
+      navigation.navigate("Otp", { confirmation, isRegistration, formData })
     } catch (error) {
       console.error(error)
     }

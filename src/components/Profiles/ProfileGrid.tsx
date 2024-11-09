@@ -1,34 +1,52 @@
-import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import ProfileImage from './ProfileImage'
+import {
+  Animated,
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import firestore from '@react-native-firebase/firestore';
+import React, {useEffect, useState} from 'react';
+import auth from '@react-native-firebase/auth';
+
+import ProfileImage from './ProfileImage';
 
 const numColumns = 2;
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 const itemSize = width / numColumns;
 const gap = 20;
 
-const ProfileGrid: React.FC = ({ data }) => {
+const ProfileGrid: React.FC = ({data, navigation}) => {
   return (
-    <View style={styles.container}>
-      <FlatList
-      style={{ flex: 0 }}
-        data={data}
-        initialNumToRender={data.length}
-        renderItem={({ item }) => <ProfileImage imgSource={item.imgSource} name={item.name} />}
-        keyExtractor={item => item.id}
-        numColumns={numColumns}
-        showsVerticalScrollIndicator={false}
-        />
-    </View>
-  )
-}
+    <FlatList
+      data={data}
+      contentContainerStyle={[
+        styles.container,
+        data.length == 1 ? styles.oneitem : styles.manyitems,
+      ]}
+      initialNumToRender={data.length}
+      renderItem={({item}) => (
+        <ProfileImage user={item} navigation={navigation} />
+      )}
+      keyExtractor={item => item.id}
+      numColumns={numColumns}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+};
 
-export default ProfileGrid
+export default ProfileGrid;
 
 const styles = StyleSheet.create({
   container: {
     display: 'flex',
-    alignItems:'center',
-    marginTop: 10
-  }
-})
+    marginTop: 10,
+  },
+  oneitem: {
+    alignItems: 'flex-start',
+  },
+  manyitems: {
+    alignItems: 'center',
+  },
+});

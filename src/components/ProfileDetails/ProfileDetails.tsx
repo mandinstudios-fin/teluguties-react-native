@@ -1,4 +1,5 @@
 import {
+    Alert,
     Dimensions,
     Image,
     SafeAreaView,
@@ -8,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Header from '../Header/Header';
@@ -19,7 +20,20 @@ import { collection, getDocs } from 'firebase/firestore';
 const { width, height } = Dimensions.get('window');
 
 const ProfileDetails: React.FC = ({ navigation }) => {
-    const [userData, setUserData] = useState({});
+    const [userData, setUserData] = useState<any>({});
+    const [name, setName] = useState<string>('');
+    const [dob, setDob] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [isEmailEdited, setIsEmailEdited] = useState<boolean>(false);
+
+    const nameRef = useRef(null);
+    const dobRef = useRef(null);
+    const emailRef = useRef(null);
+
+    const checkEmail = (email: string) => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
 
     const getCurrentUserDetails = async () => {
         const currentUser = auth().currentUser;
@@ -30,7 +44,11 @@ const ProfileDetails: React.FC = ({ navigation }) => {
 
                 if (userDoc.exists) {
                     const userDataFirestore = userDoc.data();
-                   setUserData(userDataFirestore)
+                    setUserData(userDataFirestore);
+
+                    setName(userDataFirestore?.name);
+                    setDob(userDataFirestore?.dob);
+                    setEmail(userDataFirestore?.email)
                 } else {
                     console.log("No user data found for this UID"); 
                 }
@@ -44,7 +62,49 @@ const ProfileDetails: React.FC = ({ navigation }) => {
 
     useEffect(() => {
         getCurrentUserDetails();
-    }, [])
+    }, []);
+
+    const clearRefs = () => {
+        nameRef?.current?.blur();
+        dobRef?.current?.blur();
+        emailRef?.current?.blur();
+    }
+
+    const handleUserUpdate = async () => {
+        const currentUser = auth().currentUser;
+
+        if (!name || !dob || !checkEmail(email)) {
+            Alert.alert("Error", "Please fill all the fields before updating.");
+            return;
+        }
+
+        if (currentUser) {
+            try {
+                await firestore()
+                    .collection('users')
+                    .doc(currentUser.uid)
+                    .update({
+                        name: name,
+                        dob: dob,
+                        email: email
+                    });
+
+                Alert.alert('Success', 'Your profile has been updated.');
+                clearRefs();
+                setUserData(prevData => ({ ...prevData, name, dob, email }));
+
+            } catch (error) {
+                console.error("Error updating user data:", error);
+                Alert.alert('Error', 'There was an issue updating your profile.');
+            }
+        }
+    }
+
+    const handleEmailChange = (newEmail: string) => {
+        if (!isEmailEdited) {
+          setEmail(newEmail);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.safearea}>
@@ -73,34 +133,46 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                             <View>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder={userData.name}
+                                    placeholder={name}
                                     placeholderTextColor="#EBC7B1"
+                                    value={name}
+                                    onChangeText={setName}
+                                    editable={userData?.name? false : true}
+                                    ref={nameRef}
                                 />
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={userData.dob}
+                                    placeholder={dob}
                                     style={styles.input}
                                     placeholderTextColor="#EBC7B1"
+                                    value={dob}
+                                    onChangeText={setDob}
+                                    editable={userData?.dob? false : true}
+                                    ref={dobRef}
                                 />
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={''}
+                                    placeholder={'Email'}
                                     style={styles.input}
+                                    value={email}
+                                    onChangeText={handleEmailChange}
                                     placeholderTextColor="#EBC7B1"
+                                    editable={userData?.email? false : true}
+                                    ref={emailRef}
                                 />
                             </View>
                             <View style={styles.phonecontainer}>
                                 <View style={styles.code}>
-                                    <TextInput placeholder={userData.phoneCode} />
+                                    <TextInput placeholder={userData.phoneCode} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly/>
                                 </View>
                                 <View style={styles.phone}>
-                                    <TextInput placeholder={userData.phoneNumber} />
+                                    <TextInput placeholder={userData.phoneNumber} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly/>
                                 </View>
                             </View>
 
-                            <TouchableOpacity style={styles.creat}>
+                            <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
                                 <Text style={styles.creattext}>UPDATE</Text>
                             </TouchableOpacity>
                         </View>
@@ -202,6 +274,13 @@ const styles = StyleSheet.create({
         borderColor: '#EBC7B1',
         borderWidth: 1,
         borderRadius: 12,
+    },
+    number1: {
+        textAlign: 'center'
+    },
+    number2: {
+        textAlign: 'left',
+        paddingLeft: width / 40,
     },
     creat: {
         borderRadius: 12,
