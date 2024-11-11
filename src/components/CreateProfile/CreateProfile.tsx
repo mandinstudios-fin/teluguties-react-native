@@ -52,7 +52,7 @@ const CreateProfile: React.FC = ({ navigation }) => {
   const [manglik, setManglik] = useState<string>('');
   const [countryborn, setCountryBorn] = useState<string>('');
   const [countrygrew, setCountryGrew] = useState<string>('');
-  
+
   const firstnameRef = useRef(null);
   const middlenameRef = useRef(null);
   const lastnameRef = useRef(null);
@@ -121,40 +121,40 @@ const CreateProfile: React.FC = ({ navigation }) => {
           setGender(userDataFirestore?.gender);
           setPhoneNo(userDataFirestore?.phoneno);
           setCommunity(userDataFirestore?.community);
-          setPlace(userDataFirestore?.email);
-          setReligion(userDataFirestore?.email);
-          setCaste(userDataFirestore?.email);
-          setCountry(userDataFirestore?.email);
-          setState(userDataFirestore?.email);
-          setCity(userDataFirestore?.email);
-          setAddress(userDataFirestore?.email);
-          setMaritialaStatus(userDataFirestore?.email);
-          setChildren(userDataFirestore?.email);
-          setAge(userDataFirestore?.email);
-          setEducation(userDataFirestore?.firstname);
-          setOccupation(userDataFirestore?.middlename);
-          setNationality(userDataFirestore?.lastname);
-          setPassport(userDataFirestore?.dob);
-          setIncome(userDataFirestore?.email);
-          setDrinking(userDataFirestore?.gender);
-          setSmoking(userDataFirestore?.phoneno);
-          setWeight(userDataFirestore?.community);
-          setHeight(userDataFirestore?.email);
-          setComplexion(userDataFirestore?.email);
-          setHairColor(userDataFirestore?.email);
-          setEyeColor(userDataFirestore?.email);
-          setCulture(userDataFirestore?.email);
-          setAbout(userDataFirestore?.email);
-          setDiet(userDataFirestore?.email);
-          setLifeStyle(userDataFirestore?.email);
-          setPurpose(userDataFirestore?.email);
-          setWeddingPlan(userDataFirestore?.email);
-          setFamilyStatus(userDataFirestore?.firstname);
-          setVisaType(userDataFirestore?.middlename);
-          setRelocate(userDataFirestore?.lastname);
-          setManglik(userDataFirestore?.dob);
-          setCountryBorn(userDataFirestore?.email);
-          setCountryGrew(userDataFirestore?.gender);
+          setPlace(userDataFirestore?.place);
+          setReligion(userDataFirestore?.religion);
+          setCaste(userDataFirestore?.caste);
+          setCountry(userDataFirestore?.country);
+          setState(userDataFirestore?.state);
+          setCity(userDataFirestore?.city);
+          setAddress(userDataFirestore?.address);
+          setMaritialaStatus(userDataFirestore?.maritialstatus);
+          setChildren(userDataFirestore?.children);
+          setAge(userDataFirestore?.age);
+          setEducation(userDataFirestore?.education);
+          setOccupation(userDataFirestore?.occupation);
+          setNationality(userDataFirestore?.nationality);
+          setPassport(userDataFirestore?.passport);
+          setIncome(userDataFirestore?.income);
+          setDrinking(userDataFirestore?.drinking);
+          setSmoking(userDataFirestore?.smoking);
+          setWeight(userDataFirestore?.weight);
+          setHeight(userDataFirestore?.height);
+          setComplexion(userDataFirestore?.complexion);
+          setHairColor(userDataFirestore?.haircolor);
+          setEyeColor(userDataFirestore?.eyecolor);
+          setCulture(userDataFirestore?.culture);
+          setAbout(userDataFirestore?.about);
+          setDiet(userDataFirestore?.diet);
+          setLifeStyle(userDataFirestore?.lifestyle);
+          setPurpose(userDataFirestore?.purpose);
+          setWeddingPlan(userDataFirestore?.weddingplan);
+          setFamilyStatus(userDataFirestore?.familystatus);
+          setVisaType(userDataFirestore?.visatype);
+          setRelocate(userDataFirestore?.relocate);
+          setManglik(userDataFirestore?.manglik);
+          setCountryBorn(userDataFirestore?.countryborn);
+          setCountryGrew(userDataFirestore?.countrygrew);
         } else {
           console.log("No user data found for this UID");
         }
@@ -239,39 +239,39 @@ const CreateProfile: React.FC = ({ navigation }) => {
             phoneno: phoneno,
             community: community,
             place: place,
-            religion:religion,
-            caste:caste,
-            state:state,
-            city:city,
-            address:address,
-            maritialstatus:maritialstatus,
-            children:children,
-            age:age,
-            education:education,
-            occupation:occupation,
-            nationality:nationality,
-            passport:passport,
-            income:income,
-            drinking:drinking,
-            smoking:smoking,
-            weight:weight,
-            height:height,
-            built:built,
-            complexion:complexion,
-            haircolor:haircolor,
-            eyecolor:eyecolor,
-            culture:culture,
-            about:about,
-            diet:diet,
-            lifestyle:lifestyle,
-            purpose:purpose,
-            weddingplan:weddingplan,
-            familystatus:familystatus,
-            visatype:visatype,
-            relocate:relocate,
-            manglik:manglik,
-            countryborn:countryborn,
-            countrygrew:countrygrew
+            religion: religion,
+            caste: caste,
+            state: state,
+            city: city,
+            address: address,
+            maritialstatus: maritialstatus,
+            children: children,
+            age: age,
+            education: education,
+            occupation: occupation,
+            nationality: nationality,
+            passport: passport,
+            income: income,
+            drinking: drinking,
+            smoking: smoking,
+            weight: weight,
+            height: height,
+            built: built,
+            complexion: complexion,
+            haircolor: haircolor,
+            eyecolor: eyecolor,
+            culture: culture,
+            about: about,
+            diet: diet,
+            lifestyle: lifestyle,
+            purpose: purpose,
+            weddingplan: weddingplan,
+            familystatus: familystatus,
+            visatype: visatype,
+            relocate: relocate,
+            manglik: manglik,
+            countryborn: countryborn,
+            countrygrew: countrygrew
           });
 
         Alert.alert('Success', 'Your profile has been updated.');
@@ -280,7 +280,7 @@ const CreateProfile: React.FC = ({ navigation }) => {
           ...prevData, firstname, middlename, lastname, dob, email, gender,
           phoneno, community, place, religion, country, state, city, address, maritialstatus,
           children, age, education, occupation, nationality, passport, income, drinking, smoking,
-          weight, height, built, complexion, haircolor, eyecolor, culture, about, lifestyle,purpose,
+          weight, height, built, complexion, haircolor, eyecolor, culture, about, lifestyle, purpose,
           visatype, relocate, manglik, countryborn, countrygrew
         }));
 
@@ -297,8 +297,6 @@ const CreateProfile: React.FC = ({ navigation }) => {
     }
   };
 
-
-
   return (
     <SafeAreaView style={styles.safearea}>
       <ScrollView style={styles.main}>
@@ -307,506 +305,561 @@ const CreateProfile: React.FC = ({ navigation }) => {
           <View style={styles.profile} >
             <Text style={styles.profiletext}>CREATE PROFILE</Text>
           </View>
+
           <View>
+            <Text style={styles.label}>First Name</Text>
             <TextInput
               style={styles.input}
               placeholder='First Name'
               placeholderTextColor="#EBC7B1"
               value={firstname}
               onChangeText={setFirstName}
-              editable={userData?.firstname ? false : true}
+              editable={userData?.firstname? false : true}
               ref={firstnameRef}
             />
           </View>
 
           <View>
+            <Text style={styles.label}>Middle Name</Text>
             <TextInput
               placeholder='Middle Name'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={middlename}
               onChangeText={setMiddleName}
-              editable={userData?.middlename ? false : true}
+              editable={userData?.middlename? false : true}
               ref={middlenameRef}
             />
           </View>
+
           <View>
+            <Text style={styles.label}>Last Name</Text>
             <TextInput
               placeholder='Last Name'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={lastname}
               onChangeText={setLastName}
-              editable={userData?.lastname ? false : true}
+              editable={userData?.lastname? false : true}
               ref={lastnameRef}
             />
           </View>
           <View>
+            <Text style={styles.label}>Gender</Text>
             <TextInput
               placeholder='Gender'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={gender}
               onChangeText={setGender}
-              editable={userData?.gender ? false : true}
+              editable={userData?.gender? false : true}
               ref={genderRef}
             />
           </View>
           <View>
+            <Text style={styles.label}>Phone Number</Text>
             <TextInput
               placeholder='Phone Number'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={phoneno}
               onChangeText={setPhoneNo}
-              editable={userData?.phoneno ? false : true}
+              editable={userData?.phoneno? false : true}
               ref={phonenoRef}
             />
           </View>
           <View>
+            <Text style={styles.label}>Community</Text>
             <TextInput
               placeholder='Community'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={community}
               onChangeText={setCommunity}
-              editable={userData?.community ? false : true}
+              editable={userData?.community? false : true}
               ref={communityRef}
             />
           </View>
           <View>
+          <Text style={styles.label}>Place</Text>
             <TextInput
               placeholder='Place'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={place}
               onChangeText={setPlace}
-              editable={userData?.place ? false : true}
+              editable={userData?.place? false : true}
               ref={placeRef}
             />
           </View>
           <View>
+          <Text style={styles.label}>Date of Birth</Text>
             <TextInput
               placeholder='Date of Birth'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={dob}
               onChangeText={setDob}
-              editable={userData?.dob ? false : true}
+              editable={userData?.dob? false : true}
               ref={dobRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Email</Text>
             <TextInput
               placeholder='Email'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={email}
               onChangeText={handleEmailChange}
-              editable={userData?.email ? false : true}
+              editable={userData?.email? false : true}
               ref={emailRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Religion</Text>
             <TextInput
               placeholder='Religion'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={religion}
               onChangeText={setReligion}
-              editable={userData?.religion ? false : true}
+              editable={userData?.religion? false : true}
               ref={religionRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Caste</Text>
             <TextInput
               placeholder='Caste'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={caste}
               onChangeText={setCaste}
-              editable={userData?.caste ? false : true}
+              editable={userData?.caste? false : true}
               ref={casteRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Country</Text>
             <TextInput
               placeholder='Country'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={country}
               onChangeText={setCountry}
-              editable={userData?.religion ? false : true}
+              editable={userData?.country? false : true}
               ref={countryRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>State</Text>
             <TextInput
               placeholder='State'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={state}
               onChangeText={setState}
-              editable={userData?.state ? false : true}
+              editable={userData?.state? false : true}
               ref={stateRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>City</Text>
             <TextInput
               placeholder='City'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={city}
               onChangeText={setCity}
-              editable={userData?.city ? false : true}
+              editable={userData?.city? false : true}
               ref={cityRef}
             />
           </View>
           <View>
+          <Text style={styles.label}>Address</Text>
             <TextInput
               placeholder='Address'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={address}
               onChangeText={setAddress}
-              editable={userData?.address ? false : true}
+              editable={userData?.address? false : true}
               ref={religionRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Maritial Status</Text>
             <TextInput
               placeholder='Maritial Status'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={maritialstatus}
               onChangeText={setMaritialaStatus}
-              editable={userData?.maritialstatus ? false : true}
+              editable={userData?.maritialstatus? false : true}
               ref={maritialstatusRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Children</Text>
             <TextInput
               placeholder='Children'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={children}
               onChangeText={setChildren}
-              editable={userData?.children ? false : true}
+              editable={userData?.children? false : true}
               ref={childrenRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Age</Text>
             <TextInput
               placeholder='Age'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={age}
               onChangeText={setAge}
-              editable={userData?.age ? false : true}
+              editable={userData?.age? false : true}
               ref={ageRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Education</Text>
             <TextInput
               placeholder='Education'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={education}
               onChangeText={setEducation}
-              editable={userData?.education ? false : true}
+              editable={userData?.education? false : true}
               ref={educationRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Occupation</Text>
             <TextInput
               placeholder='Occupation'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={occupation}
               onChangeText={setOccupation}
-              editable={userData?.occupation ? false : true}
+              editable={userData?.occupation? false : true}
               ref={occupationRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Nationality</Text>
             <TextInput
               placeholder='Nationality'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={occupation}
               onChangeText={setOccupation}
-              editable={userData?.religion ? false : true}
+              editable={userData?.religion? false : true}
               ref={occupationRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Passport</Text>
             <TextInput
               placeholder='Passport'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={passport}
               onChangeText={setPassport}
-              editable={userData?.passport ? false : true}
+              editable={userData?.passport? false : true}
               ref={passportRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Income</Text>
             <TextInput
               placeholder='Income'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={income}
               onChangeText={setIncome}
-              editable={userData?.religion ? false : true}
+              editable={userData?.religion? false : true}
               ref={religionRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Drinking</Text>
             <TextInput
               placeholder='Drinking'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={drinking}
               onChangeText={setDrinking}
-              editable={userData?.drinking ? false : true}
+              editable={userData?.drinking? false : true}
               ref={drinkingRef}
             />
           </View>
 
-          
-
           <View>
+          <Text style={styles.label}>Smoking</Text>
             <TextInput
               placeholder='Smoking'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={smoking}
               onChangeText={setSmoking}
-              editable={userData?.smoking ? false : true}
+              editable={userData?.smoking? false : true}
               ref={smokingRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Weight</Text>
             <TextInput
               placeholder='Weight'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={weight}
               onChangeText={setWeight}
-              editable={userData?.weight ? false : true}
+              editable={userData?.weight? false : true}
               ref={weightRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Height</Text>
             <TextInput
               placeholder='Height'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={height}
               onChangeText={setHeight}
-              editable={userData?.height ? false : true}
+              editable={userData?.height? false : true}
               ref={heightRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Built</Text>
             <TextInput
               placeholder='Built'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={built}
               onChangeText={setBuilt}
-              editable={userData?.built ? false : true}
+              editable={userData?.built? false : true}
               ref={builtRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Complexion</Text>
             <TextInput
               placeholder='Complexion'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={complexion}
               onChangeText={setComplexion}
-              editable={userData?.complexion ? false : true}
+              editable={userData?.complexion? false : true}
               ref={complexionRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Hair Color</Text>
             <TextInput
               placeholder='Hair Color'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={haircolor}
               onChangeText={setHairColor}
-              editable={userData?.built ? false : true}
+              editable={userData?.built? false : true}
               ref={builtRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Eye Color</Text>
             <TextInput
               placeholder='Eye Color'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={eyecolor}
               onChangeText={setEyeColor}
-              editable={userData?.eyecolor ? false : true}
+              editable={userData?.eyecolor? false : true}
               ref={eyecolorRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Culture</Text>
             <TextInput
               placeholder='Culture'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={culture}
               onChangeText={setCulture}
-              editable={userData?.culture ? false : true}
+              editable={userData?.culture? false : true}
               ref={cultureRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>About</Text>
             <TextInput
               placeholder='About'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={about}
               onChangeText={setAbout}
-              editable={userData?.built ? false : true}
+              editable={userData?.built? false : true}
               ref={aboutRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Diet</Text>
             <TextInput
               placeholder='Diet'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={diet}
               onChangeText={setDiet}
-              editable={userData?.diet ? false : true}
+              editable={userData?.diet? false : true}
               ref={dietRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Lifestyle</Text>
             <TextInput
               placeholder='Lifestyle'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={lifestyle}
               onChangeText={setLifeStyle}
-              editable={userData?.lifestyle ? false : true}
+              editable={userData?.lifestyle? false : true}
               ref={lifestyleRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Purpose</Text>
             <TextInput
               placeholder='Purpose'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={purpose}
               onChangeText={setPurpose}
-              editable={userData?.purpose ? false : true}
+              editable={userData?.purpose? false : true}
               ref={purposeRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Wedding Plan</Text>
             <TextInput
               placeholder='Wedding Plan'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={weddingplan}
               onChangeText={setWeddingPlan}
-              editable={userData?.weddingplan ? false : true}
+              editable={userData?.weddingplan? false : true}
               ref={weddingplanRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Family Status</Text>
             <TextInput
               placeholder='Family Status'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={familystatus}
               onChangeText={setFamilyStatus}
-              editable={userData?.familystatus ? false : true}
+              editable={userData?.familystatus? false : true}
               ref={familystatusRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Visa Type</Text>
             <TextInput
               placeholder='Visa Type'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={visatype}
               onChangeText={setVisaType}
-              editable={userData?.visatype ? false : true}
+              editable={userData?.visatype? false : true}
               ref={visatypeRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Relocate</Text>
             <TextInput
               placeholder='Relocate'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
               value={relocate}
               onChangeText={setRelocate}
-              editable={userData?.relocate ? false : true}
+              editable={userData?.relocate? false : true}
               ref={relocateRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Manglik</Text>
             <TextInput
               placeholder='Manglik'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
+              value={manglik}
+              onChangeText={setManglik}
+              editable={userData?.manglik? false : true}
+              ref={manglikRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Country Born</Text>
             <TextInput
               placeholder='Country Born'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
+              value={countryborn}
+              onChangeText={setCountryBorn}
+              editable={userData?.countryborn? false : true}
+              ref={countrybornRef}
             />
           </View>
 
           <View>
+          <Text style={styles.label}>Country Grew</Text>
             <TextInput
               placeholder='Country Grew'
               style={styles.input}
               placeholderTextColor="#EBC7B1"
+              value={countrygrew}
+              onChangeText={setCountryGrew}
+              editable={userData?.countrygrew? false : true}
+              ref={countrygrewRef}
             />
           </View>
 
-          <TouchableOpacity style={styles.creat}>
+          <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
             <Text style={styles.creattext}>Create Profile</Text>
           </TouchableOpacity>
         </View>
@@ -842,6 +895,9 @@ const styles = StyleSheet.create({
   profiletext: {
     fontSize: 25,
     color: '#792A37'
+  },
+  label: {
+    color: 'black'
   },
   input: {
     borderColor: '#EBC7B1',
