@@ -50,7 +50,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                     setDob(userDataFirestore?.dob);
                     setEmail(userDataFirestore?.email)
                 } else {
-                    console.log("No user data found for this UID"); 
+                    console.log("No user data found for this UID");
                 }
             } catch (error) {
                 console.error("Error fetching user data:", error);
@@ -102,7 +102,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
 
     const handleEmailChange = (newEmail: string) => {
         if (!isEmailEdited) {
-          setEmail(newEmail);
+            setEmail(newEmail);
         }
     };
 
@@ -137,7 +137,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                                     placeholderTextColor="#EBC7B1"
                                     value={name}
                                     onChangeText={setName}
-                                    editable={userData?.name? false : true}
+                                    editable={userData?.name ? false : true}
                                     ref={nameRef}
                                 />
                             </View>
@@ -148,7 +148,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                                     placeholderTextColor="#EBC7B1"
                                     value={dob}
                                     onChangeText={setDob}
-                                    editable={userData?.dob? false : true}
+                                    editable={userData?.dob ? false : true}
                                     ref={dobRef}
                                 />
                             </View>
@@ -159,16 +159,16 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                                     value={email}
                                     onChangeText={handleEmailChange}
                                     placeholderTextColor="#EBC7B1"
-                                    editable={userData?.email? false : true}
+                                    editable={userData?.email ? false : true}
                                     ref={emailRef}
                                 />
                             </View>
                             <View style={styles.phonecontainer}>
                                 <View style={styles.code}>
-                                    <TextInput placeholder={userData.phoneCode} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly/>
+                                    <TextInput placeholder={userData.phoneCode} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly />
                                 </View>
                                 <View style={styles.phone}>
-                                    <TextInput placeholder={userData.phoneNumber} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly/>
+                                    <TextInput placeholder={userData.phoneNumber} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
                                 </View>
                             </View>
 
