@@ -40,7 +40,7 @@ const Matches = ({ navigation }) => {
   
       const matchedUsersPromises = querySnapshot.docs.map(async (doc) => {
         const userSnapshot = await firestore().collection('users').doc(doc.id).get();
-        if (userSnapshot.exists) {
+        if (userSnapshot.exists && userSnapshot.id !== currentUser.uid) {
           return { id: userSnapshot.id, ...userSnapshot.data() };
         }
         return null;

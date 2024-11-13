@@ -42,7 +42,7 @@ const ProfileImage = ({ user, navigation }) => {
 
   const handleProfile = () => {
     addToRecelyViewed();
-    navigation.navigate("UserProfileDetails", { user })
+    navigation.navigate("UserProfileDetails", { user,navigation })
   }
 
   return (
