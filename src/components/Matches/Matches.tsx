@@ -10,31 +10,54 @@ const Matches = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
 
   const getMatchesForUser = async () => {
-    const currentUser = auth().currentUser;
-
-    if (currentUser) {
-      try {
-        const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
-
-        if (userDoc.exists) {
-          const userDataFirestore = userDoc.data();
-          const { religion, caste } = userDataFirestore;
-
-          const querySnapshot = await firestore().collection('users')
-          .where('religion', '==', religion)
-          .where('caste', '==', caste)
-          .get();
-
-          const matchedUsers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data }));
-          setData(matchedUsers);
-        } else {
-          console.log('No user data found for this UID');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
+    try {
+      const currentUser = auth().currentUser;
+      
+      if (!currentUser) {
+        console.log("No user is logged in.");
+        return;
       }
-    } else {
-      console.log('No user is currently authenticated.');
+  
+      const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
+  
+      if (!userDoc.exists) {
+        console.log('No user data found for this UID');
+        return;
+      }
+  
+      const userDataFirestore = userDoc.data();
+      const { religion, caste } = userDataFirestore;
+  
+      const querySnapshot = await firestore().collection('users')
+        .where('religion', '==', religion)
+        .where('caste', '==', caste)
+        .get();
+  
+      if (querySnapshot.empty) {
+        console.log('No matching users found.');
+        return;
+      }
+  
+      const matchedUsersPromises = querySnapshot.docs.map(async (doc) => {
+        const userSnapshot = await firestore().collection('users').doc(doc.id).get();
+        if (userSnapshot.exists) {
+          return { id: userSnapshot.id, ...userSnapshot.data() };
+        }
+        return null;
+      });
+  
+      const matchedUsersData = await Promise.all(matchedUsersPromises);
+      
+      const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
+      
+      if (filteredMatchedUsers.length === 0) {
+        console.log("No valid matches found.");
+        return;
+      }
+  
+      setData(filteredMatchedUsers);
+    } catch (error) {
+      console.error('Error fetching user matches:', error);
     }
   }
 

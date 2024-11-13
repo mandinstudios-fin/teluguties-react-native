@@ -9,47 +9,47 @@ import firestore from '@react-native-firebase/firestore'
 const RecentlyViewed = ({navigation}) => {
   const [data, setData] = useState<any>([]);
 
-  useEffect(() => {
-    const fetchRecentlyViewedData = async () => {
-      try {
-        const currentUser = auth().currentUser;
-        if (!currentUser) {
-          console.log("No user is logged in.");
-          return;
-        }
-    
-        const userRef = firestore().collection('users').doc(currentUser.uid);
-        const userDoc = await userRef.get();
-    
-        if (!userDoc.exists) {
-          console.log("User document not found.");
-          return;
-        }
-    
-        const recentlyViewed = userDoc?.data().recentlyViewed || [];
-        
-        if (recentlyViewed.length === 0) {
-          console.log("No users in recentlyViewed.");
-          return;
-        }
-    
-        const userPromises = recentlyViewed.map(async (userId) => {
-          const userSnapshot = await firestore().collection('users').doc(userId).get();
-          if (userSnapshot.exists) {
-            return { id: userSnapshot.id, ...userSnapshot.data() };
-          }
-          return null;
-        });
-    
-        const usersData = await Promise.all(userPromises);
-    
-        const filteredUsersData = usersData.filter(user => user !== null);
-        setData(filteredUsersData);
-      } catch (error) {
-        console.error("Error fetching recently viewed users:", error);
+  const fetchRecentlyViewedData = async () => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        console.log("No user is logged in.");
+        return;
       }
-    };
+  
+      const userRef = firestore().collection('users').doc(currentUser.uid);
+      const userDoc = await userRef.get();
+  
+      if (!userDoc.exists) {
+        console.log("User document not found.");
+        return;
+      }
+  
+      const recentlyViewed = userDoc?.data().recentlyViewed || [];
+      
+      if (recentlyViewed.length === 0) {
+        console.log("No users in recentlyViewed.");
+        return;
+      }
+  
+      const userPromises = recentlyViewed.map(async (userId) => {
+        const userSnapshot = await firestore().collection('users').doc(userId).get();
+        if (userSnapshot.exists) {
+          return { id: userSnapshot.id, ...userSnapshot.data() };
+        }
+        return null;
+      });
+  
+      const usersData = await Promise.all(userPromises);
+  
+      const filteredUsersData = usersData.filter(user => user !== null);
+      setData(filteredUsersData);
+    } catch (error) {
+      console.error("Error fetching recently viewed users:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchRecentlyViewedData();
   }, [])
 
