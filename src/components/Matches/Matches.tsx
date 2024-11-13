@@ -1,5 +1,5 @@
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import ProfileGrid from '../Profiles/ProfileGrid'
 
@@ -18,7 +18,7 @@ const Matches = ({ navigation }) => {
 
         if (userDoc.exists) {
           const userDataFirestore = userDoc.data();
-          const { religion, caste } = userDataFirestore();
+          const { religion, caste } = userDataFirestore;
 
           const querySnapshot = await firestore().collection('users')
           .where('religion', '==', religion)
