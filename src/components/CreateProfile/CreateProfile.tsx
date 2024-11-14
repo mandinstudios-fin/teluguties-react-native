@@ -477,7 +477,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={place}
               onChangeText={setPlace}
-        userData?.place}
+              editable={!userData?.place}
               //ref={placeRef}
             />
           </View>
@@ -489,7 +489,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={dob}
               onChangeText={setDob}
-              editable={userData?.dob? false : true}
+              editable={!git userData?.dob}
               //ref={dobRef}
             />
           </View>
