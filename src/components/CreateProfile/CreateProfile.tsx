@@ -489,7 +489,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={dob}
               onChangeText={setDob}
-              editable={!git userData?.dob}
+              editable={userData?.dob}
               //ref={dobRef}
             />
           </View>
