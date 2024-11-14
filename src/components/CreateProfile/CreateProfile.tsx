@@ -328,7 +328,7 @@ const CreateProfile: React.FC = ({navigation}) => {
         });
 
         Alert.alert('Success', 'Your profile has been updated.');
-        clearRefs();
+        //clearRefs();
         setUserData(prevData => ({
           ...prevData,
           firstname,
@@ -402,7 +402,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={firstname}
               onChangeText={setFirstName}
               editable={userData?.firstname ? false : true}
-              ref={firstnameRef}
+              //ref={firstnameRef}
             />
           </View>
 
@@ -415,7 +415,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={middlename}
               onChangeText={setMiddleName}
               editable={userData?.middlename ? false : true}
-              ref={middlenameRef}
+              //ref={middlenameRef}
             />
           </View>
 
@@ -428,7 +428,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={lastname}
               onChangeText={setLastName}
               editable={userData?.lastname ? false : true}
-              ref={lastnameRef}
+              //ref={lastnameRef}
             />
           </View>
           <View>
@@ -440,7 +440,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={gender}
               onChangeText={setGender}
               editable={userData?.gender ? false : true}
-              ref={genderRef}
+              //ref={genderRef}
             />
           </View>
 
@@ -454,7 +454,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={phoneno}
               onChangeText={setPhoneNo}
               editable={userData?.phoneno ? false : true}
-              ref={phonenoRef}
+              //ref={phonenoRef}
             />
           </View>
           <View>
@@ -466,7 +466,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={community}
               onChangeText={setCommunity}
               editable={userData?.community ? false : true}
-              ref={communityRef}
+              //ref={communityRef}
             />
           </View>
           <View>
@@ -478,7 +478,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={place}
               onChangeText={setPlace}
               editable={userData?.place ? false : true}
-              ref={placeRef}
+              //ref={placeRef}
             />
           </View>
           <View>
@@ -490,7 +490,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={dob}
               onChangeText={setDob}
               editable={userData?.dob ? false : true}
-              ref={dobRef}
+              //ref={dobRef}
             />
           </View>
 
@@ -503,7 +503,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={email}
               onChangeText={handleEmailChange}
               editable={userData?.email ? false : true}
-              ref={emailRef}
+              //ref={emailRef}
             />
           </View>
 
@@ -516,7 +516,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={religion}
               onChangeText={setReligion}
               editable={userData?.religion ? false : true}
-              ref={religionRef}
+              //ref={religionRef}
             />
           </View>
 
@@ -529,7 +529,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={caste}
               onChangeText={setCaste}
               editable={userData?.caste ? false : true}
-              ref={casteRef}
+              //ref={casteRef}
             />
           </View>
 
@@ -542,7 +542,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={country}
               onChangeText={setCountry}
               editable={userData?.country ? false : true}
-              ref={countryRef}
+              //ref={countryRef}
             />
           </View>
 
@@ -555,7 +555,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={state}
               onChangeText={setState}
               editable={userData?.state ? false : true}
-              ref={stateRef}
+              //ref={stateRef}
             />
           </View>
 
@@ -568,7 +568,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={city}
               onChangeText={setCity}
               editable={userData?.city ? false : true}
-              ref={cityRef}
+              //ref={cityRef}
             />
           </View>
           <View>
@@ -580,7 +580,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={address}
               onChangeText={setAddress}
               editable={userData?.address ? false : true}
-              ref={religionRef}
+              //ref={religionRef}
             />
           </View>
 
@@ -593,7 +593,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={maritialstatus}
               onChangeText={setMaritialaStatus}
               editable={userData?.maritialstatus ? false : true}
-              ref={maritialstatusRef}
+              //ref={maritialstatusRef}
             />
           </View>
 
@@ -606,7 +606,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={children}
               onChangeText={setChildren}
               editable={userData?.children ? false : true}
-              ref={childrenRef}
+              //ref={childrenRef}
             />
           </View>
 
@@ -619,7 +619,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={age}
               onChangeText={setAge}
               editable={userData?.age ? false : true}
-              ref={ageRef}
+              //ref={ageRef}
             />
           </View>
 
@@ -632,7 +632,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={education}
               onChangeText={setEducation}
               editable={userData?.education ? false : true}
-              ref={educationRef}
+              //ref={educationRef}
             />
           </View>
 
@@ -645,7 +645,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={occupation}
               onChangeText={setOccupation}
               editable={userData?.occupation ? false : true}
-              ref={occupationRef}
+              //ref={occupationRef}
             />
           </View>
 
@@ -658,7 +658,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={nationality}
               onChangeText={setNationality}
               editable={userData?.nationality ? false : true}
-              ref={nationalityRef}
+              //ref={nationalityRef}
             />
           </View>
 
@@ -671,7 +671,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={passport}
               onChangeText={setPassport}
               editable={userData?.passport ? false : true}
-              ref={passportRef}
+              //ref={passportRef}
             />
           </View>
 
@@ -684,7 +684,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={income}
               onChangeText={setIncome}
               editable={userData?.religion ? false : true}
-              ref={religionRef}
+              //ref={religionRef}
             />
           </View>
 
@@ -697,7 +697,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={drinking}
               onChangeText={setDrinking}
               editable={userData?.drinking ? false : true}
-              ref={drinkingRef}
+              //ref={drinkingRef}
             />
           </View>
 
@@ -710,7 +710,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={smoking}
               onChangeText={setSmoking}
               editable={userData?.smoking ? false : true}
-              ref={smokingRef}
+              //ref={smokingRef}
             />
           </View>
 
@@ -723,7 +723,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={weight}
               onChangeText={setWeight}
               editable={userData?.weight ? false : true}
-              ref={weightRef}
+              //ref={weightRef}
             />
           </View>
 
@@ -736,7 +736,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={height}
               onChangeText={setHeight}
               editable={userData?.height ? false : true}
-              ref={heightRef}
+              //ref={heightRef}
             />
           </View>
 
@@ -749,7 +749,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={built}
               onChangeText={setBuilt}
               editable={userData?.built ? false : true}
-              ref={builtRef}
+              //ref={builtRef}
             />
           </View>
 
@@ -762,7 +762,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={complexion}
               onChangeText={setComplexion}
               editable={userData?.complexion ? false : true}
-              ref={complexionRef}
+              //ref={complexionRef}
             />
           </View>
 
@@ -775,7 +775,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={haircolor}
               onChangeText={setHairColor}
               editable={userData?.built ? false : true}
-              ref={builtRef}
+              //ref={builtRef}
             />
           </View>
 
@@ -788,7 +788,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={eyecolor}
               onChangeText={setEyeColor}
               editable={userData?.eyecolor ? false : true}
-              ref={eyecolorRef}
+              //ref={eyecolorRef}
             />
           </View>
 
@@ -801,7 +801,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={culture}
               onChangeText={setCulture}
               editable={userData?.culture ? false : true}
-              ref={cultureRef}
+              //ref={cultureRef}
             />
           </View>
 
@@ -814,7 +814,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={about}
               onChangeText={setAbout}
               editable={userData?.built ? false : true}
-              ref={aboutRef}
+              //ref={aboutRef}
             />
           </View>
 
@@ -827,7 +827,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={diet}
               onChangeText={setDiet}
               editable={userData?.diet ? false : true}
-              ref={dietRef}
+              //ref={dietRef}
             />
           </View>
 
@@ -840,7 +840,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={lifestyle}
               onChangeText={setLifeStyle}
               editable={userData?.lifestyle ? false : true}
-              ref={lifestyleRef}
+              //ref={lifestyleRef}
             />
           </View>
 
@@ -853,7 +853,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={purpose}
               onChangeText={setPurpose}
               editable={userData?.purpose ? false : true}
-              ref={purposeRef}
+              //ref={purposeRef}
             />
           </View>
 
@@ -866,7 +866,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={weddingplan}
               onChangeText={setWeddingPlan}
               editable={userData?.weddingplan ? false : true}
-              ref={weddingplanRef}
+              //ref={weddingplanRef}
             />
           </View>
 
@@ -879,7 +879,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={familystatus}
               onChangeText={setFamilyStatus}
               editable={userData?.familystatus ? false : true}
-              ref={familystatusRef}
+              //ref={familystatusRef}
             />
           </View>
 
@@ -892,7 +892,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={visatype}
               onChangeText={setVisaType}
               editable={userData?.visatype ? false : true}
-              ref={visatypeRef}
+              //ref={visatypeRef}
             />
           </View>
 
@@ -905,7 +905,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={relocate}
               onChangeText={setRelocate}
               editable={userData?.relocate ? false : true}
-              ref={relocateRef}
+              //ref={relocateRef}
             />
           </View>
 
@@ -918,7 +918,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={manglik}
               onChangeText={setManglik}
               editable={userData?.manglik ? false : true}
-              ref={manglikRef}
+              //ref={manglikRef}
             />
           </View>
 
@@ -931,7 +931,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={countryborn}
               onChangeText={setCountryBorn}
               editable={userData?.countryborn ? false : true}
-              ref={countrybornRef}
+              //ref={countrybornRef}
             />
           </View>
 
@@ -944,7 +944,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               value={countrygrew}
               onChangeText={setCountryGrew}
               editable={userData?.countrygrew ? false : true}
-              ref={countrygrewRef}
+              //ref={countrygrewRef}
             />
           </View>
 
