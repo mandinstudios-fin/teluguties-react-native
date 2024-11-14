@@ -401,7 +401,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={firstname}
               onChangeText={setFirstName}
-              editable={userData?.firstname ? false : true}
+              editable={userData?.firstname? false : true}
               //ref={firstnameRef}
             />
           </View>
@@ -414,7 +414,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={middlename}
               onChangeText={setMiddleName}
-              editable={userData?.middlename ? false : true}
+              editable={userData?.middlename? false : true}
               //ref={middlenameRef}
             />
           </View>
@@ -427,7 +427,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={lastname}
               onChangeText={setLastName}
-              editable={userData?.lastname ? false : true}
+              editable={userData?.lastname? false : true}
               //ref={lastnameRef}
             />
           </View>
@@ -439,7 +439,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={gender}
               onChangeText={setGender}
-              editable={userData?.gender ? false : true}
+              editable={userData?.gender? false : true}
               //ref={genderRef}
             />
           </View>
@@ -453,7 +453,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={phoneno}
               onChangeText={setPhoneNo}
-              editable={userData?.phoneno ? false : true}
+              editable={userData?.phoneno? false : true}
               //ref={phonenoRef}
             />
           </View>
@@ -465,7 +465,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={community}
               onChangeText={setCommunity}
-              editable={userData?.community ? false : true}
+              editable={userData?.community? false : true}
               //ref={communityRef}
             />
           </View>
@@ -477,7 +477,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={place}
               onChangeText={setPlace}
-              editable={userData?.place ? false : true}
+              editable={userData?.place? false : true}
               //ref={placeRef}
             />
           </View>
@@ -489,7 +489,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={dob}
               onChangeText={setDob}
-              editable={userData?.dob ? false : true}
+              editable={userData?.dob? false : true}
               //ref={dobRef}
             />
           </View>
@@ -502,7 +502,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={email}
               onChangeText={handleEmailChange}
-              editable={userData?.email ? false : true}
+              editable={userData?.email? false : true}
               //ref={emailRef}
             />
           </View>
@@ -515,7 +515,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={religion}
               onChangeText={setReligion}
-              editable={userData?.religion ? false : true}
+              editable={userData?.religion? false : true}
               //ref={religionRef}
             />
           </View>
@@ -528,7 +528,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={caste}
               onChangeText={setCaste}
-              editable={userData?.caste ? false : true}
+              editable={userData?.caste? false : true}
               //ref={casteRef}
             />
           </View>
@@ -541,7 +541,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={country}
               onChangeText={setCountry}
-              editable={userData?.country ? false : true}
+              editable={userData?.country? false : true}
               //ref={countryRef}
             />
           </View>
@@ -554,7 +554,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={state}
               onChangeText={setState}
-              editable={userData?.state ? false : true}
+              editable={userData?.state? false : true}
               //ref={stateRef}
             />
           </View>
@@ -567,7 +567,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={city}
               onChangeText={setCity}
-              editable={userData?.city ? false : true}
+              editable={userData?.city? false : true}
               //ref={cityRef}
             />
           </View>
@@ -579,7 +579,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={address}
               onChangeText={setAddress}
-              editable={userData?.address ? false : true}
+              editable={userData?.address? false : true}
               //ref={religionRef}
             />
           </View>
@@ -592,7 +592,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={maritialstatus}
               onChangeText={setMaritialaStatus}
-              editable={userData?.maritialstatus ? false : true}
+              editable={userData?.maritialstatus? false : true}
               //ref={maritialstatusRef}
             />
           </View>
@@ -605,7 +605,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={children}
               onChangeText={setChildren}
-              editable={userData?.children ? false : true}
+              editable={userData?.children? false : true}
               //ref={childrenRef}
             />
           </View>
@@ -618,7 +618,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={age}
               onChangeText={setAge}
-              editable={userData?.age ? false : true}
+              editable={userData?.age? false : true}
               //ref={ageRef}
             />
           </View>
@@ -631,7 +631,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={education}
               onChangeText={setEducation}
-              editable={userData?.education ? false : true}
+              editable={userData?.education? false : true}
               //ref={educationRef}
             />
           </View>
@@ -644,7 +644,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={occupation}
               onChangeText={setOccupation}
-              editable={userData?.occupation ? false : true}
+              editable={userData?.occupation? false : true}
               //ref={occupationRef}
             />
           </View>
@@ -657,7 +657,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={nationality}
               onChangeText={setNationality}
-              editable={userData?.nationality ? false : true}
+              editable={userData?.nationality? false : true}
               //ref={nationalityRef}
             />
           </View>
@@ -670,7 +670,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={passport}
               onChangeText={setPassport}
-              editable={userData?.passport ? false : true}
+              editable={userData?.passport? false : true}
               //ref={passportRef}
             />
           </View>
@@ -683,7 +683,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={income}
               onChangeText={setIncome}
-              editable={userData?.religion ? false : true}
+              editable={userData?.religion? false : true}
               //ref={religionRef}
             />
           </View>
@@ -696,7 +696,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={drinking}
               onChangeText={setDrinking}
-              editable={userData?.drinking ? false : true}
+              editable={userData?.drinking? false : true}
               //ref={drinkingRef}
             />
           </View>
@@ -709,7 +709,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={smoking}
               onChangeText={setSmoking}
-              editable={userData?.smoking ? false : true}
+              editable={userData?.smoking? false : true}
               //ref={smokingRef}
             />
           </View>
@@ -722,7 +722,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={weight}
               onChangeText={setWeight}
-              editable={userData?.weight ? false : true}
+              editable={userData?.weight? false : true}
               //ref={weightRef}
             />
           </View>
@@ -735,7 +735,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={height}
               onChangeText={setHeight}
-              editable={userData?.height ? false : true}
+              editable={userData?.height? false : true}
               //ref={heightRef}
             />
           </View>
@@ -748,7 +748,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={built}
               onChangeText={setBuilt}
-              editable={userData?.built ? false : true}
+              editable={userData?.built? false : true}
               //ref={builtRef}
             />
           </View>
@@ -761,7 +761,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={complexion}
               onChangeText={setComplexion}
-              editable={userData?.complexion ? false : true}
+              editable={userData?.complexion? false : true}
               //ref={complexionRef}
             />
           </View>
@@ -774,7 +774,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={haircolor}
               onChangeText={setHairColor}
-              editable={userData?.built ? false : true}
+              editable={userData?.built? false : true}
               //ref={builtRef}
             />
           </View>
@@ -787,7 +787,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={eyecolor}
               onChangeText={setEyeColor}
-              editable={userData?.eyecolor ? false : true}
+              editable={userData?.eyecolor? false : true}
               //ref={eyecolorRef}
             />
           </View>
@@ -800,7 +800,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={culture}
               onChangeText={setCulture}
-              editable={userData?.culture ? false : true}
+              editable={userData?.culture? false : true}
               //ref={cultureRef}
             />
           </View>
@@ -813,7 +813,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={about}
               onChangeText={setAbout}
-              editable={userData?.built ? false : true}
+              editable={userData?.built? false : true}
               //ref={aboutRef}
             />
           </View>
@@ -826,7 +826,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={diet}
               onChangeText={setDiet}
-              editable={userData?.diet ? false : true}
+              editable={userData?.diet? false : true}
               //ref={dietRef}
             />
           </View>
@@ -839,7 +839,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={lifestyle}
               onChangeText={setLifeStyle}
-              editable={userData?.lifestyle ? false : true}
+              editable={userData?.lifestyle? false : true}
               //ref={lifestyleRef}
             />
           </View>
@@ -852,7 +852,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={purpose}
               onChangeText={setPurpose}
-              editable={userData?.purpose ? false : true}
+              editable={userData?.purpose? false : true}
               //ref={purposeRef}
             />
           </View>
@@ -865,7 +865,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={weddingplan}
               onChangeText={setWeddingPlan}
-              editable={userData?.weddingplan ? false : true}
+              editable={userData?.weddingplan? false : true}
               //ref={weddingplanRef}
             />
           </View>
@@ -878,7 +878,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={familystatus}
               onChangeText={setFamilyStatus}
-              editable={userData?.familystatus ? false : true}
+              editable={userData?.familystatus? false : true}
               //ref={familystatusRef}
             />
           </View>
@@ -891,7 +891,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={visatype}
               onChangeText={setVisaType}
-              editable={userData?.visatype ? false : true}
+              editable={userData?.visatype? false : true}
               //ref={visatypeRef}
             />
           </View>
@@ -904,7 +904,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={relocate}
               onChangeText={setRelocate}
-              editable={userData?.relocate ? false : true}
+              editable={userData?.relocate? false : true}
               //ref={relocateRef}
             />
           </View>
@@ -917,7 +917,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={manglik}
               onChangeText={setManglik}
-              editable={userData?.manglik ? false : true}
+              editable={userData?.manglik? false : true}
               //ref={manglikRef}
             />
           </View>
@@ -930,7 +930,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={countryborn}
               onChangeText={setCountryBorn}
-              editable={userData?.countryborn ? false : true}
+              editable={userData?.countryborn? false : true}
               //ref={countrybornRef}
             />
           </View>
@@ -943,7 +943,7 @@ const CreateProfile: React.FC = ({navigation}) => {
               placeholderTextColor="#EBC7B1"
               value={countrygrew}
               onChangeText={setCountryGrew}
-              editable={userData?.countrygrew ? false : true}
+              editable={userData?.countrygrew? false : true}
               //ref={countrygrewRef}
             />
           </View>
