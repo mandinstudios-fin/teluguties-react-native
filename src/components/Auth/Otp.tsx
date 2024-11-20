@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   SafeAreaView,
   StyleSheet,
@@ -33,14 +34,93 @@ const Otp = ({ navigation, route }) => {
       return;
     }
     try {
-      const userData = await firestore().collection('users').doc(user.uid).set({
-        name: formData.fullname,
-        phoneNumber: formData.phoneNumber,
-        dob: formData.dob,
-        phoneCode: formData.selectedCode,
-        createdAt: firestore.FieldValue.serverTimestamp()
+      const userData = await firestore().collection('profiles').doc(user.uid).set({
+        phone_number: '',
+        is_bride: formData.gender == 'Female' ? true : false,
+        profile_pic: '',
+        personal_info: {
+          name: formData.fullname,
+          gender: formData.gender,
+          date_of_birth: formData.dob,
+          age: '',
+          height: '',
+          weight: '',
+          blood_group: '',
+          marital_status: '',
+          num_children: 0
+        },
+        contact_info: {
+          phone: formData.phoneNumber,
+          selected_code: formData.selectedCode,
+          email: '',
+          current_city: '',
+          permanent_address: {
+            street: '',
+            city: '',
+            state: '',
+            country: 'India',
+            pincode: ''
+          }
+        },
+        family_background: {
+          family_type: '',
+          father_name: '',
+          mother_name: '',
+          num_brothers: 0,
+          num_sisters: 0,
+          family_values: '',
+          family_status: ''
+        },
+        education: {
+          highest_education: '',
+          field_of_study: '',
+          college: '',
+          graduation_year: ''
+        },
+        professional_details: {
+          occupation: '',
+          employer: '',
+          annual_income: 0,
+          job_location: ''
+        },
+        hobbies_interests: [],
+        religious_cultural: {
+          religion: '',
+          caste: '',
+          subcaste: '',
+          gothra: '',
+          star_rashi: '',
+          manglik_status: ''
+        },
+        lifestyle_preferences: {
+          drinking_habits: '',
+          smoking_habits: '',
+          diet_preferences: '',
+          appearance_preferences: '',
+          personality_preferences: ''
+        },
+        matrimonial_expectations: {
+          preferred_age_range: {
+            min: 0,
+            max: 0
+          },
+          preferred_height_range: {
+            min: 0,
+            max: 0
+          },
+          preferred_location: '',
+          preferred_caste_subcaste: [],
+          preferred_education: '',
+          preferred_occupation: '',
+          preferred_income: 0,
+          other_preferences: ''
+        },
+        about_me: '',
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp()
       });
       
+      setLoading(false);
       navigation.navigate("Success");
     } catch (error) {
       console.log(error)
@@ -58,9 +138,9 @@ const Otp = ({ navigation, route }) => {
         }
       } catch (error) {
         console.error('Invalid code.', error);
-      } finally {
         setLoading(false);
-        navigation.navigate("Success");
+        Alert.alert("Invalid Otp");
+        return;
       }
     }
   };

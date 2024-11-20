@@ -11,17 +11,17 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 import phoneCodesData from '../../assets/CountryCodes.json';
 import useAuth from '../../hooks/useAuth';
 import auth from '@react-native-firebase/auth';
 import { TRegisterFormData } from '../../types';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const Register = ({navigation}) => {
+const Register = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
@@ -30,12 +30,18 @@ const Register = ({navigation}) => {
     dob: '',
     phoneNumber: '',
     selectedCode: '+91',
+    gender: 'Male'
   });
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(false);
-    setFormData({...formData, dob: currentDate.toLocaleDateString()});
+    const formatter = new Intl.DateTimeFormat('en-CA');
+    const formattedDate = formatter.format(currentDate);
+
+    const formattedDateWithSlashes = formattedDate.replace(/-/g, '/');
+
+    setFormData({ ...formData, dob: formattedDateWithSlashes.toString() });
   };
 
   const showDatepicker = () => {
@@ -43,7 +49,7 @@ const Register = ({navigation}) => {
   };
 
   const handleInputChange = (name, value) => {
-    setFormData({...formData, [name]: value});
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleRegister = async () => {
@@ -57,7 +63,7 @@ const Register = ({navigation}) => {
     } catch (error) {
       console.error(error)
     }
-    
+
   };
 
   return (
@@ -113,7 +119,7 @@ const Register = ({navigation}) => {
                   onValueChange={itemValue =>
                     handleInputChange('selectedCode', itemValue)
                   }>
-                  {phoneCodesData.map(({name, dial_code, code}) => (
+                  {phoneCodesData.map(({ name, dial_code, code }) => (
                     <Picker.Item
                       key={code}
                       label={`${name} (${dial_code})`}
@@ -136,6 +142,17 @@ const Register = ({navigation}) => {
                 />
               </View>
             </View>
+            <View style={styles.gender}>
+                <Picker
+                  selectedValue={formData.gender}
+                  style={styles.picker}
+                  onValueChange={itemValue =>
+                    handleInputChange('gender', itemValue)
+                  }>
+                  <Picker.Item label={`Male`} value={`Male`} />
+                  <Picker.Item label={`Female`} value={`Female`} />
+                </Picker>
+              </View>
             <TouchableOpacity style={styles.otpbox} onPress={handleRegister}>
               <Text style={styles.otp}>Send OTP</Text>
             </TouchableOpacity>
@@ -221,6 +238,12 @@ const styles = StyleSheet.create({
   },
   phonecode: {
     width: '30%',
+    borderColor: '#EBC7B1',
+    borderWidth: 1,
+    borderRadius: 12,
+    color: '#EBC7B1',
+  },
+  gender: {
     borderColor: '#EBC7B1',
     borderWidth: 1,
     borderRadius: 12,

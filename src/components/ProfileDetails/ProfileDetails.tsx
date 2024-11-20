@@ -14,17 +14,12 @@ import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Header from '../Header/Header';
 import firestore from '@react-native-firebase/firestore';
-import firebase from '@react-native-firebase/app';
-import { collection, getDocs } from 'firebase/firestore';
 
 const { width, height } = Dimensions.get('window');
 
 const ProfileDetails: React.FC = ({ navigation }) => {
-    const [userData, setUserData] = useState<any>({});
-    const [name, setName] = useState<string>('');
-    const [dob, setDob] = useState<string>('');
-    const [email, setEmail] = useState<string>('');
-    const [isEmailEdited, setIsEmailEdited] = useState<boolean>(false);
+    const [userData, setUserData] = useState<any>();
+    const [firestoreData, setfirestoreData] = useState<any>();
 
     const nameRef = useRef(null);
     const dobRef = useRef(null);
@@ -40,15 +35,12 @@ const ProfileDetails: React.FC = ({ navigation }) => {
 
         if (currentUser) {
             try {
-                const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
+                const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
 
                 if (userDoc.exists) {
-                    const userDataFirestore = userDoc.data();
-                    setUserData(userDataFirestore);
-
-                    setName(userDataFirestore?.name);
-                    setDob(userDataFirestore?.dob);
-                    setEmail(userDataFirestore?.email)
+                    const userFirestoreData = userDoc.data();
+                    setUserData(userFirestoreData);
+                    setfirestoreData(userFirestoreData);
                 } else {
                     console.log("No user data found for this UID");
                 }
@@ -70,28 +62,41 @@ const ProfileDetails: React.FC = ({ navigation }) => {
         emailRef?.current?.blur();
     }
 
+    const checkEmailValidation = async (email: string) => {
+        const querySnapshot = await firestore().collection('profiles').where('contact_info.email', '==', email)
+
+        if(querySnapshot.empty) {
+            return true;
+        }
+
+        return false;
+    }
+
     const handleUserUpdate = async () => {
         const currentUser = auth().currentUser;
 
-        if (!name || !dob || !checkEmail(email)) {
-            Alert.alert("Error", "Please fill all the fields before updating.");
-            return;
+        if(!firestoreData?.contact_info?.email && userData?.contact_info?.email) {
+            if(!checkEmailValidation(userData?.contact_info?.email) && !checkEmail(userData?.contact_info?.email)) {
+                Alert.alert("Email already exists or Invalid Email");
+                return;
+            }
+        }
+
+        const updatedData = {
+            ...userData,
+            updatedAt: firestore.FieldValue.serverTimestamp() 
         }
 
         if (currentUser) {
             try {
                 await firestore()
-                    .collection('users')
+                    .collection('profiles')
                     .doc(currentUser.uid)
-                    .update({
-                        name: name,
-                        dob: dob,
-                        email: email
-                    });
+                    .update(updatedData);
 
                 Alert.alert('Success', 'Your profile has been updated.');
+                getCurrentUserDetails();
                 clearRefs();
-                setUserData(prevData => ({ ...prevData, name, dob, email }));
 
             } catch (error) {
                 console.error("Error updating user data:", error);
@@ -100,10 +105,28 @@ const ProfileDetails: React.FC = ({ navigation }) => {
         }
     }
 
-    const handleEmailChange = (newEmail: string) => {
-        if (!isEmailEdited) {
-            setEmail(newEmail);
-        }
+    const handleInputChange = (section: string, parameter: string, value: string, subsection?: string) => {
+        setUserData((prev) => {
+            if (subsection) {
+                return {
+                    ...prev,
+                    [section]: {
+                        ...prev[section],
+                        [subsection]: {
+                            ...prev[section][subsection],
+                            [parameter]: value
+                        }
+                    }
+                };
+            }
+            return {
+                ...prev,
+                [section]: {
+                    ...prev[section],
+                    [parameter]: value
+                }
+            };
+        });
     };
 
     return (
@@ -133,42 +156,42 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                             <View>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder={name}
+                                    placeholder={userData?.personal_info?.name ?? "Full Name"}
                                     placeholderTextColor="#EBC7B1"
-                                    value={name}
-                                    onChangeText={setName}
-                                    editable={userData?.name ? false : true}
+                                    value={userData?.personal_info?.name ?? ""}
+                                    onChangeText={(value) => handleInputChange('peraonal_info', 'name', value)}
+                                    editable={!firestoreData?.personal_info?.name}
                                     ref={nameRef}
                                 />
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={dob}
+                                    placeholder={userData?.personal_info?.date_of_birth ?? "DOB"}
                                     style={styles.input}
                                     placeholderTextColor="#EBC7B1"
-                                    value={dob}
-                                    onChangeText={setDob}
-                                    editable={userData?.dob ? false : true}
+                                    value={userData?.personal_info?.date_of_birth ?? ""}
+                                    onChangeText={(value) => handleInputChange('personal_info', 'date_of_birth',value)}
+                                    editable={!firestoreData?.personal_info?.date_of_birth}
                                     ref={dobRef}
                                 />
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={'Email'}
+                                    placeholder={userData?.contact_info?.email ?? "Email"}
                                     style={styles.input}
-                                    value={email}
-                                    onChangeText={handleEmailChange}
+                                    value={userData?.contact_info?.email ?? ""}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'email',value)}
                                     placeholderTextColor="#EBC7B1"
-                                    editable={userData?.email ? false : true}
+                                    editable={!firestoreData?.contact_info?.email}
                                     ref={emailRef}
                                 />
                             </View>
                             <View style={styles.phonecontainer}>
                                 <View style={styles.code}>
-                                    <TextInput placeholder={userData.phoneCode} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly />
+                                    <TextInput placeholder={userData?.contact_info?.selected_code} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly />
                                 </View>
                                 <View style={styles.phone}>
-                                    <TextInput placeholder={userData.phoneNumber} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
+                                    <TextInput placeholder={userData?.contact_info?.phone} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
                                 </View>
                             </View>
 

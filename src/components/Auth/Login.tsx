@@ -27,9 +27,9 @@ const Login = ({ navigation }) => {
   const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
     try {
       const userSnapshot = await firestore()
-        .collection('users')
-        .where('phoneCode', '==', selectedCode)
-        .where('phoneNumber', '==', phoneNumber)
+        .collection('profiles')
+        .where('contact_info.selected_code', '==', selectedCode)
+        .where('contact_info.phone', '==', phoneNumber)
         .get();
 
       if (userSnapshot.empty) {

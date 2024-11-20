@@ -29,7 +29,7 @@ const ProfileImage = ({ user, navigation }) => {
         return;
       }
 
-      const userRef = firestore().collection('users').doc(currentUser.uid);
+      const userRef = firestore().collection('profiles').doc(currentUser.uid);
 
       await userRef.update({
         recentlyViewed: firestore.FieldValue.arrayUnion(user.id)
@@ -52,12 +52,12 @@ const ProfileImage = ({ user, navigation }) => {
         </ShimmerPlaceholder>
         :
         <TouchableOpacity style={styles.touchable} onPress={handleProfile}>
-          {/* <Image source={imgSource} style={styles.image} /> */}
+          <Image source={{ uri: user?.profile_pic }} style={styles.image} />
           <LinearGradient
             colors={['rgba(255, 255, 255, 0.3)', 'rgba(0, 0, 0, 0.5)']}
             style={styles.overlay}
           >
-            <Text style={styles.name}>{user?.name}</Text>
+            <Text style={styles.name}>{user?.personal_info?.name}</Text>
           </LinearGradient>
         </TouchableOpacity>
       }
@@ -103,5 +103,6 @@ const styles = StyleSheet.create({
   name: {
     color: 'white',
     fontWeight: 'bold',
+    paddingLeft: width / 80
   },
 });

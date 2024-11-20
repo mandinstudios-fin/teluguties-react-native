@@ -3,4 +3,5 @@ export type TRegisterFormData = {
     dob: string;
     phoneNumber: string;
     selectedCode: string; 
+    gender: string;
 }

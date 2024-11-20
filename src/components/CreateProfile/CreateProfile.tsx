@@ -1,1012 +1,1076 @@
-import {
-  Alert,
-  Dimensions,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import Header from '../Header/Header';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
-import { Picker } from '@react-native-picker/picker';
+import { ActivityIndicator, Alert, Button, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import Header from '../Header/Header'
 
-const {width, height} = Dimensions.get('window');
+import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore'
+import storage from '@react-native-firebase/storage';
 
-const CreateProfile: React.FC = ({navigation}) => {
-  const [userData, setUserData] = useState<any>({});
-  const [firstname, setFirstName] = useState<string>("");
-  const [middlename, setMiddleName] = useState<string>("");
-  const [lastname, setLastName] = useState<string>("");
-  const [dob, setDob] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [isEmailEdited, setIsEmailEdited] = useState<string>("");
-  const [gender, setGender] = useState<string>("");
-  const [phoneno, setPhoneNo] = useState<string>("");
-  const [community, setCommunity] = useState<string>("");
-  const [place, setPlace] = useState<string>("");
-  const [religion, setReligion] = useState<string>("");
-  const [caste, setCaste] = useState<string>("");
-  const [country, setCountry] = useState<string>("");
-  const [state, setState] = useState<string>("");
-  const [city, setCity] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
-  const [maritialstatus, setMaritialaStatus] = useState<string>("");
-  const [children, setChildren] = useState<string>("");
-  const [age, setAge] = useState<string>("");
-  const [education, setEducation] = useState<string>("");
-  const [occupation, setOccupation] = useState<string>("");
-  const [nationality, setNationality] = useState<string>("");
-  const [passport, setPassport] = useState<string>("");
-  const [income, setIncome] = useState<string>("");
-  const [drinking, setDrinking] = useState<string>("");
-  const [smoking, setSmoking] = useState<string>("");
-  const [weight, setWeight] = useState<string>("");
-  const [height, setHeight] = useState<string>("");
-  const [built, setBuilt] = useState<string>("");
-  const [complexion, setComplexion] = useState<string>("");
-  const [haircolor, setHairColor] = useState<string>("");
-  const [eyecolor, setEyeColor] = useState<string>("");
-  const [culture, setCulture] = useState<string>("");
-  const [about, setAbout] = useState<string>("");
-  const [diet, setDiet] = useState<string>("");
-  const [lifestyle, setLifeStyle] = useState<string>("");
-  const [purpose, setPurpose] = useState<string>("");
-  const [weddingplan, setWeddingPlan] = useState<string>("");
-  const [familystatus, setFamilyStatus] = useState<string>("");
-  const [visatype, setVisaType] = useState<string>("");
-  const [relocate, setRelocate] = useState<string>("");
-  const [manglik, setManglik] = useState<string>("");
-  const [countryborn, setCountryBorn] = useState<string>("");
-  const [countrygrew, setCountryGrew] = useState<string>("");
+import { Picker } from '@react-native-picker/picker'
+import { launchImageLibrary } from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-  const firstnameRef = useRef(null);
-  const middlenameRef = useRef(null);
-  const lastnameRef = useRef(null);
-  const dobRef = useRef(null);
-  const emailRef = useRef(null);
-  const genderRef = useRef(null);
-  const phonenoRef = useRef(null);
-  const communityRef = useRef(null);
-  const placeRef = useRef(null);
-  const religionRef = useRef(null);
-  const casteRef = useRef(null);
-  const countryRef = useRef(null);
-  const stateRef = useRef(null);
-  const cityRef = useRef(null);
-  const addressRef = useRef(null);
-  const maritialstatusRef = useRef(null);
-  const childrenRef = useRef(null);
-  const ageRef = useRef(null);
-  const educationRef = useRef(null);
-  const occupationRef = useRef(null);
-  const nationalityRef = useRef(null);
-  const passportRef = useRef(null);
-  const incomeRef = useRef(null);
-  const drinkingRef = useRef(null);
-  const smokingRef = useRef(null);
-  const weightRef = useRef(null);
-  const heightRef = useRef(null);
-  const builtRef = useRef(null);
-  const complexionRef = useRef(null);
-  const haircolorRef = useRef(null);
-  const eyecolorRef = useRef(null);
-  const cultureRef = useRef(null);
-  const aboutRef = useRef(null);
-  const dietRef = useRef(null);
-  const lifestyleRef = useRef(null);
-  const purposeRef = useRef(null);
-  const weddingplanRef = useRef(null);
-  const familystatusRef = useRef(null);
-  const visatypeRef = useRef(null);
-  const relocateRef = useRef(null);
-  const manglikRef = useRef(null);
-  const countrybornRef = useRef(null);
-  const countrygrewRef = useRef(null);
+const { width, height } = Dimensions.get("window")
 
-  const checkEmail = (email: string) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  };
+const CreateProfile = ({ navigation }) => {
+    const [uploading, setUploading] = useState(false);
+    const [userData, setUserData] = useState<any>();
+    const [firestoreData, setFiretoreData] = useState<any>();
+    const [selectedImage, setsSelectedImage] = useState<any>();
 
-  const getCurrentUserDetails = async () => {
-    const currentUser = auth().currentUser;
+    const getCurrentUserDetails = async () => {
+        const currentUser = auth().currentUser;
 
-    if (currentUser) {
-      try {
-        const userDoc = await firestore()
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
+        if (currentUser) {
+            try {
+                const userDoc = await firestore()
+                    .collection('profiles')
+                    .doc(currentUser.uid)
+                    .get();
 
-        if (userDoc.exists) {
-          const userDataFirestore = userDoc.data();
-          setUserData(userDataFirestore);
-
-          setFirstName(userDataFirestore?.firstname);
-          setMiddleName(userDataFirestore?.middlename);
-          setLastName(userDataFirestore?.lastname);
-          setDob(userDataFirestore?.dob);
-          setEmail(userDataFirestore?.email);
-          setGender(userDataFirestore?.gender);
-          setPhoneNo(userDataFirestore?.phoneno);
-          setCommunity(userDataFirestore?.community);
-          setPlace(userDataFirestore?.place);
-          setReligion(userDataFirestore?.religion);
-          setCaste(userDataFirestore?.caste);
-          setCountry(userDataFirestore?.country);
-          setState(userDataFirestore?.state);
-          setCity(userDataFirestore?.city);
-          setAddress(userDataFirestore?.address);
-          setMaritialaStatus(userDataFirestore?.maritialstatus);
-          setChildren(userDataFirestore?.children);
-          setAge(userDataFirestore?.age);
-          setEducation(userDataFirestore?.education);
-          setOccupation(userDataFirestore?.occupation);
-          setNationality(userDataFirestore?.nationality);
-          setPassport(userDataFirestore?.passport);
-          setIncome(userDataFirestore?.income);
-          setDrinking(userDataFirestore?.drinking);
-          setSmoking(userDataFirestore?.smoking);
-          setWeight(userDataFirestore?.weight);
-          setHeight(userDataFirestore?.height);
-          setComplexion(userDataFirestore?.complexion);
-          setHairColor(userDataFirestore?.haircolor);
-          setEyeColor(userDataFirestore?.eyecolor);
-          setCulture(userDataFirestore?.culture);
-          setAbout(userDataFirestore?.about);
-          setDiet(userDataFirestore?.diet);
-          setLifeStyle(userDataFirestore?.lifestyle);
-          setPurpose(userDataFirestore?.purpose);
-          setWeddingPlan(userDataFirestore?.weddingplan);
-          setFamilyStatus(userDataFirestore?.familystatus);
-          setVisaType(userDataFirestore?.visatype);
-          setRelocate(userDataFirestore?.relocate);
-          setManglik(userDataFirestore?.manglik);
-          setCountryBorn(userDataFirestore?.countryborn);
-          setCountryGrew(userDataFirestore?.countrygrew);
-        } else {
-          console.log('No user data found for this UID');
+                if (userDoc.exists) {
+                    const userDataFirestore = userDoc.data();
+                    setFiretoreData(userDataFirestore);
+                    setUserData(userDataFirestore);
+                }
+            } catch (error) {
+                console.log(error)
+            }
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    } else {
-      console.log('No user is currently authenticated.');
     }
-  };
 
-  useEffect(() => {
-    getCurrentUserDetails();
-  }, []);
+    useEffect(() => {
+        getCurrentUserDetails();
+    }, []);
 
-  const clearRefs = () => {
-    firstnameRef?.current?.blur();
-    middlenameRef?.current?.blur();
-    lastnameRef?.current?.blur();
-    dobRef?.current?.blur();
-    emailRef?.current?.blur();
-    genderRef?.current?.blur();
-    phonenoRef?.current?.blur();
-    communityRef?.current?.blur();
-    placeRef?.current?.blur();
-    religionRef?.current?.blur();
-    casteRef?.current?.blur();
-    countryRef?.current?.blur();
-    stateRef?.current?.blur();
-    cityRef?.current?.blur();
-    addressRef?.current?.blur();
-    maritialstatusRef?.current?.blur();
-    childrenRef?.current?.blur();
-    ageRef?.current?.blur();
-    educationRef?.current?.blur();
-    occupationRef?.current?.blur();
-    nationalityRef?.current?.blur();
-    passportRef?.current?.blur();
-    incomeRef?.current?.blur();
-    drinkingRef?.current?.blur();
-    smokingRef?.current?.blur();
-    weightRef?.current?.blur();
-    heightRef?.current?.blur();
-    builtRef?.current?.blur();
-    complexionRef?.current?.blur();
-    haircolorRef?.current?.blur();
-    eyecolorRef?.current?.blur();
-    cultureRef?.current?.blur();
-    aboutRef?.current?.blur();
-    dietRef?.current?.blur();
-    lifestyleRef?.current?.blur();
-    purposeRef?.current?.blur();
-    weddingplanRef?.current?.blur();
-    familystatusRef?.current?.blur();
-    visatypeRef?.current?.blur();
-    relocateRef?.current?.blur();
-    manglikRef?.current?.blur();
-    countrybornRef?.current?.blur();
-    countrygrewRef?.current?.blur();
-  };
+    const handleUserUpdate = async () => {
+        const currentUser = auth().currentUser;
 
-  const handleUserUpdate = async () => {
-    const currentUser = auth().currentUser;
+        const updatedData = {
+            ...userData,
+            updatedAt: firestore.FieldValue.serverTimestamp()
+        }
 
-    // if (!firstname || !middlename || !lastname || !dob || !checkEmail(email)) {
-    //   Alert.alert("Error", "Please fill all the fields before updating.");
-    //   return;
-    // }
+        if (currentUser) {
+            try {
+                await firestore()
+                    .collection('profiles')
+                    .doc(currentUser.uid)
+                    .update(updatedData);
 
-    console.log(
-      firstname,
-      middlename,
-      lastname,
-      dob,
-      email,
-      gender,
-      phoneno,
-      community,
-      place,
-      religion,
-      country,
-      state,
-      city,
-      address,
-      maritialstatus,
-      children,
-      age,
-      education,
-      occupation,
-      nationality,
-      passport,
-      income,
-      drinking,
-      smoking,
-      weight,
-      height,
-      built,
-      complexion,
-      haircolor,
-      eyecolor,
-      culture,
-      about,
-      lifestyle,
-      purpose,
-      visatype,
-      relocate,
-      manglik,
-      countryborn,
-      countrygrew,
-    );
+                Alert.alert("Updated");
+                getCurrentUserDetails();
+            } catch (error) {
+                Alert.alert(error)
+                console.log(error);
+            }
+        }
+    }
 
-    if (currentUser) {
-      try {
-        await firestore().collection('users').doc(currentUser.uid).update({
-          firstname: firstname,
-          middlename: middlename,
-          lastname: lastname,
-          dob: dob,
-          email: email,
-          gender: gender,
-          phoneno: phoneno,
-          community: community,
-          place: place,
-          religion: religion,
-          caste: caste,
-          state: state,
-          city: city,
-          address: address,
-          maritialstatus: maritialstatus,
-          children: children,
-          age: age,
-          education: education,
-          occupation: occupation,
-          nationality: nationality,
-          passport: passport,
-          income: income,
-          drinking: drinking,
-          smoking: smoking,
-          weight: weight,
-          height: height,
-          built: built,
-          complexion: complexion,
-          haircolor: haircolor,
-          eyecolor: eyecolor,
-          culture: culture,
-          about: about,
-          diet: diet,
-          lifestyle: lifestyle,
-          purpose: purpose,
-          weddingplan: weddingplan,
-          familystatus: familystatus,
-          visatype: visatype,
-          relocate: relocate,
-          manglik: manglik,
-          countryborn: countryborn,
-          countrygrew: countrygrew,
+    const handleInputChange = (section: string, parameter: string, value: string, subsection?: string) => {
+        console.log(section, parameter, value, subsection)
+        setUserData((prev) => {
+            if (subsection) {
+                return {
+                    ...prev,
+                    [section]: {
+                        ...prev[section],
+                        [subsection]: {
+                            ...prev[section][subsection],
+                            [parameter]: value
+                        }
+                    }
+                };
+            }
+            return {
+                ...prev,
+                [section]: {
+                    ...prev[section],
+                    [parameter]: value
+                }
+            };
         });
+    };
 
-        Alert.alert('Success', 'Your profile has been updated.');
-        //clearRefs();
-        setUserData(prevData => ({
-          ...prevData,
-          firstname,
-          middlename,
-          lastname,
-          dob,
-          email,
-          gender,
-          phoneno,
-          community,
-          place,
-          religion,
-          country,
-          state,
-          city,
-          address,
-          maritialstatus,
-          children,
-          age,
-          education,
-          occupation,
-          nationality,
-          passport,
-          income,
-          drinking,
-          smoking,
-          weight,
-          height,
-          built,
-          complexion,
-          haircolor,
-          eyecolor,
-          culture,
-          about,
-          lifestyle,
-          purpose,
-          visatype,
-          relocate,
-          manglik,
-          countryborn,
-          countrygrew,
-        }));
-      } catch (error) {
-        console.error('Error updating user data:', error);
-        Alert.alert('Error', 'There was an issue updating your profile.');
-      }
+    const uploadImageToFirebase = async (imageUri: string) => {
+        if (!imageUri) return null;
+
+        const fileName = imageUri.split('/').pop();
+        const uniqueFileName = `${Date.now()}_${fileName}`;
+
+        const reference = storage().ref(`profile-images/${uniqueFileName}`);
+
+        setUploading(true);
+
+        try {
+            const task = reference.putFile(imageUri);
+            task.on('state_changed', (taskSnapshot) => {
+                const progress = (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100;
+                console.log(`Progress: ${progress}%`);
+            });
+
+            await task;
+
+            const downloadUrl = await reference.getDownloadURL();
+
+            setUploading(false);
+
+            return downloadUrl;
+
+        } catch (error) {
+            console.error('Upload error: ', error);
+            Alert.alert('Upload Error', 'There was an error uploading the image.');
+            setUploading(false);
+            return null;
+        }
     }
-  };
 
-  const handleEmailChange = (newEmail: string) => {
-    if (!isEmailEdited) {
-      setEmail(newEmail);
+    const handleProfileImages = async (imageUri: string) => {
+        const currentUser = auth().currentUser;
+        const downloadUrl = await uploadImageToFirebase(imageUri);
+
+        console.log(downloadUrl)
+
+        const updatedData = {
+            ...userData,
+            profile_pic: downloadUrl,
+            updatedAt: firestore.FieldValue.serverTimestamp()
+        }
+
+        if (currentUser) {
+            try {
+                await firestore()
+                    .collection('profiles')
+                    .doc(currentUser.uid)
+                    .update(updatedData);
+
+                Alert.alert("Updated");
+                getCurrentUserDetails();
+            } catch (error) {
+                Alert.alert(error)
+                console.log(error);
+            }
+        }
     }
-  };
 
-  return (
-    <SafeAreaView style={styles.safearea}>
-      <ScrollView style={styles.main}>
-        <Header navigation={navigation} />
-        <View style={styles.container}>
-          <View style={styles.profile}>
-            <Text style={styles.profiletext}>CREATE PROFILE</Text>
-          </View>
+    const openImagePicker = () => {
+        const options = {
+            mediaType: 'photo',
+            includeBase64: false,
+        };
 
-          <View>
-            <Text style={styles.label}>First Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="First Name"
-              placeholderTextColor="#EBC7B1"
-              value={firstname}
-              onChangeText={setFirstName}
-              editable={!userData?.firstname }
-              //ref={firstnameRef}
-            />
-          </View>
+        launchImageLibrary(options, (response) => {
+            if (response.didCancel) {
+                console.log('User cancelled image picker');
+            } else if (response.error) {
+                console.log('Image picker error: ', response.error);
+            } else {
+                let imageUri = response.uri || response.assets?.[0]?.uri;
+                handleProfileImages(imageUri);
+            }
+        });
+    };
 
-          <View>
-            <Text style={styles.label}>Middle Name</Text>
-            <TextInput
-              placeholder="Middle Name"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={middlename}
-              onChangeText={setMiddleName}
-              editable={!userData?.middlename}
-              //ref={middlenameRef}
-            />
-          </View>
+    const ActivityIndicatorComponent = () => {
+        return (
+            <View style={styles.activityContainer}>
+                <ActivityIndicator size="large" color="#a4737b" />
+            </View>
+        )
+    };
 
-          <View>
-            <Text style={styles.label}>Last Name</Text>
-            <TextInput
-              placeholder="Last Name"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={lastname}
-              onChangeText={setLastName}
-              editable={!userData?.lastname}
-              //ref={lastnameRef}
-            />
-          </View>
-          <View>
-            <Text style={styles.label}>Gender</Text>
-            <TextInput
-              placeholder="Gender"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={gender}
-              onChangeText={setGender}
-              editable={!userData?.gender}
-              //ref={genderRef}
-            />
-          </View>
+    return (
+        <SafeAreaView style={styles.safearea}>
+            <ScrollView style={styles.main}>
+                <Header navigation={navigation} />
+                <View style={styles.container}>
+                    <View style={styles.profile}>
+                        <Text style={styles.profiletext}>CREATE PROFILE</Text>
+                    </View>
+
+                    <View>
+                        <Text style={styles.subheading}>Personal Information</Text>
+                        <View style={styles.subcontainer}>
+                            <TouchableOpacity style={styles.circlebody} onPress={openImagePicker}>
+                                <View style={styles.circle}>
+                                    <Image source={{ uri: firestoreData?.profile_pic || "" }} height={height * 0.25} width={width * 0.50} borderRadius={500} resizeMode='cover' />
+                                    <Icon name="add-circle" size={40} color="#fff" style={styles.photoicon} />
+                                </View>
+
+                            </TouchableOpacity>
+
+                            <View>
+                                <Text style={styles.label}>Full Name</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Full Name"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.personal_info.name || ''}
+                                    editable={!firestoreData?.personal_info.name}
+                                    onChangeText={(value) => handleInputChange('personal_info', 'name', value)}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>DOB</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="DOB"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.personal_info.date_of_birth || ''}
+                                    editable={!firestoreData?.personal_info.date_of_birth}
+                                    onChangeText={(value) => handleInputChange('personal_info', 'date_of_birth', value)}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Weight (Kg)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Weight"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.personal_info.weight || ''}
+                                    editable={!firestoreData?.personal_info.weight}
+                                    onChangeText={(value) => handleInputChange('personal_info', 'weight', value)}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Marital Status</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.personal_info.marital_status}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('personal_info', 'marital_status', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.personal_info.marital_status}
+                                    >
+                                        <Picker.Item label="Never Married" value="Never Married" />
+                                        <Picker.Item label="Divorced" value="Divorced" />
+                                        <Picker.Item label="Widowed" value="Widowed" />
+                                    </Picker>
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Gender</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.personal_info.gender}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('personal_info', 'gender', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.personal_info.gender}
+                                    >
+                                        <Picker.Item label="Male" value="Male" />
+                                        <Picker.Item label="Female" value="Female" />
+                                    </Picker>
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Height (Cm)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Height"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.personal_info.height || ''}
+                                    editable={!firestoreData?.personal_info.height}
+                                    onChangeText={(value) => handleInputChange('personal_info', 'height', value)}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Blood Group</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.personal_info.blood_group}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('personal_info', 'blood_group', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.personal_info.blood_group}
+                                    >
+                                        <Picker.Item label="A+" value="A+" />
+                                        <Picker.Item label="A-" value="A-" />
+                                        <Picker.Item label="B+" value="B+" />
+                                        <Picker.Item label="B-" value="B-" />
+                                        <Picker.Item label="O+" value="O+" />
+                                        <Picker.Item label="O-" value="O-" />
+                                        <Picker.Item label="AB+" value="AB+" />
+                                        <Picker.Item label="AB-" value="AB-" />
+                                    </Picker>
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>No. of Children</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="No. of Children"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.personal_info.num_children || ''}
+                                    editable={!firestoreData?.personal_info.num_children}
+                                    onChangeText={(value) => handleInputChange('personal_info', 'num_children', value)}
+                                />
+                            </View>
 
 
-          <View>
-            <Text style={styles.label}>Phone Number</Text>
-            <TextInput
-              placeholder="Phone Number"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={phoneno}
-              onChangeText={setPhoneNo}
-              editable={!userData?.phoneno}
-              //ref={phonenoRef}
-            />
-          </View>
-          <View>
-            <Text style={styles.label}>Community</Text>
-            <TextInput
-              placeholder="Community"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={community}
-              onChangeText={setCommunity}
-              editable={!userData?.community}
-              //ref={communityRef}
-            />
-          </View>
-          <View>
-            <Text style={styles.label}>Place</Text>
-            <TextInput
-              placeholder="Place"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={place}
-              onChangeText={setPlace}
-              editable={!userData?.place}
-              //ref={placeRef}
-            />
-          </View>
-          <View>
-            <Text style={styles.label}>Date of Birth</Text>
-            <TextInput
-              placeholder="Date of Birth"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={dob}
-              onChangeText={setDob}
-              editable={userData?.dob}
-              //ref={dobRef}
-            />
-          </View>
+                        </View>
+                    </View>
 
-          <View>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              placeholder="Email"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={email}
-              onChangeText={handleEmailChange}
-              editable={userData?.email}
-              //ref={emailRef}
-            />
-          </View>
+                    <View>
+                        <Text style={styles.subheading}>Contact Information</Text>
+                        <View style={styles.subcontainer}>
+                            <View style={styles.phonenobody}>
+                                <View style={styles.phonecode}>
+                                    <TextInput
+                                        style={styles.phoneno}
+                                        value={userData?.contact_info.selected_code}
+                                        editable={!firestoreData?.contact_info.selected_code}
+                                    ></TextInput>
+                                </View>
+                                <View style={styles.phonenomain}>
+                                    <TextInput
+                                        style={styles.phoneno}
+                                        value={userData?.contact_info.phone}
+                                        editable={!firestoreData?.contact_info.phone}
+                                    ></TextInput>
+                                </View>
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Religion</Text>
-            <TextInput
-              placeholder="Religion"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={religion}
-              onChangeText={setReligion}
-              editable={!userData?.religion}
-              //ref={religionRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Current City</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Current City"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.contact_info.current_city || ''}
+                                    editable={!firestoreData?.contact_info.current_city}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'current_city', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Caste</Text>
-            <TextInput
-              placeholder="Caste"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={caste}
-              onChangeText={setCaste}
-              editable={!userData?.caste}
-              //ref={casteRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>City</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="City"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.contact_info?.permanent_address?.city !== undefined ? userData?.contact_info?.permanent_address?.city : ""}
+                                    editable={!firestoreData?.contact_info?.permanent_address?.city}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'city', value, 'permanent_address')}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Country</Text>
-            <TextInput
-              placeholder="Country"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={country}
-              onChangeText={setCountry}
-              editable={!userData?.country}
-              //ref={countryRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>State</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="State"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.contact_info?.permanent_address?.state !== undefined ? userData?.contact_info?.permanent_address?.state : ""}
+                                    editable={!firestoreData?.contact_info?.permanent_address?.state}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'state', value, 'permanent_address')}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>State</Text>
-            <TextInput
-              placeholder="State"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={state}
-              onChangeText={setState}
-              editable={!userData?.state}
-              //ref={stateRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Country</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Country"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.contact_info?.permanent_address?.country !== undefined ? userData?.contact_info?.permanent_address?.country : ""}
+                                    editable={!firestoreData?.contact_info?.permanent_address?.country}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'country', value, 'permanent_address')}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>City</Text>
-            <TextInput
-              placeholder="City"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={city}
-              onChangeText={setCity}
-              editable={!userData?.city}
-              //ref={cityRef}
-            />
-          </View>
-          <View>
-            <Text style={styles.label}>Address</Text>
-            <TextInput
-              placeholder="Address"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={address}
-              onChangeText={setAddress}
-              editable={!userData?.address}
-              //ref={religionRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Pincode</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Pincode"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.contact_info?.permanent_address?.pincode !== undefined ? userData?.contact_info?.permanent_address?.pincode : ""}
+                                    editable={!firestoreData?.contact_info?.permanent_address?.pincode}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'pincode', value, 'permanent_address')}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Maritial Status</Text>
-            <TextInput
-              placeholder="Maritial Status"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={maritialstatus}
-              onChangeText={setMaritialaStatus}
-              editable={!userData?.maritialstatus}
-              //ref={maritialstatusRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Street</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Street"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.contact_info?.permanent_address?.street !== undefined ? userData?.contact_info?.permanent_address?.street : ""}
+                                    editable={!firestoreData?.contact_info?.permanent_address?.street}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'street', value, 'permanent_address')}
+                                />
+                            </View>
+                        </View>
+                    </View>
 
-          <View>
-            <Text style={styles.label}>Children</Text>
-            <TextInput
-              placeholder="Children"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={children}
-              onChangeText={setChildren}
-              editable={!userData?.children}
-              //ref={childrenRef}
-            />
-          </View>
+                    <View>
+                        <Text style={styles.subheading}>Family Background</Text>
+                        <View style={styles.subcontainer}>
+                            <View>
+                                <Text style={styles.label}>Family Type</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.family_background?.family_type}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('family_background', 'family_type', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.family_background?.family_type}
+                                    >
+                                        <Picker.Item label="Joint" value="Joint" />
+                                        <Picker.Item label="Nuclear" value="Nuclear" />
+                                    </Picker>
+                                </View>
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Age</Text>
-            <TextInput
-              placeholder="Age"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={age}
-              onChangeText={setAge}
-              editable={!userData?.age}
-              //ref={ageRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Mother's Name</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Mother's Name"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.family_background?.mother_name || ''}
+                                    editable={!firestoreData?.family_background?.mother_name}
+                                    onChangeText={(value) => handleInputChange('family_background', 'mother_name', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Education</Text>
-            <TextInput
-              placeholder="Education"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={education}
-              onChangeText={setEducation}
-              editable={!userData?.education}
-              //ref={educationRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Father's Name</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Father's Name"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.family_background?.father_name || ''}
+                                    editable={!firestoreData?.family_background?.father_name}
+                                    onChangeText={(value) => handleInputChange('family_background', 'father_name', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Occupation</Text>
-            <TextInput
-              placeholder="Occupation"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={occupation}
-              onChangeText={setOccupation}
-              editable={!userData?.occupation}
-              //ref={occupationRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>No. of Brothers</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="No. of Brothers"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.family_background?.num_brothers || ''}
+                                    editable={!firestoreData?.family_background?.num_brothers}
+                                    onChangeText={(value) => handleInputChange('family_background', 'num_brothers', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Nationality</Text>
-            <TextInput
-              placeholder="Nationality"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={nationality}
-              onChangeText={setNationality}
-              editable={!userData?.nationality}
-              //ref={nationalityRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>No. of Sisters</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="No. of Sisters"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.family_background?.num_sisters || ''}
+                                    editable={!firestoreData?.family_background?.num_sisters}
+                                    onChangeText={(value) => handleInputChange('family_background', 'num_sisters', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Passport</Text>
-            <TextInput
-              placeholder="Passport"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={passport}
-              onChangeText={setPassport}
-              editable={!userData?.passport}
-              //ref={passportRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Family Status</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.family_background?.family_status}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('family_background', 'family_status', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.family_background?.family_status}
+                                    >
+                                        <Picker.Item label="Middle" value="Middle" />
+                                        <Picker.Item label="Upper Middle" value="Upper Middle" />
+                                        <Picker.Item label="Rich" value="Rich" />
+                                        <Picker.Item label="Affluent" value="Affluent" />
+                                    </Picker>
+                                </View>
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Income</Text>
-            <TextInput
-              placeholder="Income"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={income}
-              onChangeText={setIncome}
-              editable={!userData?.religion}
-              //ref={religionRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Family Values</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.family_background?.family_values}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('family_background', 'family_values', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.family_background?.family_values}
+                                    >
+                                        <Picker.Item label="Traditional" value="Traditional" />
+                                        <Picker.Item label="Moderate" value="Moderate" />
+                                        <Picker.Item label="Modern" value="Modern" />
+                                    </Picker>
+                                </View>
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Drinking</Text>
-            <TextInput
-              placeholder="Drinking"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={drinking}
-              onChangeText={setDrinking}
-              editable={!userData?.drinking}
-              //ref={drinkingRef}
-            />
-          </View>
+                        </View>
+                    </View>
 
-          <View>
-            <Text style={styles.label}>Smoking</Text>
-            <TextInput
-              placeholder="Smoking"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={smoking}
-              onChangeText={setSmoking}
-              editable={!userData?.smoking}
-              //ref={smokingRef}
-            />
-          </View>
+                    <View>
+                        <Text style={styles.subheading}>Education & Career</Text>
+                        <View style={styles.subcontainer}>
+                            <View>
+                                <Text style={styles.label}>Highest Education</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.education?.highest_education}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('education', 'highest_education', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.education?.highest_education}
+                                    >
+                                        <Picker.Item label="Bachelor's Degree" value="Bachelor's Degree" />
+                                        <Picker.Item label="Master's Degree" value="Master's Degree" />
+                                        <Picker.Item label="Ph.D" value="Ph.D" />
+                                        <Picker.Item label="Diploma" value="Diploma" />
+                                    </Picker>
+                                </View>
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Weight</Text>
-            <TextInput
-              placeholder="Weight"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={weight}
-              onChangeText={setWeight}
-              editable={!userData?.weight}
-              //ref={weightRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Field of Study</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Field of Study"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.education?.field_of_study || ''}
+                                    editable={!firestoreData?.education?.field_of_study}
+                                    onChangeText={(value) => handleInputChange('education', 'field_of_study', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Height</Text>
-            <TextInput
-              placeholder="Height"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={height}
-              onChangeText={setHeight}
-              editable={!userData?.height}
-              //ref={heightRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>College/ University</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="College/ University"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.education?.college || ''}
+                                    editable={!firestoreData?.education?.college}
+                                    onChangeText={(value) => handleInputChange('education', 'college', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Built</Text>
-            <TextInput
-              placeholder="Built"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={built}
-              onChangeText={setBuilt}
-              editable={!userData?.built}
-              //ref={builtRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Graduation Year</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Graduation Year"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.education?.graduation_year || ''}
+                                    editable={!firestoreData?.education?.graduation_year}
+                                    onChangeText={(value) => handleInputChange('education', 'graduation_year', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Complexion</Text>
-            <TextInput
-              placeholder="Complexion"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={complexion}
-              onChangeText={setComplexion}
-              editable={!userData?.complexion}
-              //ref={complexionRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Occupation</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Occupation"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.professional_details?.occupation || ''}
+                                    editable={!firestoreData?.professional_details?.occupation}
+                                    onChangeText={(value) => handleInputChange('professional_details', 'occupation', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Hair Color</Text>
-            <TextInput
-              placeholder="Hair Color"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={haircolor}
-              onChangeText={setHairColor}
-              editable={!userData?.built}
-              //ref={builtRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Employer</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Employer"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.professional_details?.employer || ''}
+                                    editable={!firestoreData?.professional_details?.employer}
+                                    onChangeText={(value) => handleInputChange('professional_details', 'employer', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Eye Color</Text>
-            <TextInput
-              placeholder="Eye Color"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={eyecolor}
-              onChangeText={setEyeColor}
-              editable={!userData?.eyecolor}
-              //ref={eyecolorRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Job Location</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Job Location"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.professional_details?.job_location || ''}
+                                    editable={!firestoreData?.professional_details?.job_location}
+                                    onChangeText={(value) => handleInputChange('professional_details', 'job_location', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Culture</Text>
-            <TextInput
-              placeholder="Culture"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={culture}
-              onChangeText={setCulture}
-              editable={!userData?.culture}
-              //ref={cultureRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Annual Income</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Annual Income"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.professional_details?.annual_income || ''}
+                                    editable={!firestoreData?.professional_details?.annual_income}
+                                    onChangeText={(value) => handleInputChange('professional_details', 'annual_income', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>About</Text>
-            <TextInput
-              placeholder="About"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={about}
-              onChangeText={setAbout}
-              editable={!userData?.built}
-              //ref={aboutRef}
-            />
-          </View>
 
-          <View>
-            <Text style={styles.label}>Diet</Text>
-            <TextInput
-              placeholder="Diet"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={diet}
-              onChangeText={setDiet}
-              editable={!userData?.diet}
-              //ref={dietRef}
-            />
-          </View>
 
-          <View>
-            <Text style={styles.label}>Lifestyle</Text>
-            <TextInput
-              placeholder="Lifestyle"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={lifestyle}
-              onChangeText={setLifeStyle}
-              editable={!userData?.lifestyle}
-              //ref={lifestyleRef}
-            />
-          </View>
+                        </View>
+                    </View>
 
-          <View>
-            <Text style={styles.label}>Purpose</Text>
-            <TextInput
-              placeholder="Purpose"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={purpose}
-              onChangeText={setPurpose}
-              editable={!userData?.purpose}
-              //ref={purposeRef}
-            />
-          </View>
+                    <View>
+                        <Text style={styles.subheading}>Religious & Cultural</Text>
+                        <View style={styles.subcontainer}>
+                            <View>
+                                <Text style={styles.label}>Religion</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.religious_cultural?.religion}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('religious_cultural', 'religion', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.religious_cultural?.religion}
+                                    >
+                                        <Picker.Item label="Hindu" value="Hindu" />
+                                        <Picker.Item label="Muslim" value="Muslim" />
+                                        <Picker.Item label="Christian" value="Christian" />
+                                        <Picker.Item label="Sikh" value="Sikh" />
+                                        <Picker.Item label="Other" value="Other" />
+                                    </Picker>
+                                </View>
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Wedding Plan</Text>
-            <TextInput
-              placeholder="Wedding Plan"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={weddingplan}
-              onChangeText={setWeddingPlan}
-              editable={!userData?.weddingplan}
-              //ref={weddingplanRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Caste</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Caste"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.religious_cultural?.caste || ''}
+                                    editable={!firestoreData?.religious_cultural?.caste}
+                                    onChangeText={(value) => handleInputChange('religious_cultural', 'caste', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Family Status</Text>
-            <TextInput
-              placeholder="Family Status"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={familystatus}
-              onChangeText={setFamilyStatus}
-              editable={!userData?.familystatus}
-              //ref={familystatusRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>SubCaste</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="SubCaste"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.religious_cultural?.subcaste || ''}
+                                    editable={!firestoreData?.religious_cultural?.subcaste}
+                                    onChangeText={(value) => handleInputChange('religious_cultural', 'subcaste', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Visa Type</Text>
-            <TextInput
-              placeholder="Visa Type"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={visatype}
-              onChangeText={setVisaType}
-              editable={!userData?.visatype}
-              //ref={visatypeRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Gothra</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Gothra"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.religious_cultural?.gothra || ''}
+                                    editable={!firestoreData?.religious_cultural?.gothra}
+                                    onChangeText={(value) => handleInputChange('religious_cultural', 'gothra', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Relocate</Text>
-            <TextInput
-              placeholder="Relocate"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={relocate}
-              onChangeText={setRelocate}
-              editable={!userData?.relocate}
-              //ref={relocateRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Star/Rashi</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Star/Rashi"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.religious_cultural?.star_rashi || ''}
+                                    editable={!firestoreData?.religious_cultural?.star_rashi}
+                                    onChangeText={(value) => handleInputChange('religious_cultural', 'star_rashi', value)}
+                                />
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Manglik</Text>
-            <TextInput
-              placeholder="Manglik"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={manglik}
-              onChangeText={setManglik}
-              editable={!userData?.manglik}
-              //ref={manglikRef}
-            />
-          </View>
+                            <View>
+                                <Text style={styles.label}>Manglik Status</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.religious_cultural?.manglik_status}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('religious_cultural', 'manglik_status', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.religious_cultural?.manglik_status}
+                                    >
+                                        <Picker.Item label="Manglik" value="Manglik" />
+                                        <Picker.Item label="Non-Manglik" value="Non-Manglik" />
+                                        <Picker.Item label="Anshik Manglik" value="Anshik Manglik" />
+                                    </Picker>
+                                </View>
+                            </View>
 
-          <View>
-            <Text style={styles.label}>Country Born</Text>
-            <TextInput
-              placeholder="Country Born"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={countryborn}
-              onChangeText={setCountryBorn}
-              editable={!userData?.countryborn}
-              //ref={countrybornRef}
-            />
-          </View>
 
-          <View>
-            <Text style={styles.label}>Country Grew</Text>
-            <TextInput
-              placeholder="Country Grew"
-              style={styles.input}
-              placeholderTextColor="#EBC7B1"
-              value={countrygrew}
-              onChangeText={setCountryGrew}
-              editable={!userData?.countrygrew}
-              //ref={countrygrewRef}
-            />
-          </View>
 
-          <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
-            <Text style={styles.creattext}>Create Profile</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
 
-export default CreateProfile;
+
+                        </View>
+                    </View>
+
+                    <View>
+                        <Text style={styles.subheading}>Lifestyle & Preferences</Text>
+                        <View style={styles.subcontainer}>
+                            <View>
+                                <Text style={styles.label}>Drinking Habits</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.lifestyle_preferences?.drinking_habits}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('lifestyle_preferences', 'drinking_habits', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.lifestyle_preferences?.drinking_habits}
+                                    >
+                                        <Picker.Item label="Never" value="Never" />
+                                        <Picker.Item label="Occasionally" value="Occasionally" />
+                                        <Picker.Item label="Regular" value="Regular" />
+                                    </Picker>
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Smoking Habits</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.lifestyle_preferences?.smoking_habits}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('lifestyle_preferences', 'smoking_habits', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.lifestyle_preferences?.smoking_habits}
+                                    >
+                                        <Picker.Item label="Non-Smoker" value="Non-Smoker" />
+                                        <Picker.Item label="Occasionally Smoker" value="Occasionally Smoker" />
+                                        <Picker.Item label="Regular Smoker" value="Regular Smoker" />
+                                    </Picker>
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Diet Preferences</Text>
+                                <View style={styles.input}>
+                                    <Picker
+                                        selectedValue={userData?.lifestyle_preferences?.diet_preferences}
+                                        onValueChange={(itemValue) => {
+                                            handleInputChange('lifestyle_preferences', 'diet_preferences', itemValue);
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!firestoreData?.lifestyle_preferences?.diet_preferences}
+                                    >
+                                        <Picker.Item label="Vegetarian" value="Vegetarian" />
+                                        <Picker.Item label="Non-Vegetarian" value="Non-Vegetarian" />
+                                        <Picker.Item label="Eggetarian" value="Eggetarian" />
+                                    </Picker>
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Hobbies & Interests</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Hobbies & Intrests"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.hobbies_interests?.join(', ') || ''}
+                                    editable={!firestoreData?.hobbies_interests}
+                                    onChangeText={(value) => {
+                                        setUserData(prev => ({
+                                            ...prev,
+                                            hobbies_interests: value.split(',').map(item => item.trim())
+                                        }))
+                                    }}
+                                />
+                            </View>
+                        </View>
+                    </View>
+
+                    <View>
+                        <Text style={styles.subheading}>Partner Preferences</Text>
+                        <View style={styles.subcontainer}>
+                            <View>
+                                <Text style={styles.label}>Age Range(Min)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Age Range(Min)"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_age_range?.min ?? ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_age_range?.min}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_age_range', value, 'min')}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Age Range(Max)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Age Range(Max)"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_age_range?.max != undefined ? userData.matrimonial_expectations.preferred_age_range.max : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_age_range?.max}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_age_range', value, 'max')}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Height Range(Min)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Height Range(Min)"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_height_range?.min != undefined ? userData.matrimonial_expectations.preferred_height_range.min : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_height_range?.min}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_height_range', value, 'min')}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Height Range(Max)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Height Range(Max)"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_height_range?.max != undefined ? userData.matrimonial_expectations.preferred_height_range.max : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_height_range?.max}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_height_range', value, 'max')}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Preferred Location</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Preferred Location"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_location != undefined ? userData.matrimonial_expectations.preferred_location : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_location}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_location', value)}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Preferred Education</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Preferred Education"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_education != undefined ? userData.matrimonial_expectations.preferred_education : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_education}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_education', value)}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Preferred Occupation</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Preferred Occupation"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_occupation != undefined ? userData.matrimonial_expectations.preferred_occupation : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_occupation}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_occupation', value)}
+                                />
+                            </View>
+
+
+                            <View>
+                                <Text style={styles.label}>Minimum Annual Income</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Minimum Annual Income"
+                                    keyboardType='number-pad'
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.preferred_income != undefined ? userData.matrimonial_expectations.preferred_income : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.preferred_income}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'preferred_income', value)}
+                                />
+                            </View>
+
+
+                            <View>
+                                <Text style={styles.label}>Other Preferences</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Other Preferences"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.matrimonial_expectations?.other_preferences != undefined ? userData.matrimonial_expectations.other_preferences : ''}
+                                    editable={!firestoreData?.matrimonial_expectations?.other_preferences}
+                                    onChangeText={(value) => handleInputChange('matrimonial_expectations', 'other_preferences', value)}
+                                />
+                            </View>
+                        </View>
+                    </View>
+
+                    <View>
+                        <View style={styles.subcontainer}>
+                            <View>
+                                <Text style={styles.label}>About Me</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="About Me"
+                                    placeholderTextColor="#EBC7B1"
+                                    keyboardType='number-pad'
+                                    value={userData?.about_me || ''}
+                                    editable={!firestoreData?.about_me}
+                                    onChangeText={(value) => {
+                                        setUserData(prev => ({
+                                            ...prev,
+                                            about_me: value
+                                        }))
+                                    }}
+                                />
+                            </View>
+
+
+                        </View>
+                    </View>
+
+                    <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
+                        <Text style={styles.creattext}>Create Profile</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+            <View style={uploading ? styles.loadingContainer : null}>
+                {uploading && <ActivityIndicator size="large" color="#a4737b" />}
+            </View>
+        </SafeAreaView>
+    )
+}
+
+export default CreateProfile
 
 const styles = StyleSheet.create({
-  safearea: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  main: {
-    flexGrow: 1,
-  },
-  container: {
-    backgroundColor: '#f5f5f5',
-    flex: 1,
-    gap: width / 30,
-    paddingLeft: width / 20,
-    paddingRight: width / 20,
-    paddingBottom: width / 30,
-  },
-  profile: {
-    alignItems: 'center',
-    padding: 20,
-  },
-  profiletext: {
-    fontSize: 25,
-    color: '#792A37',
-  },
-  label: {
-    color: 'black',
-  },
-  input: {
-    borderColor: '#EBC7B1',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingLeft: width / 40,
-    color: '#EBC7B1',
-  },
-  creat: {
-    borderRadius: 12,
-    backgroundColor: '#a4737b',
-    padding: width / 30,
-  },
-  creattext: {
-    color: 'white',
-    textAlign: 'center',
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 4,
-  },
-});
+    safearea: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    main: {
+        flexGrow: 1,
+    },
+    container: {
+        backgroundColor: '#f5f5f5',
+        flex: 1,
+        gap: width / 30,
+        paddingLeft: width / 20,
+        paddingRight: width / 20,
+        paddingBottom: width / 30,
+    },
+    activityContainer: {
+        backgroundColor: '#f5f5f5',
+        flex: 1,
+        gap: width / 30,
+        paddingLeft: width / 20,
+        paddingRight: width / 20,
+        paddingBottom: width / 30,
+    },
+    profile: {
+        alignItems: 'center',
+        padding: 20,
+    },
+    profiletext: {
+        fontSize: 25,
+        color: '#792A37',
+    },
+    label: {
+        color: 'black',
+    },
+    input: {
+        borderColor: '#EBC7B1',
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingLeft: width / 40,
+        color: '#EBC7B1',
+    },
+    picker: {
+        color: '#EBC7B1',
+    },
+    phonenobody: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: width / 30,
+    },
+    phonecode: {
+        width: '30%',
+        borderColor: '#EBC7B1',
+        borderWidth: 1,
+        borderRadius: 12,
+        color: '#EBC7B1',
+    },
+    phonenomain: {
+        flex: 1,
+    },
+    phoneno: {
+        borderWidth: 1,
+        borderRadius: 12,
+        borderColor: '#EBC7B1',
+        color: '#BE7356',
+        height: 'auto',
+        paddingLeft: width / 40,
+    },
+    subheading: {
+        fontSize: 18,
+        color: '#792A37',
+    },
+    subcontainer: {
+        marginTop: width / 30
+    },
+    creat: {
+        borderRadius: 12,
+        backgroundColor: '#a4737b',
+        padding: width / 30,
+    },
+    creattext: {
+        color: 'white',
+        textAlign: 'center',
+    },
+    circlebody: {
+
+        display: 'flex',
+        alignItems: 'center',
+    },
+    circle: {
+        height: height * 0.25,
+        width: width * 0.50,
+        borderRadius: 500,
+        borderColor: '#782A37',
+        borderWidth: 2,
+    },
+    photoicon: {
+        position: 'absolute',
+        bottom: 0,
+        right: width * 0.05,
+    },
+    loadingContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    },
+
+})

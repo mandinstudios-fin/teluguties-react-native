@@ -18,7 +18,7 @@ const Matches = ({ navigation }) => {
         return;
       }
   
-      const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
+      const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
   
       if (!userDoc.exists) {
         console.log('No user data found for this UID');
@@ -26,11 +26,18 @@ const Matches = ({ navigation }) => {
       }
   
       const userDataFirestore = userDoc.data();
-      const { religion, caste } = userDataFirestore;
+      const religion = userDataFirestore?.religious_cultural?.religion;
+      const caste = userDataFirestore?.religious_cultural?.caste;
+      const city = userDataFirestore?.contact_info?.current_city;
+      const state = userDataFirestore?.contact_info?.permanent_address?.state;
+
+      console.log(religion, caste, city, state)
   
-      const querySnapshot = await firestore().collection('users')
-        .where('religion', '==', religion)
-        .where('caste', '==', caste)
+      const querySnapshot = await firestore().collection('profiles')
+        .where('religious_cultural.religion', '==', religion)
+        .where('religious_cultural.caste', '==', caste)
+        .where('contact_info.current_city', '==', city)
+        .where('contact_info.permanent_address.state', '==', state)
         .get();
   
       if (querySnapshot.empty) {
@@ -39,7 +46,7 @@ const Matches = ({ navigation }) => {
       }
   
       const matchedUsersPromises = querySnapshot.docs.map(async (doc) => {
-        const userSnapshot = await firestore().collection('users').doc(doc.id).get();
+        const userSnapshot = await firestore().collection('profiles').doc(doc.id).get();
         if (userSnapshot.exists && userSnapshot.id !== currentUser.uid) {
           return { id: userSnapshot.id, ...userSnapshot.data() };
         }
@@ -72,7 +79,9 @@ const Matches = ({ navigation }) => {
         <View style={styles.boxContainer}>
           <View style={styles.box}></View>
         </View>
-        <View style={styles.profilegridcontainer}><ProfileGrid navigation={navigation} data={data} /></View>
+        {
+          data.length == 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>Please fill all details</Text></View>) : (<ProfileGrid navigation={navigation} data={data} />)
+        }
       </View>
     </SafeAreaView>
   )
@@ -100,4 +109,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 10
   },
+  warncontainer: {
+    paddingHorizontal: 10,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  warn: {
+    fontSize: 20,
+    color: '#000'
+  }
 })
