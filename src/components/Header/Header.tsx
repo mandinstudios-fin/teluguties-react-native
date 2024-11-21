@@ -18,35 +18,10 @@ const { width, height } = Dimensions.get('window');
 const Header = ({ navigation }) => {
   const [firestoreData, setFiretoreData] = useState<any>();
 
-  const getCurrentUserDetails = async () => {
+  useEffect(() => {
     const currentUser = auth().currentUser;
 
     if (currentUser) {
-      try {
-        const userDoc = await firestore()
-          .collection('profiles')
-          .doc(currentUser.uid)
-          .get();
-
-        if (userDoc.exists) {
-          const userDataFirestore = userDoc.data();
-          setFiretoreData(userDataFirestore);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    getCurrentUserDetails();
-  }, []);
-
-  useEffect(() => {
-    const currentUser = auth().currentUser; 
-    
-    if (currentUser) {
-      
       const unsubscribe = firestore()
         .collection('profiles')
         .doc(currentUser.uid)

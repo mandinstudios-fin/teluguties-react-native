@@ -18,6 +18,7 @@ import firestore from '@react-native-firebase/firestore'
 
 import useAuth from '../../hooks/useAuth';
 import { removeListener, startOtpListener } from 'react-native-otp-verify';
+import { getUsersAge } from '../../utils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -42,12 +43,12 @@ const Otp = ({ navigation, route }) => {
           name: formData.fullname,
           gender: formData.gender,
           date_of_birth: formData.dob,
-          age: '',
+          age: getUsersAge(formData.dob),
           height: '',
           weight: '',
           blood_group: '',
           marital_status: '',
-          num_children: 0
+          num_children: 0,
         },
         contact_info: {
           phone: formData.phoneNumber,
@@ -59,8 +60,8 @@ const Otp = ({ navigation, route }) => {
             city: '',
             state: '',
             country: 'India',
-            pincode: ''
-          }
+            pincode: '',
+          },
         },
         family_background: {
           family_type: '',
@@ -69,19 +70,19 @@ const Otp = ({ navigation, route }) => {
           num_brothers: 0,
           num_sisters: 0,
           family_values: '',
-          family_status: ''
+          family_status: '',
         },
         education: {
           highest_education: '',
           field_of_study: '',
           college: '',
-          graduation_year: ''
+          graduation_year: '',
         },
         professional_details: {
           occupation: '',
           employer: '',
           annual_income: 0,
-          job_location: ''
+          job_location: '',
         },
         hobbies_interests: [],
         religious_cultural: {
@@ -90,42 +91,42 @@ const Otp = ({ navigation, route }) => {
           subcaste: '',
           gothra: '',
           star_rashi: '',
-          manglik_status: ''
+          manglik_status: '',
         },
         lifestyle_preferences: {
           drinking_habits: '',
           smoking_habits: '',
           diet_preferences: '',
           appearance_preferences: '',
-          personality_preferences: ''
+          personality_preferences: '',
         },
         matrimonial_expectations: {
           preferred_age_range: {
             min: 0,
-            max: 0
+            max: 0,
           },
           preferred_height_range: {
             min: 0,
-            max: 0
+            max: 0,
           },
           preferred_location: '',
           preferred_caste_subcaste: [],
           preferred_education: '',
           preferred_occupation: '',
           preferred_income: 0,
-          other_preferences: ''
+          other_preferences: '',
         },
         about_me: '',
         createdAt: firestore.FieldValue.serverTimestamp(),
-        updatedAt: firestore.FieldValue.serverTimestamp()
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       });
-      
+
       setLoading(false);
       navigation.navigate("Success");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const confirmOtp = async (otp) => {
     setLoading(true);
@@ -133,7 +134,7 @@ const Otp = ({ navigation, route }) => {
       try {
         await confirmation.confirm(otp);
 
-        if(isRegistration) {
+        if (isRegistration) {
           await updateUserDetails();
         }
       } catch (error) {
@@ -142,6 +143,9 @@ const Otp = ({ navigation, route }) => {
         Alert.alert("Invalid Otp");
         return;
       }
+      setLoading(false);
+      navigation.navigate("Success");
+
     }
   };
 

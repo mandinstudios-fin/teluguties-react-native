@@ -9,68 +9,69 @@ import firestore from '@react-native-firebase/firestore';
 const Matches = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
 
-  const getMatchesForUser = async () => {
-    try {
-      const currentUser = auth().currentUser;
-      
-      if (!currentUser) {
-        console.log("No user is logged in.");
-        return;
-      }
-  
-      const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
-  
-      if (!userDoc.exists) {
-        console.log('No user data found for this UID');
-        return;
-      }
-  
-      const userDataFirestore = userDoc.data();
-      const religion = userDataFirestore?.religious_cultural?.religion;
-      const caste = userDataFirestore?.religious_cultural?.caste;
-      const city = userDataFirestore?.contact_info?.current_city;
-      const state = userDataFirestore?.contact_info?.permanent_address?.state;
-
-      console.log(religion, caste, city, state)
-  
-      const querySnapshot = await firestore().collection('profiles')
-        .where('religious_cultural.religion', '==', religion)
-        .where('religious_cultural.caste', '==', caste)
-        .where('contact_info.current_city', '==', city)
-        .where('contact_info.permanent_address.state', '==', state)
-        .get();
-  
-      if (querySnapshot.empty) {
-        console.log('No matching users found.');
-        return;
-      }
-  
-      const matchedUsersPromises = querySnapshot.docs.map(async (doc) => {
-        const userSnapshot = await firestore().collection('profiles').doc(doc.id).get();
-        if (userSnapshot.exists && userSnapshot.id !== currentUser.uid) {
-          return { id: userSnapshot.id, ...userSnapshot.data() };
-        }
-        return null;
-      });
-  
-      const matchedUsersData = await Promise.all(matchedUsersPromises);
-      
-      const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
-      
-      if (filteredMatchedUsers.length === 0) {
-        console.log("No valid matches found.");
-        return;
-      }
-  
-      setData(filteredMatchedUsers);
-    } catch (error) {
-      console.error('Error fetching user matches:', error);
-    }
-  }
-
   useEffect(() => {
-    getMatchesForUser();
-  }, [])
+    const unsubscribe = firestore()
+      .collection('profiles')
+      .onSnapshot(async (snapshot) => {
+        try {
+          const currentUser = auth().currentUser;
+  
+          if (!currentUser) {
+            console.log("No user is logged in.");
+            return;
+          }
+  
+          const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
+  
+          if (!userDoc.exists) {
+            console.log('No user data found for this UID');
+            return;
+          }
+  
+          const userDataFirestore = userDoc.data();
+          const religion = userDataFirestore?.religious_cultural?.religion;
+          const caste = userDataFirestore?.religious_cultural?.caste;
+          const city = userDataFirestore?.contact_info?.current_city;
+          const state = userDataFirestore?.contact_info?.permanent_address?.state;
+  
+          console.log(religion, caste, city, state);
+  
+          // Filter profiles based on user data (religion, caste, city, state)
+          const matchingDocs = snapshot.docs.filter(doc => {
+            const data = doc.data();
+            return (
+              data.religious_cultural.religion === religion &&
+              data.religious_cultural.caste === caste &&
+              data.contact_info.current_city === city &&
+              data.contact_info.permanent_address.state === state
+            );
+          });
+  
+          const matchedUsersData = await Promise.all(
+            matchingDocs.map(async (doc) => {
+              if (doc.id !== currentUser.uid) {
+                return { id: doc.id, ...doc.data() };
+              }
+              return null;
+            })
+          );
+  
+          const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
+  
+          if (filteredMatchedUsers.length === 0) {
+            console.log("No valid matches found.");
+            return;
+          }
+  
+          setData(filteredMatchedUsers);
+        } catch (error) {
+          console.error('Error fetching user matches:', error);
+        }
+      });
+
+    return () => unsubscribe();
+  }, []);
+  
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -80,7 +81,7 @@ const Matches = ({ navigation }) => {
           <View style={styles.box}></View>
         </View>
         {
-          data.length == 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>Please fill all details</Text></View>) : (<ProfileGrid navigation={navigation} data={data} />)
+          data.length == 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>Please fill all details (Religion, Caste, Currenct City, State)</Text></View>) : (<ProfileGrid navigation={navigation} data={data} />)
         }
       </View>
     </SafeAreaView>
@@ -117,6 +118,7 @@ const styles = StyleSheet.create({
   },
   warn: {
     fontSize: 20,
-    color: '#000'
+    color: '#000',
+    textAlign: 'center'
   }
 })

@@ -21,7 +21,7 @@ const Home = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    (async () => {
       try {
         const currentUser = auth().currentUser;
         if (!currentUser) {
@@ -58,9 +58,7 @@ const Home = ({ navigation }) => {
       } catch (error) {
         console.error('Error getting users:', error);
       }
-    };
-
-    fetchUsers();
+    })();
   }, []);
 
   return (

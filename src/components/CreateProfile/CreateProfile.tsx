@@ -193,10 +193,9 @@ const CreateProfile = ({ navigation }) => {
                         <View style={styles.subcontainer}>
                             <TouchableOpacity style={styles.circlebody} onPress={openImagePicker}>
                                 <View style={styles.circle}>
-                                    <Image source={{ uri: firestoreData?.profile_pic || "" }} height={height * 0.25} width={width * 0.50} borderRadius={500} resizeMode='cover' />
+                                    <Image source={{ uri: firestoreData?.profile_pic }} height={height * 0.25} width={width * 0.50} borderRadius={500} resizeMode='cover' />
                                     <Icon name="add-circle" size={40} color="#fff" style={styles.photoicon} />
                                 </View>
-
                             </TouchableOpacity>
 
                             <View>
@@ -1046,7 +1045,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     circlebody: {
-
         display: 'flex',
         alignItems: 'center',
     },
@@ -1061,6 +1059,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         right: width * 0.05,
+        zIndex: 100
     },
     loadingContainer: {
         position: 'absolute',

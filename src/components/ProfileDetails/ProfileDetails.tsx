@@ -177,7 +177,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={userData?.contact_info?.email ?? "Email"}
+                                    placeholder={"Email"}
                                     style={styles.input}
                                     value={userData?.contact_info?.email ?? ""}
                                     onChangeText={(value) => handleInputChange('contact_info', 'email',value)}

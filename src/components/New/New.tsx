@@ -18,26 +18,42 @@ const New = ({ navigation }) => {
       const startTimestamp = Timestamp.fromDate(startOfDay);
       const endTimestamp = Timestamp.fromDate(endOfDay);
 
+      const userDoc = await firestore().collection('profiles').doc(currentUser?.uid).get();
+      const userData = userDoc.data();
+
+      if (!userData) {
+        console.log('User data not found');
+        return;
+      }
+
+      const userGender = userData.personal_info.gender;
+      const genderFilter = userGender === 'Male' ? 'Female' : 'Male';
+
       try {
-        const snapshot = await firestore()
+        firestore()
           .collection('profiles')
           .where('createdAt', '>=', startTimestamp)
           .where('createdAt', '<=', endTimestamp)
-          .get();
-
-        const users = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-          .filter(user => user.id !== currentUser.uid);
-        setData(users);
+          .where('personal_info.gender', '==', genderFilter)
+          .onSnapshot(snapshot => {
+            const users = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+              .filter(user => user.id !== currentUser.uid);
+            // Update the state with the users
+            setData(users);
+          }, error => {
+            console.error("Error fetching users:", error);
+          });
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error subscribing to users:", error);
       }
     };
 
     getUsersCreatedToday();
   }, []);
+  
   return (
     <SafeAreaView style={styles.safearea}>
       <ScrollView>

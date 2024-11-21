@@ -4,6 +4,7 @@ import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import LinearGradient from 'react-native-linear-gradient';
 import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
+import { getFirstName, getUsersAge } from '../../utils';
 
 const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient)
 
@@ -42,7 +43,7 @@ const ProfileImage = ({ user, navigation }) => {
 
   const handleProfile = () => {
     addToRecelyViewed();
-    navigation.navigate("UserProfileDetails", { user,navigation })
+    navigation.navigate("UserProfileDetails", { user, navigation });
   }
 
   return (
@@ -57,7 +58,11 @@ const ProfileImage = ({ user, navigation }) => {
             colors={['rgba(255, 255, 255, 0.3)', 'rgba(0, 0, 0, 0.5)']}
             style={styles.overlay}
           >
-            <Text style={styles.name}>{user?.personal_info?.name}</Text>
+            <Text style={styles.name}>{getFirstName(user?.personal_info?.name)} <Text style={styles.userage}>{getUsersAge(user?.personal_info?.date_of_birth)}</Text></Text>
+            <Text style={styles.subname}>
+              {user?.personal_info?.height ? `${user.personal_info.height}cm` : ''}
+              {user?.religious_cultural?.religion ? `${user?.personal_info?.height ? ` /` : ''} ${user?.religious_cultural?.religion}` : ''}
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
       }
@@ -103,6 +108,16 @@ const styles = StyleSheet.create({
   name: {
     color: 'white',
     fontWeight: 'bold',
-    paddingLeft: width / 80
+    paddingLeft: width / 80,
+    fontSize: 15,
   },
+  userage: {
+    fontSize: 12,
+  },
+  subname: {
+    paddingLeft: width / 80,
+    paddingBottom: width / 80,
+    color: 'white',
+  },
+
 });
