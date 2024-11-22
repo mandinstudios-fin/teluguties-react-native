@@ -16,7 +16,6 @@ const CreateProfile = ({ navigation }) => {
     const [uploading, setUploading] = useState(false);
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setFiretoreData] = useState<any>();
-    const [selectedImage, setsSelectedImage] = useState<any>();
 
     const getCurrentUserDetails = async () => {
         const currentUser = auth().currentUser;
@@ -68,7 +67,6 @@ const CreateProfile = ({ navigation }) => {
     }
 
     const handleInputChange = (section: string, parameter: string, value: string, subsection?: string) => {
-        console.log(section, parameter, value, subsection)
         setUserData((prev) => {
             if (subsection) {
                 return {

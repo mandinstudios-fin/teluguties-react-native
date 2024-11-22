@@ -18,7 +18,7 @@ const UserProfileDetails = ({ route, navigation }) => {
           </View>
           <View style={styles.userdetails}>
             <View style={styles.imagecontainer}>
-              <Image source={{ uri: user?.profile_pic }} style={styles.userimage} />
+              {user?.profile_pic ? (<Image source={{ uri: user?.profile_pic }} style={styles.userimage} />) : <View style={styles.profile_pic_notavailable}><Text style={styles.profile_pic_notavailabletext}>No Preview Image Available</Text></View>}
             </View>
             <View style={styles.name}>
               <Text style={styles.username}>{user?.personal_info?.name} <Text style={styles.userage}>{user?.personal_info.age ? user.personal_info.age : getUsersAge(user?.personal_info.date_of_birth)}</Text></Text>
@@ -34,58 +34,58 @@ const UserProfileDetails = ({ route, navigation }) => {
 
           <View style={styles.userdetailsmain}>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>Name</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Name</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.personal_info?.name || 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>Date of Birth</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Date of Birth</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.personal_info?.date_of_birth || 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>City</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>City</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.contact_info?.current_city || 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>Caste</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Caste</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.religious_cultural?.caste || 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>Religion</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Religion</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.religious_cultural?.religion || 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>Occupation</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Occupation</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.professional_details?.occupation || 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>Height</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Height</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.personal_info?.height ? `${user.personal_info.height}cm` : 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater}>Weight</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Weight</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
-              <Text style={styles.detailsnamevalue}>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.personal_info?.weight ? `${user.personal_info.weight}kg` : 'Not Specified'}
               </Text>
             </View>
@@ -132,6 +132,18 @@ const styles = StyleSheet.create({
     height: height * 0.3,
     resizeMode: 'contain',
   },
+  profile_pic_notavailable: {
+    width: width,
+    height: height * 0.3,
+    borderWidth: 0.2,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  profile_pic_notavailabletext: {
+    color: '#752B35',
+    fontWeight:'bold'
+  },
   username: {
     color: '#000'
   },
@@ -172,17 +184,17 @@ const styles = StyleSheet.create({
   detailsnameparamater: {
     width: width * 0.25,
     color: '#752B35',
-    fontSize: fontScale * 20,
+    fontSize: fontScale * 17,
   },
   detailsnamecolon: {
     width: width * 0.1,
     color: '#752B35',
     fontWeight: 'bold',
-    fontSize: fontScale * 20,
+    fontSize: fontScale * 17,
   },
   detailsnamevalue: {
     width: width * 0.3,
     color: '#752B35',
-    fontSize: fontScale * 20,
+    fontSize: fontScale * 17,
   },
 });
