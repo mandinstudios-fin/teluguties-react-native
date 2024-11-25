@@ -2,6 +2,7 @@ import { ActivityIndicator, Alert, Button, Dimensions, Image, SafeAreaView, Scro
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 
+
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage';
@@ -9,6 +10,8 @@ import storage from '@react-native-firebase/storage';
 import { Picker } from '@react-native-picker/picker'
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
+
 
 const { width, height } = Dimensions.get("window")
 
@@ -16,6 +19,7 @@ const CreateProfile = ({ navigation }) => {
     const [uploading, setUploading] = useState(false);
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setFiretoreData] = useState<any>();
+
 
     const getCurrentUserDetails = async () => {
         const currentUser = auth().currentUser;
@@ -169,6 +173,32 @@ const CreateProfile = ({ navigation }) => {
         });
     };
 
+    const deleteProfileImage = async () => {
+        const currentUser = auth().currentUser;
+        const updatedData = {
+            ...userData,
+            profile_pic: "",
+            updatedAt: firestore.FieldValue.serverTimestamp()
+        }
+
+        if (currentUser) {
+            try {
+                await firestore()
+                    .collection('profiles')
+                    .doc(currentUser.uid)
+                    .update(updatedData);
+
+                Alert.alert("Updated");
+                getCurrentUserDetails();
+            } catch (error) {
+                Alert.alert(error)
+                console.log(error);
+            }
+        }
+    };
+
+    
+
     const ActivityIndicatorComponent = () => {
         return (
             <View style={styles.activityContainer}>
@@ -195,6 +225,15 @@ const CreateProfile = ({ navigation }) => {
                                     <Icon name="add-circle" size={40} color="#fff" style={styles.photoicon} />
                                 </View>
                             </TouchableOpacity>
+
+                            <View style={styles.deleteimagebox}>
+                            <TouchableOpacity style={styles.deleteimagecontainer} onPress={deleteProfileImage}>
+                            <MIcon name="delete" size={24} color="black" />
+                                <Text style={styles.deleteimage}>Delete image</Text>
+                            </TouchableOpacity>
+                            </View>
+
+                            
 
                             <View>
                                 <Text style={styles.label}>Full Name</Text>
@@ -990,7 +1029,8 @@ const styles = StyleSheet.create({
         color: '#792A37',
     },
     label: {
-        color: 'black',
+        color: '#591724',
+        fontWeight:'bold'
     },
     input: {
         borderColor: '#EBC7B1',
@@ -1031,7 +1071,23 @@ const styles = StyleSheet.create({
         color: '#792A37',
     },
     subcontainer: {
-        marginTop: width / 30
+        marginTop: width / 30,
+        display:'flex',
+        gap:width/30
+    },
+
+    deleteimagebox:{
+        display:'flex',
+        alignItems:'flex-end',
+    },
+
+    deleteimagecontainer:{
+        display:'flex',
+        flexDirection:'row',
+        alignItems:'flex-end',
+    },
+
+    deleteimage:{
     },
     creat: {
         borderRadius: 12,
