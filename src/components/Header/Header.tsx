@@ -41,13 +41,21 @@ const Header = ({ navigation }) => {
           <TouchableOpacity
             onPress={() => navigation.navigate('ProfileDetails')}
             style={styles.profile}>
-            <Image
+              {
+                firestoreData?.profile_pic ? 
+                (<Image
               source={{ uri: firestoreData?.profile_pic }}
               height={50}
               width={50}
               borderRadius={500}
               resizeMode="cover"
-            />
+            />) :
+              (
+                <View 
+                style={ styles.emptyview }
+                />
+              )
+              }
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
@@ -91,11 +99,18 @@ const styles = StyleSheet.create({
   logo: {
     alignItems: 'center',
     marginBottom: 10,
+    marginTop:-30,
   },
 
   image: {
-    height: 100,
+    height: 60,
     width: 300,
     resizeMode: 'contain',
   },
+  emptyview: {
+    height: 50,
+    width: 50,
+    borderRadius: 500,
+    backgroundColor: '#AFAFAF',
+  }
 });

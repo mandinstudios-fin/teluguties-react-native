@@ -37,7 +37,6 @@ const CreateProfile = ({ navigation }) => {
                     setUserData(userDataFirestore);
                 }
             } catch (error) {
-                console.log(error)
             }
         }
     }
@@ -65,7 +64,6 @@ const CreateProfile = ({ navigation }) => {
                 getCurrentUserDetails();
             } catch (error) {
                 Alert.alert(error)
-                console.log(error);
             }
         }
     }
@@ -108,7 +106,6 @@ const CreateProfile = ({ navigation }) => {
             const task = reference.putFile(imageUri);
             task.on('state_changed', (taskSnapshot) => {
                 const progress = (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100;
-                console.log(`Progress: ${progress}%`);
             });
 
             await task;
@@ -120,7 +117,6 @@ const CreateProfile = ({ navigation }) => {
             return downloadUrl;
 
         } catch (error) {
-            console.error('Upload error: ', error);
             Alert.alert('Upload Error', 'There was an error uploading the image.');
             setUploading(false);
             return null;
@@ -131,7 +127,6 @@ const CreateProfile = ({ navigation }) => {
         const currentUser = auth().currentUser;
         const downloadUrl = await uploadImageToFirebase(imageUri);
 
-        console.log(downloadUrl)
 
         const updatedData = {
             ...userData,
@@ -150,8 +145,51 @@ const CreateProfile = ({ navigation }) => {
                 getCurrentUserDetails();
             } catch (error) {
                 Alert.alert(error)
-                console.log(error);
             }
+        }
+    }
+
+    const handleUploadImages = async (imageUris: string[]) => {
+        const currentUser = auth().currentUser;
+        setUploading(true)
+
+        try {
+            const uploadedImageUrls: string[] = [];
+
+            for (let i = 0; i < imageUris.length; i++) {
+                const fileName = imageUris[i].split('/').pop();
+                const uniqueFileName = `${Date.now()}_${fileName}`;
+
+                const reference = storage().ref(`profile-images/${uniqueFileName}`);
+
+                const task = reference.putFile(imageUris[i]);
+
+
+                task.on('state_changed', (snapshot) => {
+                    const uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                }, (error) => {
+                }, async () => {
+                    const downloadUrl = await reference.getDownloadURL();
+                    uploadedImageUrls.push(downloadUrl);
+                });
+
+                await task;
+            }
+
+
+            const userRef = firestore().collection('profiles').doc(currentUser?.uid);
+
+            const updatedData = {
+                ...userData,
+                images: uploadedImageUrls,
+                updatedAt: firestore.FieldValue.serverTimestamp()
+            }
+
+            await userRef.update(updatedData);
+            Alert.alert("Updated");
+
+            setUploading(false);
+        } catch (error) {
         }
     }
 
@@ -163,12 +201,32 @@ const CreateProfile = ({ navigation }) => {
 
         launchImageLibrary(options, (response) => {
             if (response.didCancel) {
-                console.log('User cancelled image picker');
             } else if (response.error) {
-                console.log('Image picker error: ', response.error);
             } else {
                 let imageUri = response.uri || response.assets?.[0]?.uri;
                 handleProfileImages(imageUri);
+            }
+        });
+    };
+
+    const addImages = () => {
+        const options = {
+            mediaType: 'photo',
+            includeBase64: false,
+            selectionLimit: 5
+        };
+
+        launchImageLibrary(options, (response) => {
+            if (response.didCancel) {
+            } else if (response.errorCode) {
+            } else {
+                let selectedImages = response.assets || [];
+                if (selectedImages.length > 5) {
+                    Alert.alert('You can only select up to 5 images');
+                    return;
+                }
+                selectedImages = response.assets.map((asset) => asset.uri);
+                handleUploadImages(selectedImages);
             }
         });
     };
@@ -192,12 +250,11 @@ const CreateProfile = ({ navigation }) => {
                 getCurrentUserDetails();
             } catch (error) {
                 Alert.alert(error)
-                console.log(error);
             }
         }
     };
 
-    
+
 
     const ActivityIndicatorComponent = () => {
         return (
@@ -221,20 +278,38 @@ const CreateProfile = ({ navigation }) => {
                         <View style={styles.subcontainer}>
                             <TouchableOpacity style={styles.circlebody} onPress={openImagePicker}>
                                 <View style={styles.circle}>
-                                    <Image source={{ uri: firestoreData?.profile_pic }} height={height * 0.25} width={width * 0.50} borderRadius={500} resizeMode='cover' />
+                                    {
+                                        firestoreData?.profile_pic ?
+                                            (
+                                                <Image source={{ uri: firestoreData?.profile_pic }}
+                                                    height={height * 0.25}
+                                                     width={width * 0.50}
+                                                    borderRadius={500}
+                                                     resizeMode='cover' />
+                                            ) :
+                                            (
+                                                <View style={styles.emptyview}/>
+                                            )
+                                    }
                                     <Icon name="add-circle" size={40} color="#fff" style={styles.photoicon} />
                                 </View>
                             </TouchableOpacity>
 
-                            <View style={styles.deleteimagebox}>
-                            <TouchableOpacity style={styles.deleteimagecontainer} onPress={deleteProfileImage}>
-                            <MIcon name="delete" size={24} color="black" />
-                                <Text style={styles.deleteimage}>Delete image</Text>
-                            </TouchableOpacity>
+                            <View style={styles.imagecontrols}>
+                                <View style={styles.addimagebox}>
+                                    <TouchableOpacity style={styles.addimagecontainer} onPress={addImages}>
+                                        <MIcon name="add-photo-alternate" size={24} color="black" />
+                                        <Text style={styles.addimagetext}>Add your Images</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View style={styles.deleteimagebox}>
+                                    <TouchableOpacity style={styles.deleteimagecontainer} onPress={deleteProfileImage}>
+                                        <MIcon name="delete" size={24} color="black" />
+                                        <Text style={styles.deleteimage}>Delete image</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-
-                            
-
                             <View>
                                 <Text style={styles.label}>Full Name</Text>
                                 <TextInput
@@ -1030,7 +1105,7 @@ const styles = StyleSheet.create({
     },
     label: {
         color: '#591724',
-        fontWeight:'bold'
+        fontWeight: 'bold'
     },
     input: {
         borderColor: '#EBC7B1',
@@ -1072,22 +1147,43 @@ const styles = StyleSheet.create({
     },
     subcontainer: {
         marginTop: width / 30,
-        display:'flex',
-        gap:width/30
+        display: 'flex',
+        gap: width / 30
+    },
+    imagecontrols: {
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    addimagebox: {
+        display: 'flex',
+        alignItems: 'flex-start',
     },
 
-    deleteimagebox:{
-        display:'flex',
-        alignItems:'flex-end',
+    addimagecontainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
     },
 
-    deleteimagecontainer:{
-        display:'flex',
-        flexDirection:'row',
-        alignItems:'flex-end',
+    addimagetext: {
+        color: 'black'
     },
 
-    deleteimage:{
+    deleteimagebox: {
+        display: 'flex',
+        alignItems: 'flex-end',
+    },
+
+    deleteimagecontainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+    },
+
+    deleteimage: {
+        color: 'black'
     },
     creat: {
         borderRadius: 12,
@@ -1125,5 +1221,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
+    emptyview:{
+        height:height * 0.25,
+        width:width * 0.50,
+       borderRadius:500,
+    }
 
 })

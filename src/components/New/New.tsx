@@ -1,11 +1,21 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import Header from '../Header/Header'
-import ProfileGrid from '../Profiles/ProfileGrid'
-import firestore, { Timestamp } from '@react-native-firebase/firestore'
-import auth from '@react-native-firebase/auth'
+import {
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import Header from '../Header/Header';
+import ProfileGrid from '../Profiles/ProfileGrid';
+import firestore, {Timestamp} from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
-const New = ({ navigation }) => {
+const {width, height, fontScale} = Dimensions.get('window');
+
+const New = ({navigation}) => {
   const [data, setData] = useState<any>([]);
 
   useEffect(() => {
@@ -18,11 +28,13 @@ const New = ({ navigation }) => {
       const startTimestamp = Timestamp.fromDate(startOfDay);
       const endTimestamp = Timestamp.fromDate(endOfDay);
 
-      const userDoc = await firestore().collection('profiles').doc(currentUser?.uid).get();
+      const userDoc = await firestore()
+        .collection('profiles')
+        .doc(currentUser?.uid)
+        .get();
       const userData = userDoc.data();
 
       if (!userData) {
-        console.log('User data not found');
         return;
       }
 
@@ -35,60 +47,119 @@ const New = ({ navigation }) => {
           .where('createdAt', '>=', startTimestamp)
           .where('createdAt', '<=', endTimestamp)
           .where('personal_info.gender', '==', genderFilter)
-          .onSnapshot(snapshot => {
-            const users = snapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-              .filter(user => user.id !== currentUser.uid);
-            // Update the state with the users
-            setData(users);
-          }, error => {
-            console.error("Error fetching users:", error);
-          });
-      } catch (error) {
-        console.error("Error subscribing to users:", error);
-      }
+          .onSnapshot(
+            snapshot => {
+              const users = snapshot.docs
+                .map(doc => ({
+                  id: doc.id,
+                  ...doc.data(),
+                }))
+                .filter(user => user.id !== currentUser.uid);
+              // Update the state with the users
+              setData(users);
+            },
+            error => {},
+          );
+      } catch (error) {}
     };
 
     getUsersCreatedToday();
   }, []);
-  
+
   return (
     <SafeAreaView style={styles.safearea}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollview}>
         <View style={styles.main}>
           <Header navigation={navigation} />
           <View style={styles.boxContainer}>
             <View style={styles.box}></View>
           </View>
+
+          <View style={styles.container}>
+            <View style={styles.subnavigationbar}>
+              <TouchableOpacity onPress={() => navigation.replace('Layout')}>
+                <Text style={styles.subnavigationtext}>Daily</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.push('New')}>
+                <Text style={styles.subnavigationactivetext}>New</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
+                <Text style={styles.subnavigationtext}>Shortlist</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.push('RecentlyViewed')}>
+                <Text style={styles.subnavigationtext}>Recently Viewed</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          {data.length === 0 ? (
+            <View style={styles.warncontainer}>
+              <Text style={styles.warn}>No New Profiles</Text>
+            </View>
+          ) : (
+            <ProfileGrid navigation={navigation} data={data} />
+          )}
         </View>
-        <ProfileGrid navigation={navigation} data={data} />
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default New
+export default New;
 
 const styles = StyleSheet.create({
   safearea: {
     flex: 1,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+  },
+  scrollview: {
+    flex: 1
   },
   main: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   boxContainer: {
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   box: {
     backgroundColor: 'transparent',
     borderColor: '#AFAFAF',
     borderWidth: 0.5,
-    height: 80,
+    height: 60,
     width: '100%',
     borderRadius: 15,
-    marginBottom: 10
+    marginBottom: 10,
   },
-})
+
+  subnavigationbar: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  subnavigationtext: {
+    fontSize: 15,
+    color: '#AFAFAF',
+    fontWeight: 'bold',
+  },
+  subnavigationactivetext: {
+    fontSize: 15,
+    color: '#7b2a39',
+    fontWeight: 'bold',
+  },
+  container: {
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  warncontainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  warn: {
+    fontSize: 20,
+    color: '#000',
+    textAlign: 'center',
+  },
+});

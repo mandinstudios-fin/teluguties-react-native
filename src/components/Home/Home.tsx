@@ -25,7 +25,6 @@ const Home = ({ navigation }) => {
       try {
         const currentUser = auth().currentUser;
         if (!currentUser) {
-          console.log('No user is logged in');
           return;
         }
 
@@ -33,7 +32,6 @@ const Home = ({ navigation }) => {
         const userData = userDoc.data();
 
         if (!userData) {
-          console.log('User data not found');
           return;
         }
 
@@ -56,7 +54,6 @@ const Home = ({ navigation }) => {
 
         return () => unsubscribe();
       } catch (error) {
-        console.error('Error getting users:', error);
       }
     })();
   }, []);
@@ -69,16 +66,9 @@ const Home = ({ navigation }) => {
           <View style={styles.boxContainer}>
             <View style={styles.box}></View>
           </View>
-
-
-
-
           <View style={styles.container}>
             <View style={styles.subnavigationbar}>
-              {/* <TouchableOpacity onPress={() => navigation.push('Matches')}>
-              <Text style={styles.subnavigationtext}>My Matches</Text>
-            </TouchableOpacity> */}
-              <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.replace("Layout")}>
                 <Text style={styles.subnavigationactivetext}>Daily</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.push('New')}>
@@ -143,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderColor: '#AFAFAF',
     borderWidth: 0.5,
-    height: 80,
+    height: 60,
     width: '100%',
     borderRadius: 15,
     marginBottom: 10
@@ -156,7 +146,8 @@ const styles = StyleSheet.create({
   },
   subnavigationtext: {
     fontSize: 15,
-    color: '#a4737b'
+    color: '#AFAFAF',
+    fontWeight:'bold'
   },
   subnavigationactivetext: {
     fontSize: 15,

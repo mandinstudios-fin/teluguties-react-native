@@ -1,9 +1,11 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import ProfileGrid from '../Profiles/ProfileGrid'
 import firestore, { Timestamp } from '@react-native-firebase/firestore'
 import auth from '@react-native-firebase/auth'
+
+const { width, height, fontScale } = Dimensions.get("window")
 
 const Shortlist = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
@@ -13,7 +15,6 @@ const Shortlist = ({ navigation }) => {
       try {
         const currentUser = auth().currentUser;
         if (!currentUser) {
-          console.log("No user is logged in.");
           return;
         }
 
@@ -21,14 +22,12 @@ const Shortlist = ({ navigation }) => {
         const userDoc = await userRef.get();
 
         if (!userDoc.exists) {
-          console.log("User document not found.");
           return;
         }
 
         const shortlistedProfiles = userDoc?.data().shortlisted || [];
 
         if (shortlistedProfiles.length === 0) {
-          console.log("No users in Shortlist.");
           return;
         }
 
@@ -45,7 +44,6 @@ const Shortlist = ({ navigation }) => {
         const filteredUsersData = usersData.filter(user => user !== null);
         setData(filteredUsersData);
       } catch (error) {
-        console.error("Error fetching Shortlist users:", error);
       }
     };
 
@@ -54,16 +52,34 @@ const Shortlist = ({ navigation }) => {
   
   return (
     <SafeAreaView style={styles.safearea}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollview}>
         <View style={styles.main}>
           <Header navigation={navigation} />
           <View style={styles.boxContainer}>
             <View style={styles.box}></View>
           </View>
-        </View>
+        
+
+        <View style={styles.container}>
+            <View style={styles.subnavigationbar}>
+              <TouchableOpacity onPress={() => navigation.replace("Layout")}>
+                <Text style={styles.subnavigationtext}>Daily</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.push('New')}>
+                <Text style={styles.subnavigationtext}>New</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
+                <Text style={styles.subnavigationactivetext}>Shortlist</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.push('RecentlyViewed')}>
+                <Text style={styles.subnavigationtext}>Recently Viewed</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         {
-          data.length === 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>No Shortlisted Profiles</Text></View>) : (<ProfileGrid navigation={navigation} data={data} />)
+          data.length === 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>No Shortlisted Profiles 😔</Text></View>) : (<ProfileGrid navigation={navigation} data={data} />)
         }
+        </View>
       </ScrollView>
     </SafeAreaView>
   )
@@ -76,6 +92,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white'
   },
+  scrollview: {
+    flex: 1
+  },
   main: {
     flexGrow: 1
   },
@@ -86,20 +105,41 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderColor: '#AFAFAF',
     borderWidth: 0.5,
-    height: 80,
+    height: 60,
     width: '100%',
     borderRadius: 15,
     marginBottom: 10
   },
   warncontainer: {
-    paddingHorizontal: 10,
     flex: 1,
+    paddingHorizontal: 10,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   warn: {
     fontSize: 20,
     color: '#000',
     textAlign: 'center'
+  },
+  
+  subnavigationbar: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  subnavigationtext: {
+    fontSize: 15,
+    color: '#AFAFAF',
+    fontWeight:'bold'
+  },
+  subnavigationactivetext: {
+    fontSize: 15,
+    color: '#7b2a39',
+    fontWeight: 'bold'
+  },
+  container: {
+    marginBottom: 10,
+    paddingHorizontal: 10
   }
 })

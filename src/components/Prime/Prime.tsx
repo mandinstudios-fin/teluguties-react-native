@@ -1,41 +1,56 @@
-import { Dimensions, FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Dimensions, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import Header from '../Header/Header'
 import { data } from '../../utils'
 import Unorderedlist from 'react-native-unordered-list';
 
-const { width } = Dimensions.get('window')
+const { width, height } = Dimensions.get('window');
+
+const membershipData = [
+  { id: '1', title: 'Prime Plus', price: '₹2000' },
+  { id: '2', title: 'Platinum Plus', price: '₹4000' },
+  { id: '3', title: 'Diamond Plus', price: '₹6000' },
+];
+
+
+const renderItem = ({ item }) => (
+
+  <View style={styles.box}>
+    <View style={styles.membershipcontainer}>
+      <Text style={styles.membershiptext}>{item.title}</Text>
+      <Text style={styles.validity}>3months validity </Text>
+    </View>
+    <View>
+      <Text style={styles.price}>{item.price}</Text>
+    </View>
+    <View style={styles.boxContainer}>
+      <TouchableOpacity style={styles.subscribe}>
+        <Text style={styles.subscribetext}>Subscribe</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
 
 const Prime = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safearea}>
       <ScrollView contentContainerStyle={styles.main} style={styles.scrollView}>
-        <Header navigation={navigation}/>
-        <View style={styles.maincontainer}>
-          <View style={styles.membershipcontainer}><Text style={styles.membership}>Prime Membership</Text></View>
-          <View style={styles.container}>
-            {data.map((item, index) => (
-              <View key={item.id} style={styles.itemContainer}>
-                <Unorderedlist
-                  bulletUnicode={`0x003${index + 1}`}
-                  color='#BE7356'
-                >
-                  <Text style={styles.heading}>
-                    {item.heading}
-                    <Text style={styles.text}>{item.text}</Text>
-                  </Text>
-                </Unorderedlist>
-              </View>
-            ))}
-          </View>
-          <View style={styles.sub}>
-            <TouchableOpacity style={styles.touch}>
-              <Text style={styles.subtext}>Subscribe</Text>
-            </TouchableOpacity>
-          </View>
 
+        <View style={styles.logo}>
+          <Image
+            style={styles.image}
+            source={require('../../assets/logo.png')}
+          />
         </View>
-        
+
+        <View style={styles.boxesholder}>
+          <FlatList
+            data={membershipData}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingBottom: 20, flexGrow: 1, justifyContent: 'space-between' }}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   )
@@ -52,102 +67,71 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   scrollView: {
-    flex: 1, // Ensure ScrollView takes full height
+    flex: 1,
   },
-  maincontainer: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
-    alignItems:'center',
-    paddingHorizontal: 10,
+  logo: {
+    marginTop: width / 10,
+    height: height / 10,
+    width: width,
+    alignItems: 'center',
   },
-  membershipcontainer:{
-    paddingVertical:30
+  image: {
+    height: 60,
+    width: '100%',
+    resizeMode: 'contain',
   },
-  membership:{
-    color:'#792a38',
-    fontSize:25,
-  },
-  container:{
+  boxesholder: {
+    flex: 1,
+    paddingLeft: width / 25,
+    marginRight: width / 25,
+    gap: 25,
     
   },
-  itemContainer:{
-    paddingBottom: 10,
+  boxContainer: {
+    display: 'flex',
+    alignItems: "center"
+  },
+  box: {
+    backgroundColor: 'transparent',
+    borderColor: '#AFAFAF',
+    borderWidth: 0.7,
+    width: width - width / 12,
+    borderRadius: 15,
+    marginBottom: 20,
+    paddingHorizontal: width * 0.05,
+    paddingVertical: width * 0.07
+  },
+  membershipcontainer: {
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'flex-start'
+    alignItems: 'center',
+    gap: 22
   },
-  heading:{
-    fontSize:15,
-    color:'#BE7356',
-    display: 'flex',
+  membershiptext: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    color: '#e4bd9e',
   },
-  textcontainer: {
-
+  subscribe: {
+    borderRadius: 25,
+    backgroundColor: '#a4737b',
+    padding: width / 30,
+    marginTop: 20,
+    width: "75%"
   },
-  text:{
+  subscribetext: {
+    color: 'white',
+    textAlign: 'center',
+  },
+  validity: {
+    borderRadius: 10,
+    backgroundColor: '#e4bd9e',
+    color: 'white',
+    paddingHorizontal: width / 50,
+  },
+  price:{
     color:'black',
-
-  },
-  sub:{ 
-   width:width,
-   paddingHorizontal:10,
-   marginTop:width/40
-
-  },
-  touch: {
-    alignItems:'center',
-    backgroundColor:'#A4737B',
-    borderRadius:12,
-    padding:width/30,
-  },
-  subtext:{
-    color:'white'
   }
 
+
 })
-
-// const Prime = () => {
-//   const items = [
-//     "First item",
-//     "Second item",
-//     "Third item"
-//   ];
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.header}>My Numbered List</Text>
-//       <Unorderedlist
-//         bulletUnicode={"0x0030"} // Unicode for '0'
-//         color="blue" // Bullet color
-//         style={styles.listItem} // Custom styles
-//       >
-//         {items.map((item, index) => (
-//           <Text key={index} style={styles.listText}>
-//             {index + 1}. {item}
-//           </Text>
-//         ))}
-//       </Unorderedlist>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 20,
-//   },
-//   header: {
-//     fontSize: 24,
-//     marginBottom: 20,
-//   },
-//   listItem: {
-//     fontSize: 18,
-//   },
-//   listText: {
-//     fontSize: 18,
-//   },
-// });
-
-// export default Prime;

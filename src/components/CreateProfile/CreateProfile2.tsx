@@ -170,13 +170,10 @@ const CreateProfile: React.FC = ({navigation}) => {
           setCountryBorn(userDataFirestore?.countryborn);
           setCountryGrew(userDataFirestore?.countrygrew);
         } else {
-          console.log('No user data found for this UID');
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
       }
     } else {
-      console.log('No user is currently authenticated.');
     }
   };
 
@@ -372,7 +369,6 @@ const CreateProfile: React.FC = ({navigation}) => {
           countrygrew,
         }));
       } catch (error) {
-        console.error('Error updating user data:', error);
         Alert.alert('Error', 'There was an issue updating your profile.');
       }
     }

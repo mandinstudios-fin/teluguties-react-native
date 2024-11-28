@@ -15,13 +15,13 @@ import React, { useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
 import phoneCodesData from '../../assets/CountryCodes.json';
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore'; 
+import firestore from '@react-native-firebase/firestore';
 
 const { width, height } = Dimensions.get('window');
 
 const Login = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const [selectedCode, setSelectedCode] = useState('+91'); // Default code
+  const [selectedCode, setSelectedCode] = useState('+91');
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
@@ -33,9 +33,9 @@ const Login = ({ navigation }) => {
         .get();
 
       if (userSnapshot.empty) {
-        return false; 
+        return false;
       } else {
-        return true; 
+        return true;
       }
     } catch (error) {
       return false;
@@ -46,7 +46,7 @@ const Login = ({ navigation }) => {
     const fullPhoneNumber = selectedCode + phoneNumber;
     const phoneExists = await checkPhoneNumberExists(selectedCode, phoneNumber);
 
-    if(!phoneExists) {
+    if (!phoneExists) {
       navigation.navigate("Register");
       return;
     }
@@ -54,12 +54,11 @@ const Login = ({ navigation }) => {
     setLoading(true);
     try {
       const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
-      
+
       const isRegistration = false;
       setLoading(false);
       navigation.navigate("Otp", { confirmation, isRegistration })
     } catch (error) {
-      console.error(error);
     }
   };
 
@@ -76,7 +75,7 @@ const Login = ({ navigation }) => {
         <View style={styles.logoinbody}>
           <Image
             style={styles.loginimage}
-            source={require('../../assets/login.png')}
+            source={require('../../assets/couple.jpg')}
           />
         </View>
 
@@ -162,15 +161,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logo: {
-    marginTop: width / 10,
+    marginTop: width / 20,
     height: height / 10,
     width: width,
     alignItems: 'center',
+
   },
   image: {
-    height: '100%',
+    height: 70,
     width: '100%',
     resizeMode: 'contain',
+
   },
   logoinbody: {
     height: width / 1.3,
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
   loginimage: {
     height: '100%',
     width: '100%',
-    resizeMode: 'contain',
+    resizeMode: 'cover',
   },
   bottomformcontainer: {
     marginTop: width / 40,
@@ -210,6 +211,7 @@ const styles = StyleSheet.create({
   number: {
     textAlign: 'center',
     fontSize: 17,
+    color: 'white',
   },
 
   phonenobody: {
@@ -219,7 +221,7 @@ const styles = StyleSheet.create({
     gap: width / 30,
   },
   picker: {
-    color: '#BE7356',
+    color: '#AFAFAF',
   },
   phonecode: {
     width: '30%',
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
   },
   otpbox: {
     borderRadius: 12,
-    backgroundColor: '#a4737b',
+    backgroundColor: '#BE7356',
     padding: width / 30,
   },
   otp: {

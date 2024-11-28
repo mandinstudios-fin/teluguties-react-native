@@ -14,7 +14,7 @@ const SplashScreen = () => {
   return (
     <SafeAreaView style={styles.safearea}>
       <View style={styles.main}>
-        <View>
+        {/* <View>
           <View style={styles.logo}>
             <Image
               style={styles.image}
@@ -36,7 +36,10 @@ const SplashScreen = () => {
               24/7 Customer Service | ManDinStudios LLP | Hyderabad
             </Text>
           </View>
-        </View>
+        </View> */}
+        <View style={styles.imagecontainer}><Image style={styles.image} source={require('../../assets/splash.png')}/></View>
+
+        
       </View>
       
     </SafeAreaView>
@@ -87,5 +90,12 @@ const styles = StyleSheet.create({
   footertext: {
     textAlign: 'center',
     color: 'black'
+  },
+  imagecontainer: {
+    height: height,
+    width: width,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });

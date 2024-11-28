@@ -18,6 +18,7 @@ import phoneCodesData from '../../assets/CountryCodes.json';
 import useAuth from '../../hooks/useAuth';
 import auth from '@react-native-firebase/auth';
 import { TRegisterFormData } from '../../types';
+import firestore from '@react-native-firebase/firestore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -32,6 +33,24 @@ const Register = ({ navigation }) => {
     selectedCode: '+91',
     gender: 'Male'
   });
+
+  const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
+    try {
+      const userSnapshot = await firestore()
+        .collection('profiles')
+        .where('contact_info.selected_code', '==', selectedCode)
+        .where('contact_info.phone', '==', phoneNumber)
+        .get();
+
+      if (userSnapshot.empty) {
+        return false;
+      } else {
+        return true;                                 
+      }
+    } catch (error) {
+      return false;
+    }
+  };
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -54,6 +73,14 @@ const Register = ({ navigation }) => {
 
   const handleRegister = async () => {
     setLoading(true)
+    const phoneExists = await checkPhoneNumberExists(formData.selectedCode, formData.phoneNumber);
+
+    if (phoneExists) {
+      navigation.navigate("Login");
+      setLoading(false);
+      return;
+    }
+
     try {
       const confirmation = await auth().signInWithPhoneNumber(formData.selectedCode + formData.phoneNumber);
 
@@ -79,7 +106,7 @@ const Register = ({ navigation }) => {
         <View style={styles.logoinbody}>
           <Image
             style={styles.loginimage}
-            source={require('../../assets/login.png')}
+            source={require('../../assets/sss.webp')}
           />
         </View>
 
@@ -91,16 +118,16 @@ const Register = ({ navigation }) => {
             <TextInput
               style={styles.name}
               placeholder="Enter Your Full Name"
-              placeholderTextColor="#EBC7B1"
+              placeholderTextColor="#AFAFAF"
               value={formData.fullname}
               onChangeText={value => handleInputChange('fullname', value)}
             />
             <TextInput
               style={styles.name}
               placeholder="DOB"
-              placeholderTextColor="#EBC7B1"
+              placeholderTextColor="#AFAFAF"
               value={formData.dob}
-              onFocus={showDatepicker} // Show date picker when focused
+              onFocus={showDatepicker} 
             />
             {show && (
               <DateTimePicker
@@ -132,7 +159,7 @@ const Register = ({ navigation }) => {
                 <TextInput
                   style={styles.phoneno}
                   placeholder="Enter Phone Number"
-                  placeholderTextColor="#EBC7B1"
+                  placeholderTextColor="#AFAFAF"
                   value={formData.phoneNumber}
                   onChangeText={value =>
                     handleInputChange('phoneNumber', value)
@@ -187,13 +214,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logo: {
-    marginTop: width / 10,
+    marginTop: width / 20,
     height: height / 10,
     width: width,
     alignItems: 'center',
   },
   image: {
-    height: '100%',
+    height: 70,
     width: '100%',
     resizeMode: 'contain',
   },
@@ -204,7 +231,7 @@ const styles = StyleSheet.create({
   loginimage: {
     height: '100%',
     width: '100%',
-    resizeMode: 'contain',
+    resizeMode: 'cover',
   },
   bottomformcontainer: {
     marginTop: width / 40,
@@ -250,7 +277,7 @@ const styles = StyleSheet.create({
     color: '#EBC7B1',
   },
   picker: {
-    color: '#BE7356',
+    color: '#AFAFAF',
   },
   phonenomain: {
     flex: 1,
@@ -265,7 +292,7 @@ const styles = StyleSheet.create({
   },
   otpbox: {
     borderRadius: 5,
-    backgroundColor: '#a4737b',
+    backgroundColor: '#BE7356',
     padding: width / 30,
   },
   otp: {

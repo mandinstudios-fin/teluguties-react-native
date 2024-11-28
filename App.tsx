@@ -5,6 +5,12 @@ import firebase from '@react-native-firebase/app'
 import SplashScreen from './src/components/SplashScreen/SplashScreen';
 import Navigator from './src/components/Navigation/Navigator';
 
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+  'VirtualizedLists should never be nested inside plain ScrollViews with the same orientation because it can break windowing and other functionality'
+]);
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyBB5BIlokO-Ym7svGGpOhwQJgVhr8hToqQ",
   authDomain: "teluguties-87c0d.firebaseapp.com",
@@ -19,12 +25,11 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading time with a timeout
     const timer = setTimeout(() => {
-      setLoading(false); // Set loading to false after 2 seconds
-    }, 2000);
+      setLoading(false); 
+    }, 3000);
 
-    return () => clearTimeout(timer); // Cleanup the timer on unmount
+    return () => clearTimeout(timer); 
   }, []);
 
   useEffect(() => {

@@ -1,10 +1,12 @@
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import ProfileGrid from '../Profiles/ProfileGrid'
 
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+
+const { width, height } = Dimensions.get('window');
 
 const Matches = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
@@ -15,28 +17,23 @@ const Matches = ({ navigation }) => {
       .onSnapshot(async (snapshot) => {
         try {
           const currentUser = auth().currentUser;
-  
+
           if (!currentUser) {
-            console.log("No user is logged in.");
             return;
           }
-  
+
           const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
-  
+
           if (!userDoc.exists) {
-            console.log('No user data found for this UID');
             return;
           }
-  
+
           const userDataFirestore = userDoc.data();
           const religion = userDataFirestore?.religious_cultural?.religion;
           const caste = userDataFirestore?.religious_cultural?.caste;
           const city = userDataFirestore?.contact_info?.current_city;
           const state = userDataFirestore?.contact_info?.permanent_address?.state;
-  
-          console.log(religion, caste, city, state);
-  
-          // Filter profiles based on user data (religion, caste, city, state)
+
           const matchingDocs = snapshot.docs.filter(doc => {
             const data = doc.data();
             return (
@@ -46,7 +43,7 @@ const Matches = ({ navigation }) => {
               data.contact_info.permanent_address.state === state
             );
           });
-  
+
           const matchedUsersData = await Promise.all(
             matchingDocs.map(async (doc) => {
               if (doc.id !== currentUser.uid) {
@@ -55,35 +52,41 @@ const Matches = ({ navigation }) => {
               return null;
             })
           );
-  
+
           const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
-  
+
           if (filteredMatchedUsers.length === 0) {
-            console.log("No valid matches found.");
             return;
           }
-  
+
           setData(filteredMatchedUsers);
         } catch (error) {
-          console.error('Error fetching user matches:', error);
         }
       });
 
     return () => unsubscribe();
   }, []);
-  
+
 
   return (
     <SafeAreaView style={styles.safearea}>
-      <View style={styles.main}>
-        <Header navigation={navigation}/>
+      <ScrollView style={styles.main}>
+        <Header navigation={navigation} />
         <View style={styles.boxContainer}>
           <View style={styles.box}></View>
         </View>
         {
-          data.length == 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>Please fill all details (Religion, Caste, Currenct City, State)</Text></View>) : (<ProfileGrid navigation={navigation} data={data} />)
+          data.length == 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>Please fill all details😉 (Religion, Caste, Currenct City, State)</Text>
+            <TouchableOpacity style={styles.creat} onPress={() => navigation.toggleDrawer('CreateProfile')}>
+              <Text style={styles.creattext}>Creat Profile</Text>
+            </TouchableOpacity>
+          </View>) : (<ProfileGrid navigation={navigation} data={data} />)
         }
-      </View>
+
+
+
+
+      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -105,7 +108,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderColor: '#AFAFAF',
     borderWidth: 0.5,
-    height: 80,
+    height: 60,
     width: '100%',
     borderRadius: 15,
     marginBottom: 10
@@ -120,5 +123,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#000',
     textAlign: 'center'
-  }
+  },
+  creat: {
+    borderRadius: 12,
+    backgroundColor: '#a4737b',
+    padding: width / 30,
+    marginTop: 20,
+  },
+  creattext: {
+    color: 'white',
+    textAlign: 'center',
+  },
 })

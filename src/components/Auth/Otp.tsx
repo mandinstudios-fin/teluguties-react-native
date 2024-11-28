@@ -31,7 +31,6 @@ const Otp = ({ navigation, route }) => {
   const updateUserDetails = async () => {
     const user = auth().currentUser;
     if (!user) {
-      console.error('No user is logged in');
       return;
     }
     try {
@@ -122,9 +121,8 @@ const Otp = ({ navigation, route }) => {
       });
 
       setLoading(false);
-      navigation.navigate("Success");
+      navigation.replace("Success");
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -138,13 +136,12 @@ const Otp = ({ navigation, route }) => {
           await updateUserDetails();
         }
       } catch (error) {
-        console.error('Invalid code.', error);
         setLoading(false);
         Alert.alert("Invalid Otp");
         return;
       }
       setLoading(false);
-      navigation.navigate("Success");
+      navigation.replace("Success");
 
     }
   };
@@ -176,9 +173,9 @@ const Otp = ({ navigation, route }) => {
             numberOfDigits={6}
             focusColor="#792A37"
             focusStickBlinkingDuration={500}
-            onTextChange={(text) => setOtp(text)} // Update state with the current text
-            onFilled={(text) => handleSubmit(text)} // Handle when input is filled
-            value={otp} // Bind the OTP state to the input
+            onTextChange={(text) => setOtp(text)} 
+            onFilled={(text) => handleSubmit(text)} 
+            value={otp} 
             textInputProps={{
               accessibilityLabel: "One-Time Password",
             }}
@@ -193,7 +190,7 @@ const Otp = ({ navigation, route }) => {
         </View>
 
         <TouchableOpacity style={styles.textbox} onPress={() => navigation.navigate("Success")}>
-          <Text style={styles.text}>Resend code</Text>
+          {/* <Text style={styles.text}>Resend code</Text> */}
         </TouchableOpacity>
 
         <View style={styles.footerbody}>

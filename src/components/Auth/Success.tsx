@@ -11,20 +11,40 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
+import auth from '@react-native-firebase/auth'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const Success = ({ navigation }) => {
-  const [isNavigating, setIsNavigating] = useState(false);
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      
+      return true;  
+    });
+
+    const timeoutId = setTimeout(() => {
+      navigation.replace("Layout");
+
+      
+    }, 2000);  
+
+    return () => {
+      clearTimeout(timeoutId);
+      backHandler.remove();
+    };
+  }, [navigation]);
+
+  const saveUserToAsyncStorage = () => {
+    const user = auth().currentUser;
+
+    AsyncStorage.setItem('userToken', user?.uid);
+  };
 
   useEffect(() => {
-    // Start the timeout when the component mounts
-    const timeoutId = setTimeout(() => {
-      navigation.replace("Layout"); // Navigate to the Layout screen
-    }, 2000);
+    saveUserToAsyncStorage();
+  }, [])
 
-    return () => clearTimeout(timeoutId);
-  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -40,7 +60,7 @@ const Success = ({ navigation }) => {
 
         <View style={styles.verifiedcontainer}>
           <View>
-            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/verified.json')} autoPlay loop resizeMode='cover' style={styles.lottie}/></Animated.View>
+            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/verified.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
             <Text style={styles.verifiedtext}>Phone Number Verified</Text>
             <View style={styles.textcontainer}>
               <Text style={styles.text}>
@@ -92,8 +112,8 @@ const styles = StyleSheet.create({
   },
   verifiedcontainer: {
     alignItems: 'center',
-    flex:1,
-    justifyContent:'center',
+    flex: 1,
+    justifyContent: 'center',
   },
   lottiecontainer: {
     height: 'auto',

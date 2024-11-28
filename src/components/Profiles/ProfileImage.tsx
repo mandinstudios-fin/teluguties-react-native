@@ -37,7 +37,6 @@ const ProfileImage = ({ user, navigation }) => {
       });
 
     } catch (error) {
-      console.error("Error updating recentlyViewed field:", error);
     }
   }
 
@@ -53,7 +52,7 @@ const ProfileImage = ({ user, navigation }) => {
         </ShimmerPlaceholder>
         :
         <TouchableOpacity style={styles.touchable} onPress={handleProfile}>
-          <Image source={{ uri: user?.profile_pic }} style={styles.image} />
+          {user?.profile_pic ? <Image source={{ uri: user.profile_pic }} style={styles.image} /> : <View style={styles.image}/>}
           <LinearGradient
             colors={['rgba(255, 255, 255, 0.3)', 'rgba(0, 0, 0, 0.5)']}
             style={styles.overlay}

@@ -32,6 +32,18 @@ const ProfileGrid: React.FC = ({data, navigation}) => {
       keyExtractor={item => item.id}
       numColumns={numColumns}
       showsVerticalScrollIndicator={false}
+
+      ListHeaderComponent={
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>{''}</Text>
+        </View>
+      }
+    
+      ListFooterComponent={
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>{''}</Text>
+        </View>
+      }
     />
   );
 };
@@ -49,4 +61,21 @@ const styles = StyleSheet.create({
   manyitems: {
     alignItems: 'center',
   },
+  headerContainer: {
+    backgroundColor: '#f0f0f0',
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  footerContainer: {
+    backgroundColor: '#f0f0f0',
+  },
+  footerText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+  },
+ 
 });

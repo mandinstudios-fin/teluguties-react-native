@@ -14,6 +14,7 @@ import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Header from '../Header/Header';
 import firestore from '@react-native-firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -42,13 +43,10 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                     setUserData(userFirestoreData);
                     setfirestoreData(userFirestoreData);
                 } else {
-                    console.log("No user data found for this UID");
                 }
             } catch (error) {
-                console.error("Error fetching user data:", error);
             }
         } else {
-            console.log("No user is currently authenticated.");
         }
     }
 
@@ -99,7 +97,6 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                 clearRefs();
 
             } catch (error) {
-                console.error("Error updating user data:", error);
                 Alert.alert('Error', 'There was an issue updating your profile.');
             }
         }
