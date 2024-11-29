@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   subscribe: {
     borderRadius: 25,
-    backgroundColor: '#a4737b',
+    backgroundColor: '#7b2a38',
     padding: width / 30,
     marginTop: 20,
     width: "75%"

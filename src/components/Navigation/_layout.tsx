@@ -5,6 +5,7 @@ import AIcon from 'react-native-vector-icons/AntDesign';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import IIcon from 'react-native-vector-icons/Ionicons';
 import {View, Text, StyleSheet, Dimensions, Alert} from 'react-native';
+import HelpCenter from '../HelpCenter/HelpCenter';
 
 import Chat from '../Chat/Chat';
 import Home from '../Home/Home';
@@ -121,6 +122,16 @@ const Layout = ({ navigation }) => {
         drawerIcon: ({ focused, size }) => (
           <MIcon
             name="create" // Change this to any icon you prefer
+            size={size}
+            color={focused ? '#E9BA9B' : '#561825'}  // Change color when active
+          />
+        ),
+      }} />
+
+<Drawer.Screen name="Help Center" component={HelpCenter} options={{
+        drawerIcon: ({ focused, size }) => (
+          <MIcon
+            name="add-call" // Change this to any icon you prefer
             size={size}
             color={focused ? '#E9BA9B' : '#561825'}  // Change color when active
           />

@@ -1,4 +1,4 @@
-import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import ProfileGrid from '../Profiles/ProfileGrid'
@@ -49,7 +49,7 @@ const Shortlist = ({ navigation }) => {
 
     getShortlistedProfiles();
   }, []);
-  
+
   return (
     <SafeAreaView style={styles.safearea}>
       <ScrollView contentContainerStyle={styles.scrollview}>
@@ -58,9 +58,9 @@ const Shortlist = ({ navigation }) => {
           <View style={styles.boxContainer}>
             <View style={styles.box}></View>
           </View>
-        
 
-        <View style={styles.container}>
+
+          <View style={styles.container}>
             <View style={styles.subnavigationbar}>
               <TouchableOpacity onPress={() => navigation.replace("Layout")}>
                 <Text style={styles.subnavigationtext}>Daily</Text>
@@ -76,9 +76,17 @@ const Shortlist = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-        {
-          data.length === 0 ? (<View style={styles.warncontainer}><Text style={styles.warn}>No Shortlisted Profiles 😔</Text></View>) : (<ProfileGrid navigation={navigation} data={data} />)
-        }
+          {
+            data.length === 0 ? (
+              <View style={styles.warncontainer}>
+
+                <View style={styles.imagecontainer}>
+                  <Image style={styles.image} source={require('../../assets/star.png')} />
+                </View>
+                <Text style={styles.warn}>Woo...!</Text>
+                <Text style={styles.warn2}>something awaits on your way! </Text>
+              </View>) : (<ProfileGrid navigation={navigation} data={data} />)
+          }
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -118,10 +126,15 @@ const styles = StyleSheet.create({
   },
   warn: {
     fontSize: 20,
+    color: '#7b2a38',
+    textAlign: 'center'
+  },
+  warn2: {
+    fontSize: 20,
     color: '#000',
     textAlign: 'center'
   },
-  
+
   subnavigationbar: {
     display: 'flex',
     flexDirection: 'row',
@@ -131,7 +144,7 @@ const styles = StyleSheet.create({
   subnavigationtext: {
     fontSize: 15,
     color: '#AFAFAF',
-    fontWeight:'bold'
+    fontWeight: 'bold'
   },
   subnavigationactivetext: {
     fontSize: 15,
@@ -140,6 +153,16 @@ const styles = StyleSheet.create({
   },
   container: {
     marginBottom: 10,
-    paddingHorizontal: 10
+    paddingHorizontal: 20
+  },
+  imagecontainer:{
+    height:height*0.1,
+    width:width,
+    display:'flex',
+    alignItems:'center'
+  },
+  image:{
+    height:'100%',
+    resizeMode:'contain'
   }
 })

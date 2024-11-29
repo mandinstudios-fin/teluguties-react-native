@@ -60,7 +60,7 @@ const Success = ({ navigation }) => {
 
         <View style={styles.verifiedcontainer}>
           <View>
-            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/verified.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
+            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/success.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
             <Text style={styles.verifiedtext}>Phone Number Verified</Text>
             <View style={styles.textcontainer}>
               <Text style={styles.text}>

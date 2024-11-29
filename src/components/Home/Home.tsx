@@ -1,20 +1,32 @@
-import { SafeAreaView, StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { createStackNavigator } from '@react-navigation/stack';
-import { DATA } from '../../utils';
+import {createStackNavigator} from '@react-navigation/stack';
+import {DATA} from '../../utils';
 import ProfileGrid from '../Profiles/ProfileGrid';
-import { BottomTabBar, useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import {
+  BottomTabBar,
+  useBottomTabBarHeight,
+} from '@react-navigation/bottom-tabs';
 import Header from '../Header/Header';
 
-import auth from '@react-native-firebase/auth'
-import firestore from '@react-native-firebase/firestore'
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const Stack = createStackNavigator();
-const { width } = Dimensions.get('window')
+const {width} = Dimensions.get('window');
 let bottomPadding = 0;
 
-const Home = ({ navigation }) => {
+const Home = ({navigation}) => {
   const tabBarHeight = useBottomTabBarHeight();
   bottomPadding = tabBarHeight;
 
@@ -28,7 +40,10 @@ const Home = ({ navigation }) => {
           return;
         }
 
-        const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
+        const userDoc = await firestore()
+          .collection('profiles')
+          .doc(currentUser.uid)
+          .get();
         const userData = userDoc.data();
 
         if (!userData) {
@@ -41,7 +56,7 @@ const Home = ({ navigation }) => {
         const unsubscribe = firestore()
           .collection('profiles')
           .where('personal_info.gender', '==', genderFilter)
-          .onSnapshot((snapshot) => {
+          .onSnapshot(snapshot => {
             const usersList = snapshot.docs
               .map(doc => ({
                 id: doc.id,
@@ -53,8 +68,7 @@ const Home = ({ navigation }) => {
           });
 
         return () => unsubscribe();
-      } catch (error) {
-      }
+      } catch (error) {}
     })();
   }, []);
 
@@ -68,7 +82,7 @@ const Home = ({ navigation }) => {
           </View>
           <View style={styles.container}>
             <View style={styles.subnavigationbar}>
-            <TouchableOpacity onPress={() => navigation.replace("Layout")}>
+              <TouchableOpacity onPress={() => navigation.replace('Layout')}>
                 <Text style={styles.subnavigationactivetext}>Daily</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.push('New')}>
@@ -77,7 +91,8 @@ const Home = ({ navigation }) => {
               <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
                 <Text style={styles.subnavigationtext}>Shortlist</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.push('RecentlyViewed')}>
+              <TouchableOpacity
+                onPress={() => navigation.push('RecentlyViewed')}>
                 <Text style={styles.subnavigationtext}>Recently Viewed</Text>
               </TouchableOpacity>
             </View>
@@ -95,10 +110,10 @@ export default Home;
 const styles = StyleSheet.create({
   safearea: {
     flex: 1,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   main: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   topsection: {
     paddingHorizontal: 10,
@@ -106,19 +121,19 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
 
   profile: {
     backgroundColor: '#AFAFAF',
     height: 50,
     width: 50,
-    borderRadius: 200
+    borderRadius: 200,
   },
 
   logo: {
     alignItems: 'center',
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   image: {
@@ -127,7 +142,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   boxContainer: {
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   box: {
     backgroundColor: 'transparent',
@@ -136,7 +151,7 @@ const styles = StyleSheet.create({
     height: 60,
     width: '100%',
     borderRadius: 15,
-    marginBottom: 10
+    marginBottom: 10,
   },
   subnavigationbar: {
     display: 'flex',
@@ -147,17 +162,15 @@ const styles = StyleSheet.create({
   subnavigationtext: {
     fontSize: 15,
     color: '#AFAFAF',
-    fontWeight:'bold'
+    fontWeight: 'bold',
   },
   subnavigationactivetext: {
     fontSize: 15,
     color: '#7b2a39',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   container: {
     marginBottom: 10,
-    paddingHorizontal: 10
-  }
-
-
+    paddingHorizontal: 20,
+  },
 });

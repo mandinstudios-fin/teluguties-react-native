@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     },
     creat: {
         borderRadius: 12,
-        backgroundColor: '#a4737b',
+        backgroundColor: '#7b2a38',
         padding: width / 30,
     },
     creattext: {

@@ -8,3 +8,9 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+-keep class com.google.firebase.** { *; }
+-keep class com.google.firebase.auth.** { *; }
+-keep class com.google.firebase.messaging.** { *; }
+-keep class com.google.firebase.firestore.** { *; }
+-keep class com.google.firebase.database.** { *; }

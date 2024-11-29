@@ -1,5 +1,6 @@
 import {
   Dimensions,
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -94,7 +95,11 @@ const New = ({navigation}) => {
           </View>
           {data.length === 0 ? (
             <View style={styles.warncontainer}>
-              <Text style={styles.warn}>No New Profiles</Text>
+              <View style={styles.imagecontainer}>
+              <Image style={styles.image} source={require('../../assets/star.png')}/>
+            </View>
+            <Text style={styles.warn}>Woo...!</Text>
+            <Text style={styles.warn2}>something awaits on your way! </Text>
             </View>
           ) : (
             <ProfileGrid navigation={navigation} data={data} />
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
   },
   container: {
     marginBottom: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
   warncontainer: {
     flex: 1,
@@ -159,7 +164,22 @@ const styles = StyleSheet.create({
   },
   warn: {
     fontSize: 20,
-    color: '#000',
+    color: '#7b2a38',
     textAlign: 'center',
   },
+  warn2: {
+    fontSize: 20,
+    color: '#000',
+    textAlign: 'center'
+  },
+  imagecontainer:{
+    height:height*0.1,
+    width:width,
+    display:'flex',
+    alignItems:'center'
+  },
+  image:{
+    height:'100%',
+    resizeMode:'contain'
+  }
 });

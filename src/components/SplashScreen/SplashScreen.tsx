@@ -37,7 +37,7 @@ const SplashScreen = () => {
             </Text>
           </View>
         </View> */}
-        <View style={styles.imagecontainer}><Image style={styles.image} source={require('../../assets/splash.png')}/></View>
+        <View style={styles.imagecontainer}><Image style={styles.image} source={require('../../assets/splashscreen.jpg')}/></View>
 
         
       </View>
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   safearea: {
     flex: 1,
     position:'relative',
-    backgroundColor:'#f5f5f5'
+    backgroundColor:'#7b2a38'
   },
   main: {
     flex:1,
