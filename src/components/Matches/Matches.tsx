@@ -12,59 +12,43 @@ const Matches = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
 
   useEffect(() => {
-    const unsubscribe = firestore()
-      .collection('profiles')
-      .onSnapshot(async (snapshot) => {
-        try {
-          const currentUser = auth().currentUser;
-
-          if (!currentUser) {
-            return;
-          }
-
-          const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
-
-          if (!userDoc.exists) {
-            return;
-          }
-
-          const userDataFirestore = userDoc.data();
-          const religion = userDataFirestore?.religious_cultural?.religion;
-          const caste = userDataFirestore?.religious_cultural?.caste;
-          const city = userDataFirestore?.contact_info?.current_city;
-          const state = userDataFirestore?.contact_info?.permanent_address?.state;
-
-          const matchingDocs = snapshot.docs.filter(doc => {
-            const data = doc.data();
-            return (
-              data.religious_cultural.religion === religion &&
-              data.religious_cultural.caste === caste &&
-              data.contact_info.current_city === city &&
-              data.contact_info.permanent_address.state === state
-            );
-          });
-
-          const matchedUsersData = await Promise.all(
-            matchingDocs.map(async (doc) => {
-              if (doc.id !== currentUser.uid) {
-                return { id: doc.id, ...doc.data() };
-              }
-              return null;
-            })
-          );
-
-          const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
-
-          if (filteredMatchedUsers.length === 0) {
-            return;
-          }
-
-          setData(filteredMatchedUsers);
-        } catch (error) {
+    const getShortlistedProfiles = async () => {
+      try {
+        const currentUser = auth().currentUser;
+        if (!currentUser) {
+          return;
         }
-      });
 
-    return () => unsubscribe();
+        const userRef = firestore().collection('profiles').doc(currentUser.uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+          return;
+        }
+
+        const shortlistedProfiles = userDoc?.data().matches || [];
+
+        if (shortlistedProfiles.length === 0) {
+          return;
+        }
+
+        const userPromises = shortlistedProfiles.map(async (userId) => {
+          const userSnapshot = await firestore().collection('profiles').doc(userId).get();
+          if (userSnapshot.exists) {
+            return { id: userSnapshot.id, ...userSnapshot.data() };
+          }
+          return null;
+        });
+
+        const usersData = await Promise.all(userPromises);
+
+        const filteredUsersData = usersData.filter(user => user !== null);
+        setData(filteredUsersData);
+      } catch (error) {
+      }
+    };
+
+    getShortlistedProfiles();
   }, []);
 
 
@@ -84,9 +68,9 @@ const Matches = ({ navigation }) => {
             </View>
             <Text style={styles.warn}>Woo...!</Text>
             <Text style={styles.warn2}>something awaits on your way! </Text>
-            <TouchableOpacity style={styles.creat} onPress={() => navigation.toggleDrawer('CreateProfile')}>
+            {/* <TouchableOpacity style={styles.creat} onPress={() => navigation.toggleDrawer('CreateProfile')}>
               <Text style={styles.creattext}>Create Profile</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>) : (<ProfileGrid navigation={navigation} data={data} />)
         }
 

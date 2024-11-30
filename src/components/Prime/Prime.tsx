@@ -1,8 +1,7 @@
-import { Dimensions, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
-import Header from '../Header/Header'
-import { data } from '../../utils'
-import Unorderedlist from 'react-native-unordered-list';
+import { Alert, Dimensions, FlatList, Image, Linking, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import firestore, { Timestamp } from '@react-native-firebase/firestore'
+import auth from '@react-native-firebase/auth'
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,25 +12,58 @@ const membershipData = [
 ];
 
 
-const renderItem = ({ item }) => (
-
-  <View style={styles.box}>
-    <View style={styles.membershipcontainer}>
-      <Text style={styles.membershiptext}>{item.title}</Text>
-      <Text style={styles.validity}>3months validity </Text>
-    </View>
-    <View>
-      <Text style={styles.price}>{item.price}</Text>
-    </View>
-    <View style={styles.boxContainer}>
-      <TouchableOpacity style={styles.subscribe}>
-        <Text style={styles.subscribetext}>Subscribe</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
-
 const Prime = ({ navigation }) => {
+  const [user, setUser] = useState();
+
+  useEffect(() => {
+    const getCurrentUserDetails = async () => {
+      try {
+        const currentUser = auth().currentUser;
+        if (!currentUser) {
+          return;
+        }
+
+        const userRef = firestore().collection('profiles').doc(currentUser.uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+          return;
+        }
+
+        const data = userDoc?.data()
+
+        setUser(data);
+      } catch (error) {
+      }
+    };
+
+    getCurrentUserDetails();
+  }, [])
+
+
+  const openPaymentWebsite = () => {
+    Linking.openURL(`https://payments.mandinstudios.com/direct-verify?phone=${user?.contact_info?.phone}`)
+      .catch((err) => Alert.alert('Failed to initiate Payment'));
+  };
+
+  const renderItem = ({ item }) => (
+
+    <View style={styles.box}>
+      <View style={styles.membershipcontainer}>
+        <Text style={styles.membershiptext}>{item.title}</Text>
+        <Text style={styles.validity}>3months validity </Text>
+      </View>
+      <View>
+        <Text style={styles.price}>{item.price}</Text>
+      </View>
+      <View style={styles.boxContainer}>
+        <TouchableOpacity style={styles.subscribe} onPress={openPaymentWebsite}>
+          <Text style={styles.subscribetext}>Subscribe</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.safearea}>
       <ScrollView contentContainerStyle={styles.main} style={styles.scrollView}>
@@ -85,7 +117,7 @@ const styles = StyleSheet.create({
     paddingLeft: width / 25,
     marginRight: width / 25,
     gap: 25,
-    
+
   },
   boxContainer: {
     display: 'flex',
@@ -129,8 +161,8 @@ const styles = StyleSheet.create({
     color: 'white',
     paddingHorizontal: width / 50,
   },
-  price:{
-    color:'black',
+  price: {
+    color: 'black',
   }
 
 

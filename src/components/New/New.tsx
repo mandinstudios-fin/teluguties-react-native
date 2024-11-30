@@ -81,7 +81,7 @@ const New = ({navigation}) => {
               <TouchableOpacity onPress={() => navigation.replace('Layout')}>
                 <Text style={styles.subnavigationtext}>Daily</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.push('New')}>
+              <TouchableOpacity >
                 <Text style={styles.subnavigationactivetext}>New</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
@@ -90,6 +90,10 @@ const New = ({navigation}) => {
               <TouchableOpacity
                 onPress={() => navigation.push('RecentlyViewed')}>
                 <Text style={styles.subnavigationtext}>Recently Viewed</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.push('Likely')}>
+                <Text style={styles.subnavigationtext}>Likely</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -118,10 +122,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   scrollview: {
-    flex: 1
+    flexGrow: 1
   },
   main: {
-    flexGrow: 1,
+    flex: 1,
   },
   boxContainer: {
     paddingHorizontal: 10,

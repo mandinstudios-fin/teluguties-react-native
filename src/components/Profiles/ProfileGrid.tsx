@@ -32,6 +32,8 @@ const ProfileGrid: React.FC = ({data, navigation}) => {
       keyExtractor={item => item.id}
       numColumns={numColumns}
       showsVerticalScrollIndicator={false}
+      
+      columnWrapperStyle={{ gap: 15 }}
 
       ListHeaderComponent={
         <View style={styles.headerContainer}>
@@ -53,27 +55,29 @@ export default ProfileGrid;
 const styles = StyleSheet.create({
   container: {
     display: 'flex',
-    marginTop: 10,
+    gap: 15
   },
   oneitem: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   manyitems: {
     alignItems: 'center',
   },
   headerContainer: {
     backgroundColor: '#f0f0f0',
+    height:0,
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 0,
     fontWeight: 'bold',
     color: '#333',
   },
   footerContainer: {
     backgroundColor: '#f0f0f0',
+    height:0,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 0,
     color: '#888',
     textAlign: 'center',
   },

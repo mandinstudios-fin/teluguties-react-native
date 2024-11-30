@@ -31,7 +31,7 @@ const Navigator = () => {
     return (
       <View style={{ flex: 1, backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#E4BD9E" />
-        <Text>Loading...</Text>
+        <Text style={{ color: '#7b2a38', fontWeight: 'bold' }}>Loading...</Text>
       </View>
     );
   }

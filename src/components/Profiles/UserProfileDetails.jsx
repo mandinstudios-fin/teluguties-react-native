@@ -1,18 +1,85 @@
-import { Dimensions, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { Dimensions, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text,ActivityIndicator, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import ImageSlider from 'react-native-image-slider';
 import Header from '../Header/Header'
 import { getUsersAge } from '../../utils'
 import Slider from './Slider';
+import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore'
+import { useNavigationState } from '@react-navigation/native';
 
 const { width, height, fontScale } = Dimensions.get("window")
 
 const UserProfileDetails = ({ route, navigation }) => {
+  const [routeName, setRouteName] = useState();
+  const [loading, setLoading] = useState(false);
   const { user } = route.params;
-
-
   const images = user?.images?.length > 0 ? [user.profile_pic, ...user.images] : [user.profile_pic];
 
+  const state = useNavigationState(state => state);
+
+  useEffect(() => {
+    if (state && state.index > 0) {
+      const previousRoute = state.routes[state.index - 1]; // Get the previous route
+      setRouteName(previousRoute.name);
+    }
+  }, [state]);
+
+  const addToShortlist = async () => {
+    setLoading(true)
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        return;
+      }
+
+      const userRef = firestore().collection('profiles').doc(currentUser.uid);
+      await userRef.update({
+        shortlisted: firestore.FieldValue.arrayUnion(user.id)
+      });
+
+
+      Alert.alert('Added to shortlist')
+    } catch (error) {
+    }
+    setLoading(false)
+  };
+
+  const makeAMatch = async () => {
+    setLoading(true);
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        return;
+      }
+
+      const userRef = firestore().collection('profiles').doc(currentUser.uid);
+      await userRef.update({
+        matches: firestore.FieldValue.arrayUnion(user.id)
+      });
+
+
+      Alert.alert('Added to Matches')
+    } catch (error) {
+    }
+    setLoading(false);
+  };
+
+  const sendContactRequest = async (toUid) => {
+    setLoading(true);
+    const fromUid = auth().currentUser.uid;
+    try {
+      await firestore().collection('requests').add({
+        fromUid,
+        toUid,
+        timestamp: firestore.FieldValue.serverTimestamp(),
+      });
+      Alert.alert('Request sent successfully');
+    } catch (error) {
+      console.log(error)
+    }
+    setLoading(false);
+  };
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -94,8 +161,41 @@ const UserProfileDetails = ({ route, navigation }) => {
               </Text>
             </View>
           </View>
+
+          {
+            routeName == 'Shortlist' || routeName == 'Matches' ?
+              (
+                <View style={styles.contactmain}>
+                  <View style={styles.contactbox}>
+                    <TouchableOpacity style={styles.contact} onPress={sendContactRequest}>
+                      <Text style={styles.contacttext}>Contact</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )
+              :
+              (
+                <View style={styles.shortmatchbox}>
+                  <View style={styles.shortlistbox}>
+                    <TouchableOpacity style={styles.shortlist} onPress={addToShortlist}>
+                      <Text style={styles.shortlisttext}>Shortlist</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.matchbox}>
+                    <TouchableOpacity style={styles.match} onPress={makeAMatch}>
+                      <Text style={styles.matchtext}>Make a Match</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )
+          }
+
         </View>
       </ScrollView>
+      <View style={loading ? styles.loadingContainer : null}>
+        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+      </View>
     </SafeAreaView>
   )
 }
@@ -175,7 +275,7 @@ const styles = StyleSheet.create({
     fontSize: fontScale * 20
   },
   namesubdata: {
-    color: '#AFAFAF',
+    color: '#7b2a50',
     fontSize: fontScale * 16,
     paddingLeft: width / 20,
   },
@@ -192,18 +292,18 @@ const styles = StyleSheet.create({
   },
   detailsnameparamater: {
     width: width * 0.25,
-    color: '#AFAFAF',
+    color: '#7b2a50',
     fontSize: fontScale * 17,
   },
   detailsnamecolon: {
     width: width * 0.1,
-    color: '#AFAFAF',
+    color: '#7b2a50',
     fontWeight: 'bold',
     fontSize: fontScale * 17,
   },
   detailsnamevalue: {
     width: width * 0.3,
-    color: '#AFAFAF',
+    color: '#7b2a50',
     fontSize: fontScale * 17,
   },
   slider: {
@@ -233,4 +333,63 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
+  shortmatchbox: {
+    marginTop: 20,
+    paddingHorizontal: width * 0.05,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  shortlist: {
+    paddingHorizontal: width * 0.1,
+    paddingVertical: width * 0.04,
+    backgroundColor: '#7b2a38',
+    borderRadius: 5,
+
+  },
+  shortlisttext: {
+    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 15,
+  },
+  match: {
+    paddingHorizontal: width * 0.1,
+    paddingVertical: width * 0.04,
+    backgroundColor: '#7b2a38',
+    borderRadius: 5,
+  },
+  matchtext: {
+    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 15,
+  },
+  contactmain: {
+    marginTop: 20,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  contact: {
+    paddingHorizontal: width * 0.1,
+    paddingVertical: width * 0.04,
+    backgroundColor: '#7b2a38',
+    borderRadius: 5,
+  },
+  contacttext: {
+    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 15,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+
 });

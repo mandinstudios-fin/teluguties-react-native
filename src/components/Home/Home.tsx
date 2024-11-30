@@ -8,10 +8,10 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {createStackNavigator} from '@react-navigation/stack';
-import {DATA} from '../../utils';
+import { createStackNavigator } from '@react-navigation/stack';
+import { DATA } from '../../utils';
 import ProfileGrid from '../Profiles/ProfileGrid';
 import {
   BottomTabBar,
@@ -23,10 +23,10 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 const Stack = createStackNavigator();
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 let bottomPadding = 0;
 
-const Home = ({navigation}) => {
+const Home = ({ navigation }) => {
   const tabBarHeight = useBottomTabBarHeight();
   bottomPadding = tabBarHeight;
 
@@ -68,7 +68,7 @@ const Home = ({navigation}) => {
           });
 
         return () => unsubscribe();
-      } catch (error) {}
+      } catch (error) { }
     })();
   }, []);
 
@@ -82,7 +82,7 @@ const Home = ({navigation}) => {
           </View>
           <View style={styles.container}>
             <View style={styles.subnavigationbar}>
-              <TouchableOpacity onPress={() => navigation.replace('Layout')}>
+              <TouchableOpacity >
                 <Text style={styles.subnavigationactivetext}>Daily</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.push('New')}>
@@ -94,6 +94,10 @@ const Home = ({navigation}) => {
               <TouchableOpacity
                 onPress={() => navigation.push('RecentlyViewed')}>
                 <Text style={styles.subnavigationtext}>Recently Viewed</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.push('Likely')}>
+                <Text style={styles.subnavigationtext}>Likely</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -111,6 +115,9 @@ const styles = StyleSheet.create({
   safearea: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  scrollview: {
+    flex: 1,
   },
   main: {
     flexGrow: 1,

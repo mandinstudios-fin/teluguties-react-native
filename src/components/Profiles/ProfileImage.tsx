@@ -13,6 +13,7 @@ const IMAGE_SIZE = width / 2 - 25; // Two columns with some spacing
 
 const ProfileImage = ({ user, navigation }) => {
   const [loading, setLoading] = useState(true);
+  const shimmerColors = ['#D0D0D0', '#E5E5E5', '#D0D0D0'];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,7 +49,11 @@ const ProfileImage = ({ user, navigation }) => {
   return (
     <>
       {loading ?
-        <ShimmerPlaceholder style={styles.container} >
+        <ShimmerPlaceholder style={styles.container} shimmerColors={shimmerColors}  linearGradientProps={{
+          colors: shimmerColors, // Gradient colors
+          start: { x: 0, y: 0 },
+          end: { x: 1, y: 0 },
+        }}>
         </ShimmerPlaceholder>
         :
         <TouchableOpacity style={styles.touchable} onPress={handleProfile}>
@@ -79,9 +84,6 @@ const styles = StyleSheet.create({
     aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
-    marginLeft: width / 50,
-    marginRight: width / 50,
-    marginBottom: width / 25,
   },
   touchable: {
     width: IMAGE_SIZE,
@@ -90,9 +92,6 @@ const styles = StyleSheet.create({
     aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
-    marginLeft: width / 50,
-    marginRight: width / 50,
-    marginBottom: width / 25,
   },
   image: {
     height: '100%',

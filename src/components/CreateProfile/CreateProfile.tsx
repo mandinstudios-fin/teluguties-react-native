@@ -1101,7 +1101,8 @@ const styles = StyleSheet.create({
     },
     profiletext: {
         fontSize: 25,
-        color: '#792A37',
+        fontWeight: 'bold',
+        color: '#792A38',
     },
     label: {
         color: '#591724',
@@ -1142,8 +1143,9 @@ const styles = StyleSheet.create({
         paddingLeft: width / 40,
     },
     subheading: {
-        fontSize: 18,
-        color: '#792A37',
+        fontSize: 19,
+        color: '#792A38',
+        fontWeight: 'bold'
     },
     subcontainer: {
         marginTop: width / 30,
@@ -1154,7 +1156,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
     },
     addimagebox: {
         display: 'flex',
@@ -1164,7 +1166,7 @@ const styles = StyleSheet.create({
     addimagecontainer: {
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
     },
 
     addimagetext: {
@@ -1179,7 +1181,7 @@ const styles = StyleSheet.create({
     deleteimagecontainer: {
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'flex-end',
+        alignItems: 'center',
     },
 
     deleteimage: {
