@@ -14,15 +14,15 @@ const Stack = createStackNavigator();
 
 const HomeStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="ProfileDetails" component={ProfileDetails} />
-      <Stack.Screen name="Daily" component={Daily} />
-      <Stack.Screen name="New" component={New} />
-      <Stack.Screen name="Shortlist" component={Shortlist} />
-      <Stack.Screen name="RecentlyViewed" component={RecentlyViewed} />
-      <Stack.Screen name="Likely" component={Likely} />
-      <Stack.Screen name="UserProfileDetails" component={UserProfileDetails} />
+    <Stack.Navigator screenOptions={{headerShown: false, }}>
+      <Stack.Screen name="Home" component={Home} options={{ presentation: 'transparentModal' }}/>
+      <Stack.Screen name="ProfileDetails" component={ProfileDetails} options={{ presentation: 'transparentModal' }}/>
+      <Stack.Screen name="Daily" component={Daily} options={{ presentation: 'transparentModal' }}/>
+      <Stack.Screen name="New" component={New} options={{ presentation: 'transparentModal' }} />
+      <Stack.Screen name="Shortlist" component={Shortlist} options={{ presentation: 'transparentModal' }}/>
+      <Stack.Screen name="RecentlyViewed" component={RecentlyViewed} options={{ presentation: 'transparentModal' }}/>
+      <Stack.Screen name="Likely" component={Likely} options={{ presentation: 'transparentModal' }}/>
+      <Stack.Screen name="UserProfileDetails" component={UserProfileDetails}  options={{presentation:'modal'}}/>
     </Stack.Navigator>
   );
 };

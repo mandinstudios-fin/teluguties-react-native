@@ -15,6 +15,7 @@ import React, {useRef, useState} from 'react';
 import Header from '../Header/Header';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { errorToast, successToast } from '../../utils';
 
 const {width, height} = Dimensions.get('window');
 
@@ -37,10 +38,10 @@ const HelpCenter = ({navigation}) => {
         sentAt: firestore.FieldValue.serverTimestamp(),
         userType: 'user', // Mark the sender as a user
       });
-      Alert.alert('Message sent successfully...');
+      successToast('Message sent successfully...');
       setMessage('');
     } catch (error) {
-      Alert.alert('Error sending message. Plese try after some time...');
+      errorToast('Error sending message. Plese try after some time...');
     }
     setLoading(false);
   };

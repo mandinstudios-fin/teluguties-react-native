@@ -1,8 +1,8 @@
-import { Dimensions, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text,ActivityIndicator, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, ActivityIndicator, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import ImageSlider from 'react-native-image-slider';
 import Header from '../Header/Header'
-import { getUsersAge } from '../../utils'
+import { errorToast, getUsersAge, successToast } from '../../utils'
 import Slider from './Slider';
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
@@ -13,6 +13,7 @@ const { width, height, fontScale } = Dimensions.get("window")
 const UserProfileDetails = ({ route, navigation }) => {
   const [routeName, setRouteName] = useState();
   const [loading, setLoading] = useState(false);
+  const [requestData, setRequestData] = useState();
   const { user } = route.params;
   const images = user?.images?.length > 0 ? [user.profile_pic, ...user.images] : [user.profile_pic];
 
@@ -24,6 +25,30 @@ const UserProfileDetails = ({ route, navigation }) => {
       setRouteName(previousRoute.name);
     }
   }, [state]);
+
+  const getRequestDetail = async () => {
+    const fromUid = auth().currentUser.uid;
+    const toUid = user.id;
+
+    setLoading(true)
+    try {
+      const existingRequestQuery = await firestore()
+        .collection('requests')
+        .where('fromUid', '==', fromUid)
+        .where('toUid', '==', toUid)
+        .get();
+
+      const data = existingRequestQuery.docs[0].data();
+      setRequestData(data)
+
+    } catch (error) {
+    }
+    setLoading(false)
+  };
+
+  useEffect(() => {
+    getRequestDetail()
+  }, [])
 
   const addToShortlist = async () => {
     setLoading(true)
@@ -39,8 +64,9 @@ const UserProfileDetails = ({ route, navigation }) => {
       });
 
 
-      Alert.alert('Added to shortlist')
+      successToast('Added to shortlist')
     } catch (error) {
+      errorToast('Something Went Wrong')
     }
     setLoading(false)
   };
@@ -59,24 +85,41 @@ const UserProfileDetails = ({ route, navigation }) => {
       });
 
 
-      Alert.alert('Added to Matches')
+      successToast('Added to Matches')
     } catch (error) {
+      errorToast('Something Went Wrong')
     }
     setLoading(false);
   };
 
-  const sendContactRequest = async (toUid) => {
+  const sendContactRequest = async () => {
     setLoading(true);
     const fromUid = auth().currentUser.uid;
+    const toUid = user.id;
+
     try {
+      const existingRequestQuery = await firestore()
+        .collection('requests')
+        .where('fromUid', '==', fromUid)
+        .where('toUid', '==', toUid)
+        .get();
+
+      if (!existingRequestQuery.empty) {
+        errorToast('Request already sent.');
+        setLoading(false);
+        return;
+      }
+
       await firestore().collection('requests').add({
         fromUid,
         toUid,
+        status: 'pending',
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
-      Alert.alert('Request sent successfully');
+      successToast('Request sent successfully');
+      getRequestDetail();
     } catch (error) {
-      console.log(error)
+      errorToast('Something Went Wrong')
     }
     setLoading(false);
   };
@@ -160,6 +203,27 @@ const UserProfileDetails = ({ route, navigation }) => {
                 {user?.personal_info?.weight ? `${user.personal_info.weight}kg` : 'Not Specified'}
               </Text>
             </View>
+            {
+              requestData?.status == "approved" &&
+              <View style={styles.detailscontainer}>
+                <Text style={styles.detailsnameparamater} numberOfLines={1}>Phone</Text>
+                <Text style={styles.detailsnamecolon}>:</Text>
+                <Text style={styles.detailsnamevalue} >
+                  {user?.contact_info?.phone ? `${user.contact_info.phone}` : 'Not Specified'}
+                </Text>
+              </View>
+            }
+
+            {
+              requestData?.status == "approved" &&
+              <View style={styles.detailscontainer}>
+                <Text style={styles.detailsnameparamater} numberOfLines={1}>Email</Text>
+                <Text style={styles.detailsnamecolon}>:</Text>
+                <Text style={styles.detailsnamevalue}>
+                  {user?.contact_info?.email ? `${user.contact_info.email}` : 'Not Specified'}
+                </Text>
+              </View>
+            }
           </View>
 
           {
@@ -167,8 +231,12 @@ const UserProfileDetails = ({ route, navigation }) => {
               (
                 <View style={styles.contactmain}>
                   <View style={styles.contactbox}>
-                    <TouchableOpacity style={styles.contact} onPress={sendContactRequest}>
-                      <Text style={styles.contacttext}>Contact</Text>
+                    <TouchableOpacity style={styles.contact} onPress={() => {
+                      if(!requestData) {
+                        sendContactRequest();
+                      }
+                    }}>
+                      <Text style={styles.contacttext}>{requestData?.status ? requestData.status : 'Contact'}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

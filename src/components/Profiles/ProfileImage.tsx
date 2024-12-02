@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, Dimensions, TouchableOpacity, Animated } from 'react-native';
-import React, { createRef, useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import LinearGradient from 'react-native-linear-gradient';
@@ -7,13 +7,15 @@ import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
 import { getFirstName, getUsersAge } from '../../utils';
 
 const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient)
+const shimmerColors = ['#D0D0D0', '#E5E5E5', '#D0D0D0'];
+
 
 const { width } = Dimensions.get('window');
 const IMAGE_SIZE = width / 2 - 25; // Two columns with some spacing
 
 const ProfileImage = ({ user, navigation }) => {
   const [loading, setLoading] = useState(true);
-  const shimmerColors = ['#D0D0D0', '#E5E5E5', '#D0D0D0'];
+  
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -84,6 +86,7 @@ const styles = StyleSheet.create({
     aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
+    maxWidth:'49%'
   },
   touchable: {
     width: IMAGE_SIZE,

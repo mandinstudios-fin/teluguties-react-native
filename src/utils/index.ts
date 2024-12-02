@@ -1,3 +1,7 @@
+import { useToast } from 'react-native-toast-notifications'
+
+const toast = useToast();
+
 export const DATA = Array.from({ length: 20 }, (_, i) => ({
   id: `${i + 1}`,
   imgSource: { uri: `https://picsum.photos/200/200?random=${i}` }, // Random image with a unique signature
@@ -39,3 +43,11 @@ export const getUsersAge = (date_of_birth: string): number => {
 
   return age;
 };
+
+export const successToast = (message: string) => {
+ toast.show(message, { type: 'success' });
+}
+
+export const errorToast = (message: string) => {
+  toast.show(message, { type: 'danger' });
+ }

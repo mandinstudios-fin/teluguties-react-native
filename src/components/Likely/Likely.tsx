@@ -46,10 +46,14 @@ const Likely = ({navigation}) => {
             const data = doc.data();
             return (
               data.religious_cultural.religion === religion &&
-              data.religious_cultural.caste === caste &&
-              data.contact_info.current_city === city &&
-              data.contact_info.permanent_address.state === state
+              data.contact_info.current_city === city  
             );
+            // return (
+            //   data.religious_cultural.religion === religion ||
+            //   data.religious_cultural.caste === caste ||
+            //   data.contact_info.current_city === city ||
+            //   data.contact_info.permanent_address.state === state
+            // );
           });
 
           const matchedUsersData = await Promise.all(

@@ -1,4 +1,5 @@
 import {
+    ActivityIndicator,
     Alert,
     Dimensions,
     Image,
@@ -15,10 +16,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Header from '../Header/Header';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { errorToast, successToast } from '../../utils';
 
 const { width, height } = Dimensions.get('window');
 
 const ProfileDetails: React.FC = ({ navigation }) => {
+    const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setfirestoreData] = useState<any>();
 
@@ -63,7 +66,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     const checkEmailValidation = async (email: string) => {
         const querySnapshot = await firestore().collection('profiles').where('contact_info.email', '==', email)
 
-        if(querySnapshot.empty) {
+        if (querySnapshot.empty) {
             return true;
         }
 
@@ -73,8 +76,8 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     const handleUserUpdate = async () => {
         const currentUser = auth().currentUser;
 
-        if(!firestoreData?.contact_info?.email && userData?.contact_info?.email) {
-            if(!checkEmailValidation(userData?.contact_info?.email) && !checkEmail(userData?.contact_info?.email)) {
+        if (!firestoreData?.contact_info?.email && userData?.contact_info?.email) {
+            if (!checkEmailValidation(userData?.contact_info?.email) && !checkEmail(userData?.contact_info?.email)) {
                 Alert.alert("Email already exists or Invalid Email");
                 return;
             }
@@ -82,8 +85,10 @@ const ProfileDetails: React.FC = ({ navigation }) => {
 
         const updatedData = {
             ...userData,
-            updatedAt: firestore.FieldValue.serverTimestamp() 
+            updatedAt: firestore.FieldValue.serverTimestamp()
         }
+
+        setLoading(true);
 
         if (currentUser) {
             try {
@@ -92,14 +97,15 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                     .doc(currentUser.uid)
                     .update(updatedData);
 
-                Alert.alert('Success', 'Your profile has been updated.');
+                successToast('Your profile has been updated.');
                 getCurrentUserDetails();
                 clearRefs();
 
             } catch (error) {
-                Alert.alert('Error', 'There was an issue updating your profile.');
+                errorToast('There was an issue updating your profile.');
             }
         }
+        setLoading(false);
     }
 
     const handleInputChange = (section: string, parameter: string, value: string, subsection?: string) => {
@@ -167,7 +173,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                                     style={styles.input}
                                     placeholderTextColor="#EBC7B1"
                                     value={userData?.personal_info?.date_of_birth ?? ""}
-                                    onChangeText={(value) => handleInputChange('personal_info', 'date_of_birth',value)}
+                                    onChangeText={(value) => handleInputChange('personal_info', 'date_of_birth', value)}
                                     editable={!firestoreData?.personal_info?.date_of_birth}
                                     ref={dobRef}
                                 />
@@ -177,7 +183,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                                     placeholder={"Email"}
                                     style={styles.input}
                                     value={userData?.contact_info?.email ?? ""}
-                                    onChangeText={(value) => handleInputChange('contact_info', 'email',value)}
+                                    onChangeText={(value) => handleInputChange('contact_info', 'email', value)}
                                     placeholderTextColor="#EBC7B1"
                                     editable={!firestoreData?.contact_info?.email}
                                     ref={emailRef}
@@ -208,6 +214,9 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                         <Text style={styles.footertext}>www.mandinstudios.com</Text>
                     </View>
                 </View>
+            </View>
+            <View style={loading ? styles.loadingContainer : null}>
+                {loading && <ActivityIndicator size="large" color="#a4737b" />}
             </View>
         </SafeAreaView>
     );
@@ -323,5 +332,15 @@ const styles = StyleSheet.create({
     footertext: {
         textAlign: 'center',
         color: 'black',
+    },
+    loadingContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
 });

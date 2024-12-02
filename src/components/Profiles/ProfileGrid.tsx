@@ -23,7 +23,7 @@ const ProfileGrid: React.FC = ({data, navigation}) => {
       data={data}
       contentContainerStyle={[
         styles.container,
-        data.length == 1 ? styles.oneitem : styles.manyitems,
+        
       ]}
       initialNumToRender={data.length}
       renderItem={({item}) => (
@@ -54,8 +54,9 @@ export default ProfileGrid;
 
 const styles = StyleSheet.create({
   container: {
-    display: 'flex',
-    gap: 15
+    flex:1,
+    gap: 15,
+    alignItems:'center',
   },
   oneitem: {
     alignItems: 'center',

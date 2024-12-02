@@ -8,9 +8,11 @@ import firestore from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage';
 
 import { Picker } from '@react-native-picker/picker'
-import { launchImageLibrary } from 'react-native-image-picker';
+import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
+import { errorToast, successToast } from '../../utils'
+
 
 
 const { width, height } = Dimensions.get("window")
@@ -19,7 +21,6 @@ const CreateProfile = ({ navigation }) => {
     const [uploading, setUploading] = useState(false);
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setFiretoreData] = useState<any>();
-
 
     const getCurrentUserDetails = async () => {
         const currentUser = auth().currentUser;
@@ -53,6 +54,8 @@ const CreateProfile = ({ navigation }) => {
             updatedAt: firestore.FieldValue.serverTimestamp()
         }
 
+        setUploading(true);
+
         if (currentUser) {
             try {
                 await firestore()
@@ -60,12 +63,14 @@ const CreateProfile = ({ navigation }) => {
                     .doc(currentUser.uid)
                     .update(updatedData);
 
-                Alert.alert("Updated");
+                    successToast("Updated Details")
                 getCurrentUserDetails();
             } catch (error) {
-                Alert.alert(error)
+                errorToast("Something Went Wrong")
             }
         }
+
+        setUploading(false);
     }
 
     const handleInputChange = (section: string, parameter: string, value: string, subsection?: string) => {
@@ -117,7 +122,7 @@ const CreateProfile = ({ navigation }) => {
             return downloadUrl;
 
         } catch (error) {
-            Alert.alert('Upload Error', 'There was an error uploading the image.');
+            errorToast( 'There was an error uploading the image.');
             setUploading(false);
             return null;
         }
@@ -141,10 +146,10 @@ const CreateProfile = ({ navigation }) => {
                     .doc(currentUser.uid)
                     .update(updatedData);
 
-                Alert.alert("Updated");
+                    successToast("Updated");
                 getCurrentUserDetails();
             } catch (error) {
-                Alert.alert(error)
+                errorToast('Something Went Wrong')
             }
         }
     }
@@ -168,6 +173,7 @@ const CreateProfile = ({ navigation }) => {
                 task.on('state_changed', (snapshot) => {
                     const uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 }, (error) => {
+                    console.log(error)
                 }, async () => {
                     const downloadUrl = await reference.getDownloadURL();
                     uploadedImageUrls.push(downloadUrl);
@@ -186,10 +192,11 @@ const CreateProfile = ({ navigation }) => {
             }
 
             await userRef.update(updatedData);
-            Alert.alert("Updated");
+            successToast("Updated");
 
             setUploading(false);
         } catch (error) {
+            errorToast('Something Went Wrong')
         }
     }
 
@@ -219,10 +226,11 @@ const CreateProfile = ({ navigation }) => {
         launchImageLibrary(options, (response) => {
             if (response.didCancel) {
             } else if (response.errorCode) {
+                console.log(response.errorCode)
             } else {
                 let selectedImages = response.assets || [];
                 if (selectedImages.length > 5) {
-                    Alert.alert('You can only select up to 5 images');
+                    errorToast('You can only select up to 5 images');
                     return;
                 }
                 selectedImages = response.assets.map((asset) => asset.uri);
@@ -246,10 +254,10 @@ const CreateProfile = ({ navigation }) => {
                     .doc(currentUser.uid)
                     .update(updatedData);
 
-                Alert.alert("Updated");
+                    successToast("Updated");
                 getCurrentUserDetails();
             } catch (error) {
-                Alert.alert(error)
+                errorToast('Something Went Wrong')
             }
         }
     };
@@ -282,30 +290,27 @@ const CreateProfile = ({ navigation }) => {
                                         firestoreData?.profile_pic ?
                                             (
                                                 <Image source={{ uri: firestoreData?.profile_pic }}
-                                                    height={height * 0.25}
-                                                     width={width * 0.50}
-                                                    borderRadius={500}
-                                                     resizeMode='cover' />
+                                                   style={{ height:'100%',resizeMode:'cover',width:'100%',aspectRatio:1,borderRadius:500 }} />
                                             ) :
                                             (
                                                 <View style={styles.emptyview}/>
                                             )
                                     }
-                                    <Icon name="add-circle" size={40} color="#fff" style={styles.photoicon} />
+                                    <Icon name="add-circle" size={40} color="#e4bd9e" style={styles.photoicon} />
                                 </View>
                             </TouchableOpacity>
 
                             <View style={styles.imagecontrols}>
                                 <View style={styles.addimagebox}>
                                     <TouchableOpacity style={styles.addimagecontainer} onPress={addImages}>
-                                        <MIcon name="add-photo-alternate" size={24} color="black" />
+                                        <MIcon name="add-photo-alternate" size={24} color="#7b2a38" />
                                         <Text style={styles.addimagetext}>Add your Images</Text>
                                     </TouchableOpacity>
                                 </View>
 
                                 <View style={styles.deleteimagebox}>
                                     <TouchableOpacity style={styles.deleteimagecontainer} onPress={deleteProfileImage}>
-                                        <MIcon name="delete" size={24} color="black" />
+                                        <MIcon name="delete" size={24} color="#7b2a38" />
                                         <Text style={styles.deleteimage}>Delete image</Text>
                                     </TouchableOpacity>
                                 </View>
@@ -1170,7 +1175,8 @@ const styles = StyleSheet.create({
     },
 
     addimagetext: {
-        color: 'black'
+        color: '#7b2a38',
+        fontWeight:'bold'
     },
 
     deleteimagebox: {
@@ -1185,7 +1191,8 @@ const styles = StyleSheet.create({
     },
 
     deleteimage: {
-        color: 'black'
+        color: '#7b2a38',
+        fontWeight:'bold'
     },
     creat: {
         borderRadius: 12,
@@ -1205,7 +1212,10 @@ const styles = StyleSheet.create({
         width: width * 0.50,
         borderRadius: 500,
         borderColor: '#782A37',
+        aspectRatio:1,
         borderWidth: 2,
+        display:'flex',
+        alignItems:'center',
     },
     photoicon: {
         position: 'absolute',
