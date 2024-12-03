@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Header from '../Header/Header';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { errorToast, successToast } from '../../utils';
+import useToastHook from '../../utils/useToastHook';
 
 const { width, height } = Dimensions.get('window');
 
@@ -24,6 +24,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setfirestoreData] = useState<any>();
+    const { successToast, errorToast } = useToastHook();
 
     const nameRef = useRef(null);
     const dobRef = useRef(null);

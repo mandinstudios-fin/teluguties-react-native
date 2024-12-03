@@ -2,11 +2,12 @@ import { Dimensions, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleShee
 import React, { useEffect, useState } from 'react'
 import ImageSlider from 'react-native-image-slider';
 import Header from '../Header/Header'
-import { errorToast, getUsersAge, successToast } from '../../utils'
 import Slider from './Slider';
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import { useNavigationState } from '@react-navigation/native';
+import useToastHook from '../../utils/useToastHook';
+import { getUsersAge } from '../../utils';
 
 const { width, height, fontScale } = Dimensions.get("window")
 
@@ -14,9 +15,11 @@ const UserProfileDetails = ({ route, navigation }) => {
   const [routeName, setRouteName] = useState();
   const [loading, setLoading] = useState(false);
   const [requestData, setRequestData] = useState();
+  const { successToast, errorToast } = useToastHook();
   const { user } = route.params;
-  const images = user?.images?.length > 0 ? [user.profile_pic, ...user.images] : [user.profile_pic];
-
+  const images = (user && user.profile_pic && user.images && user.images.length > 0) 
+  ? [user.profile_pic, ...user.images] 
+  : (user && user.profile_pic ? [user.profile_pic] : []);
   const state = useNavigationState(state => state);
 
   useEffect(() => {
@@ -51,7 +54,7 @@ const UserProfileDetails = ({ route, navigation }) => {
   }, [])
 
   const addToShortlist = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const currentUser = auth().currentUser;
       if (!currentUser) {
@@ -59,17 +62,27 @@ const UserProfileDetails = ({ route, navigation }) => {
       }
 
       const userRef = firestore().collection('profiles').doc(currentUser.uid);
+
+      const userDoc = await userRef.get();
+      const shortlistedProfiles = userDoc.data()?.shortlisted || [];
+
+      if (shortlistedProfiles.includes(user.id)) {
+        successToast('Profile is already in your shortlist');
+        setLoading(false);
+        return;
+      }
+
       await userRef.update({
-        shortlisted: firestore.FieldValue.arrayUnion(user.id)
+        shortlisted: firestore.FieldValue.arrayUnion(user.id),
       });
 
-
-      successToast('Added to shortlist')
+      successToast('Added to shortlist');
     } catch (error) {
-      errorToast('Something Went Wrong')
+      errorToast('Something Went Wrong');
     }
-    setLoading(false)
+    setLoading(false);
   };
+
 
   const makeAMatch = async () => {
     setLoading(true);
@@ -80,6 +93,16 @@ const UserProfileDetails = ({ route, navigation }) => {
       }
 
       const userRef = firestore().collection('profiles').doc(currentUser.uid);
+
+      const userDoc = await userRef.get();
+      const matchedProfiles = userDoc.data()?.matches || [];
+
+      if (matchedProfiles.includes(user.id)) {
+        successToast('Profile is already in your matches');
+        setLoading(false);
+        return;
+      }
+
       await userRef.update({
         matches: firestore.FieldValue.arrayUnion(user.id)
       });
@@ -162,7 +185,7 @@ const UserProfileDetails = ({ route, navigation }) => {
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater} numberOfLines={1}>City</Text>
+              <Text style={styles.detailsnameparamater} numberOfLines={1}>Current City</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
               <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.contact_info?.current_city || 'Not Specified'}
@@ -176,10 +199,45 @@ const UserProfileDetails = ({ route, navigation }) => {
               </Text>
             </View>
             <View style={styles.detailscontainer}>
-              <Text style={styles.detailsnameparamater} numberOfLines={1}>Religion</Text>
+              <Text style={styles.detailsnameparamater}>Religion</Text>
               <Text style={styles.detailsnamecolon}>:</Text>
               <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.religious_cultural?.religion || 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Caste</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
+                {user?.religious_cultural?.caste ? `${user.religious_cultural?.caste}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Sub Caste</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.religious_cultural?.subcaste ? `${user.religious_cultural?.subcaste}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Gothra</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.religious_cultural?.gothra ? `${user.religious_cultural?.gothra}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Star/Rashi</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.religious_cultural?.star_rashi ? `${user.religious_cultural?.star_rashi}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Manglik Status</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.religious_cultural?.manglik_status ? `${user.religious_cultural?.manglik_status}` : 'Not Specified'}
               </Text>
             </View>
             <View style={styles.detailscontainer}>
@@ -201,6 +259,265 @@ const UserProfileDetails = ({ route, navigation }) => {
               <Text style={styles.detailsnamecolon}>:</Text>
               <Text style={styles.detailsnamevalue} numberOfLines={1}>
                 {user?.personal_info?.weight ? `${user.personal_info.weight}kg` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Marital Statua</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
+                {user?.personal_info?.marital_status ? `${user.personal_info.marital_status}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Gender</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
+                {user?.personal_info?.gender ? `${user.personal_info.marital_status}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>No. of Children</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
+                {user?.personal_info?.num_children ? `${user.personal_info.num_children}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>Blood Type</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} numberOfLines={1}>
+                {user?.personal_info?.blood_group ? `${user.personal_info.blood_group}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >State</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.contact_info?.permanent_address.state ? `${user.contact_info.permanent_address.state}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >City</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.contact_info?.permanent_address.city ? `${user.contact_info.permanent_address.city}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Country</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.contact_info?.permanent_address.country ? `${user.contact_info.permanent_address.country}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Street</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.contact_info?.permanent_address.street ? `${user.contact_info.permanent_address.street}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Family Type</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.family_background?.family_type ? `${user.family_background.family_type}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Mother's Name</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.family_background?.mother_name ? `${user.family_background.mother_name}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Father's Name</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.family_background?.father_name ? `${user.family_background.father_name}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >No.of Brothers</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.family_background?.num_brothers ? `${user.family_background.num_brothers}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >No.of Sisters</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.family_background?.num_sisters ? `${user.family_background.num_sisters}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Family Status</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.family_background?.family_status ? `${user.family_background.family_ststus}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Family Values</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.family_background?.family_values ? `${user.family_background.family_values}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Annual Income</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.professional_details?.annual_income ? `${user.professional_details.annual_income}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Employer</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.professional_details?.employer ? `${user.professional_details.employer}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Job Location</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.professional_details?.job_location ? `${user.professional_details.job_location}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Occupation</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.professional_details?.occupation ? `${user.professional_details.occupation}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Highest Education</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.education?.highest_education ? `${user.education?.highest_education}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Field Of Study</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.education?.field_of_study ? `${user.education?.field_of_study}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Graduation Year</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.education?.graduation_year ? `${user.education?.graduation_year}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >College</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.education?.college ? `${user.education?.college}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Drinking Habits</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.lifestyle_preferences?.drinking_habits ? `${user.lifestyle_preferences?.drinking_habits}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Smoking Habits</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.lifestyle_preferences?.smoking_habits ? `${user.lifestyle_preferences?.smoking_habits}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Hobbies & Interests</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.hobbies_interests ? `${user?.hobbies_interests.map((item) => <Text>{item}{" "}</Text>)}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Drinking Habits</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.lifestyle_preferences?.drinking_habits ? `${user.lifestyle_preferences?.drinking_habits}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Age Range(Min)</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_age_range?.min ? `${user.matrimonial_expectations?.preferred_age_range?.min}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Age Range(Max)</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_age_range?.max ? `${user.matrimonial_expectations?.preferred_age_range?.max}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Height Range(Min)</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_height_range?.min ? `${user.matrimonial_expectations?.preferred_height_range?.min}cm` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Height Range(Max)</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_height_range?.max ? `${user.matrimonial_expectations?.preferred_height_range?.max}cm` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Preferred Education</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_education ? `${user.matrimonial_expectations?.preferred_education}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Preferred Location</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_location ? `${user.matrimonial_expectations?.preferred_location}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Preferred Occupation</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_occupation ? `${user.matrimonial_expectations?.preferred_occupation}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Minimum Annual Income</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.preferred_income ? `Rs.${user.matrimonial_expectations?.preferred_income}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater} >Other Preferences</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.matrimonial_expectations?.other_preferences ? `${user.matrimonial_expectations?.other_preferences}` : 'Not Specified'}
+              </Text>
+            </View>
+            <View style={styles.detailscontainer}>
+              <Text style={styles.detailsnameparamater}>About Me</Text>
+              <Text style={styles.detailsnamecolon}>:</Text>
+              <Text style={styles.detailsnamevalue} >
+                {user?.about_me ? `${user.about_me}` : 'Not Specified'}
               </Text>
             </View>
             {
@@ -232,7 +549,7 @@ const UserProfileDetails = ({ route, navigation }) => {
                 <View style={styles.contactmain}>
                   <View style={styles.contactbox}>
                     <TouchableOpacity style={styles.contact} onPress={() => {
-                      if(!requestData) {
+                      if (!requestData) {
                         sendContactRequest();
                       }
                     }}>

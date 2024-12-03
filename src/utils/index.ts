@@ -1,6 +1,4 @@
-import { useToast } from 'react-native-toast-notifications'
-
-const toast = useToast();
+import firestore from '@react-native-firebase/firestore'
 
 export const DATA = Array.from({ length: 20 }, (_, i) => ({
   id: `${i + 1}`,
@@ -44,10 +42,36 @@ export const getUsersAge = (date_of_birth: string): number => {
   return age;
 };
 
-export const successToast = (message: string) => {
- toast.show(message, { type: 'success' });
+export const getTodaysDate = () => {
+  const today = new Date();
+
+  const timeZoneOffset = today.getTimezoneOffset();
+  const hoursOffset = Math.floor(Math.abs(timeZoneOffset) / 60);
+  const minutesOffset = Math.abs(timeZoneOffset) % 60;
+  const offsetSign = timeZoneOffset > 0 ? '-' : '+';
+  const formattedOffset = `${offsetSign}${String(hoursOffset).padStart(2, '0')}:${String(minutesOffset).padStart(2, '0')}`;
+
+  const formattedDate = today.toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true,
+  });
+
+  return `${formattedDate.replace(',', '')} UTC${formattedOffset}`;
 }
 
-export const errorToast = (message: string) => {
-  toast.show(message, { type: 'danger' });
- }
+export const compareDate = (firstDate, secondDate) => {
+  const timestamp1 = firestore.Timestamp.fromDate(new Date(firstDate));
+const timestamp2 = firestore.Timestamp.fromDate(new Date(secondDate));
+
+if (timestamp1.seconds < timestamp2.seconds) {
+    return true
+} else if (timestamp1.seconds > timestamp2.seconds) {
+   return false
+}
+};

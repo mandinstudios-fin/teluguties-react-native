@@ -11,9 +11,7 @@ import { Picker } from '@react-native-picker/picker'
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
-import { errorToast, successToast } from '../../utils'
-
-
+import useToastHook from '../../utils/useToastHook'
 
 const { width, height } = Dimensions.get("window")
 
@@ -21,6 +19,8 @@ const CreateProfile = ({ navigation }) => {
     const [uploading, setUploading] = useState(false);
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setFiretoreData] = useState<any>();
+    const { successToast, errorToast } = useToastHook();
+
 
     const getCurrentUserDetails = async () => {
         const currentUser = auth().currentUser;

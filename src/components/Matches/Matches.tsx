@@ -12,7 +12,7 @@ const Matches = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
 
   useEffect(() => {
-    const getShortlistedProfiles = async () => {
+    const unsubscribe = async () => {
       try {
         const currentUser = auth().currentUser;
         if (!currentUser) {
@@ -20,36 +20,66 @@ const Matches = ({ navigation }) => {
         }
 
         const userRef = firestore().collection('profiles').doc(currentUser.uid);
-        const userDoc = await userRef.get();
-
-        if (!userDoc.exists) {
-          return;
-        }
-
-        const shortlistedProfiles = userDoc?.data().matches || [];
-
-        if (shortlistedProfiles.length === 0) {
-          return;
-        }
-
-        const userPromises = shortlistedProfiles.map(async (userId) => {
-          const userSnapshot = await firestore().collection('profiles').doc(userId).get();
-          if (userSnapshot.exists) {
-            return { id: userSnapshot.id, ...userSnapshot.data() };
+        
+        // Listen for real-time updates to the user's profile
+        const unsubscribeProfile = userRef.onSnapshot((userDoc) => {
+          if (!userDoc.exists) {
+            return;
           }
-          return null;
+
+          const shortlistedProfiles = userDoc.data().matches || [];
+
+          if (shortlistedProfiles.length === 0) {
+            setData([]);
+            return;
+          }
+
+          // Fetch the profiles in real-time as well
+          const userPromises = shortlistedProfiles.map(async (userId) => {
+            const userSnapshot = await firestore().collection('profiles').doc(userId).get();
+            if (userSnapshot.exists) {
+              return { id: userSnapshot.id, ...userSnapshot.data() };
+            }
+            return null;
+          });
+
+          // Subscribe to changes for each shortlisted profile
+          const unsubscribeProfiles = shortlistedProfiles.map(userId => {
+            return firestore()
+              .collection('profiles')
+              .doc(userId)
+              .onSnapshot(userSnapshot => {
+                if (userSnapshot.exists) {
+                  setData(prevData => {
+                    const updatedData = prevData.filter(item => item.id !== userSnapshot.id);
+                    updatedData.push({ id: userSnapshot.id, ...userSnapshot.data() });
+                    return updatedData;
+                  });
+                }
+              });
+          });
+
+          // Clean up the real-time listeners for each profile when done
+          return () => {
+            unsubscribeProfiles.forEach(unsub => unsub());
+          };
         });
 
-        const usersData = await Promise.all(userPromises);
-
-        const filteredUsersData = usersData.filter(user => user !== null);
-        setData(filteredUsersData);
+        // Cleanup the profile listener on component unmount
+        return () => unsubscribeProfile();
       } catch (error) {
+        console.error(error);
       }
     };
 
-    getShortlistedProfiles();
+    unsubscribe();
+
+    // Clean up the listeners on component unmount
+    return () => {
+      setData([]);
+    };
   }, []);
+
 
 
   return (
@@ -90,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   main: {
-    flex: 1
+    flexGrow: 1
   },
   boxContainer: {
     paddingHorizontal: 10

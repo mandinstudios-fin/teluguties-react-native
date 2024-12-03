@@ -22,7 +22,7 @@ import PrimeStack from '../Prime/PrimeStack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
-import { errorToast, successToast } from '../../utils';
+import useToastHook from '../../utils/useToastHook';
 
 
 const Tab = createBottomTabNavigator();
@@ -76,6 +76,7 @@ const BottomTabs = () => {
 };
 
 const Layout = ({ navigation }) => {
+  const { successToast, errorToast } = useToastHook();
   const CustomDrawerContent = (props) => {
     const handleLogout = async () => {
       await AsyncStorage.removeItem('userToken');
@@ -118,10 +119,12 @@ const Layout = ({ navigation }) => {
         <DrawerItemList {...props} />
         <DrawerItem
           label="Logout"
-          onPress={handleLogout} // Executes the function on press
+          onPress={handleLogout}
           labelStyle={{ color: '#561825', fontWeight: 'bold' }}
           icon={() => <AIcon name="logout" size={20} color="#561825" />}
         />
+
+        
 
 
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
@@ -145,8 +148,8 @@ const Layout = ({ navigation }) => {
           backgroundColor: '#f5f5f5',
         },
         drawerLabelStyle: {
-          color: '#561825', // Set your desired text color
-          fontWeight: 'bold', // Optional: make text bold
+          color: '#561825',
+          fontWeight: 'bold',
         },
         drawerActiveTintColor: '#E9BA9B',
         drawerInactiveTintColor: '#000',
@@ -165,9 +168,9 @@ const Layout = ({ navigation }) => {
       <Drawer.Screen name="Create Profile" component={CreateProfile} options={{
         drawerIcon: ({ focused, size }) => (
           <MIcon
-            name="create" // Change this to any icon you prefer
+            name="create"
             size={size}
-            color={focused ? '#E9BA9B' : '#561825'}  // Change color when active
+            color={focused ? '#E9BA9B' : '#561825'}
           />
         ),
 
@@ -176,9 +179,9 @@ const Layout = ({ navigation }) => {
       <Drawer.Screen name="Help Center" component={HelpCenter} options={{
         drawerIcon: ({ focused, size }) => (
           <MIcon
-            name="add-call" // Change this to any icon you prefer
+            name="add-call"
             size={size}
-            color={focused ? '#E9BA9B' : '#561825'}  // Change color when active
+            color={focused ? '#E9BA9B' : '#561825'}
           />
         ),
       }} />

@@ -15,13 +15,14 @@ import React, {useRef, useState} from 'react';
 import Header from '../Header/Header';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { errorToast, successToast } from '../../utils';
+import useToastHook from '../../utils/useToastHook';
 
 const {width, height} = Dimensions.get('window');
 
 const HelpCenter = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const { successToast, errorToast } = useToastHook();
 
   const sendMessageToAdmin = async () => {
     const userId = auth().currentUser?.uid;
