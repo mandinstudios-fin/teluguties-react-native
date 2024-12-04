@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
     aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
-    maxWidth:'49%'
   },
   touchable: {
     width: IMAGE_SIZE,

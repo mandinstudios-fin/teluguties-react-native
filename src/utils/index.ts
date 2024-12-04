@@ -43,35 +43,32 @@ export const getUsersAge = (date_of_birth: string): number => {
 };
 
 export const getTodaysDate = () => {
+  const isoDate = new Date();
+
+  const day = isoDate.getDate().toString().padStart(2, '0');
+  const month = (isoDate.getMonth() + 1).toString().padStart(2, '0');
+  const year = isoDate.getFullYear();
+  const hours = isoDate.getHours().toString().padStart(2, '0');
+  const minutes = isoDate.getMinutes().toString().padStart(2, '0');
+  const seconds = isoDate.getSeconds().toString().padStart(2, '0');
+
+  const customFormattedDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  return customFormattedDate;
+};
+
+
+export const compareDate = (dateToCompare) => {
   const today = new Date();
 
-  const timeZoneOffset = today.getTimezoneOffset();
-  const hoursOffset = Math.floor(Math.abs(timeZoneOffset) / 60);
-  const minutesOffset = Math.abs(timeZoneOffset) % 60;
-  const offsetSign = timeZoneOffset > 0 ? '-' : '+';
-  const formattedOffset = `${offsetSign}${String(hoursOffset).padStart(2, '0')}:${String(minutesOffset).padStart(2, '0')}`;
+  const compareDate = new Date(dateToCompare);
 
-  const formattedDate = today.toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: true,
-  });
-
-  return `${formattedDate.replace(',', '')} UTC${formattedOffset}`;
-}
-
-export const compareDate = (firstDate, secondDate) => {
-  const timestamp1 = firestore.Timestamp.fromDate(new Date(firstDate));
-const timestamp2 = firestore.Timestamp.fromDate(new Date(secondDate));
-
-if (timestamp1.seconds < timestamp2.seconds) {
-    return true
-} else if (timestamp1.seconds > timestamp2.seconds) {
-   return false
-}
+  return today >= compareDate; 
 };
+
+export const formatDate = (date) => {
+  const isoDate = new Date(date);
+
+  const customFormattedDate = `${isoDate.getDate()}/${isoDate.getMonth() + 1}/${isoDate.getFullYear()} ${isoDate.getHours()}:${isoDate.getMinutes()}:${isoDate.getSeconds()}`;
+  
+  return customFormattedDate
+}

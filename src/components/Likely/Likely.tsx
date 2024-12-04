@@ -25,60 +25,58 @@ const Likely = ({navigation}) => {
       .onSnapshot(async (snapshot) => {
         try {
           const currentUser = auth().currentUser;
-
+  
           if (!currentUser) {
             return;
           }
-
+  
           const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
-
           if (!userDoc.exists) {
             return;
           }
-
+  
           const userDataFirestore = userDoc.data();
           const religion = userDataFirestore?.religious_cultural?.religion;
-          const caste = userDataFirestore?.religious_cultural?.caste;
-          const city = userDataFirestore?.contact_info?.current_city;
-          const state = userDataFirestore?.contact_info?.permanent_address?.state;
-
+          const gender = userDataFirestore?.personal_info?.gender;  
+  
+          if (!religion || !gender) {
+            return;
+          }
+  
+          const oppositeGender = gender === 'Male' ? 'Female' : 'Male';  
+  
           const matchingDocs = snapshot.docs.filter(doc => {
             const data = doc.data();
             return (
-              data.religious_cultural.religion === religion &&
-              data.contact_info.current_city === city  
+              data.religious_cultural?.religion === religion &&  
+              data.personal_info?.gender === oppositeGender  
             );
-            // return (
-            //   data.religious_cultural.religion === religion ||
-            //   data.religious_cultural.caste === caste ||
-            //   data.contact_info.current_city === city ||
-            //   data.contact_info.permanent_address.state === state
-            // );
           });
-
-          const matchedUsersData = await Promise.all(
-            matchingDocs.map(async (doc) => {
-              if (doc.id !== currentUser.uid) {
-                return { id: doc.id, ...doc.data() };
-              }
-              return null;
-            })
-          );
-
+  
+          const matchedUsersData = matchingDocs.map(doc => {
+            if (doc.id !== currentUser.uid) {
+              return { id: doc.id, ...doc.data() };
+            }
+            return null;  
+          });
+  
           const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
-
+  
           if (filteredMatchedUsers.length === 0) {
+            console.log('No matching users found');
             return;
           }
-
+  
           setData(filteredMatchedUsers);
+  
         } catch (error) {
+          console.error('Error in onSnapshot:', error);  
         }
       });
-
-    return () => unsubscribe();
-  }, []);
-
+  
+    return () => unsubscribe();  
+  }, []);  
+  
   return (
     <SafeAreaView style={styles.safearea}>
       <ScrollView contentContainerStyle={styles.scrollview}>

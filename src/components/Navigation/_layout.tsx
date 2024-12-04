@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import IIcon from 'react-native-vector-icons/Ionicons';
-import { View, Text, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView } from 'react-native';
 import HelpCenter from '../HelpCenter/HelpCenter';
 
 import Chat from '../Chat/Chat';
@@ -115,19 +115,17 @@ const Layout = ({ navigation }) => {
 
 
     return (
-      <DrawerContentScrollView {...props}>
-        <DrawerItemList {...props} />
-        <DrawerItem
-          label="Logout"
-          onPress={handleLogout}
-          labelStyle={{ color: '#561825', fontWeight: 'bold' }}
-          icon={() => <AIcon name="logout" size={20} color="#561825" />}
-        />
-
-        
-
-
-        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <DrawerContentScrollView {...props}>
+          <DrawerItemList {...props} />
+          <DrawerItem
+            label="Logout"
+            onPress={handleLogout}
+            labelStyle={{ color: '#561825', fontWeight: 'bold' }}
+            icon={() => <AIcon name="logout" size={20} color="#561825" />}
+          />
+        </DrawerContentScrollView>
+        <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 10 }}>
           <DrawerItem
             label="Delete Account"
             onPress={handleDeleteAccount}
@@ -135,8 +133,7 @@ const Layout = ({ navigation }) => {
             icon={() => <AIcon name="delete" size={20} color="red" />}
           />
         </View>
-
-      </DrawerContentScrollView>
+      </SafeAreaView>
     );
   };
 

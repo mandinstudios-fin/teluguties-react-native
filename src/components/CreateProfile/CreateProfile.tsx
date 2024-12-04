@@ -229,10 +229,10 @@ const CreateProfile = ({ navigation }) => {
                 console.log(response.errorCode)
             } else {
                 let selectedImages = response.assets || [];
-                if (selectedImages.length > 5) {
-                    errorToast('You can only select up to 5 images');
-                    return;
-                }
+                // if (selectedImages.length > 5) {
+                //     errorToast('You can only select up to 5 images');
+                //     return;
+                // }
                 selectedImages = response.assets.map((asset) => asset.uri);
                 handleUploadImages(selectedImages);
             }
@@ -244,6 +244,7 @@ const CreateProfile = ({ navigation }) => {
         const updatedData = {
             ...userData,
             profile_pic: "",
+            images: [],
             updatedAt: firestore.FieldValue.serverTimestamp()
         }
 

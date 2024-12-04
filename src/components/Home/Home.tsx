@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -31,9 +32,11 @@ const Home = ({ navigation }) => {
   bottomPadding = tabBarHeight;
 
   const [data, setData] = useState<any>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
+      setLoading(true)
       try {
         const currentUser = auth().currentUser;
         if (!currentUser) {
@@ -69,6 +72,8 @@ const Home = ({ navigation }) => {
 
         return () => unsubscribe();
       } catch (error) { }
+      finally { setLoading(false); }
+      
     })();
   }, []);
 
@@ -105,6 +110,9 @@ const Home = ({ navigation }) => {
           <ProfileGrid navigation={navigation} data={data} />
         </View>
       </ScrollView>
+      <View style={loading ? styles.loadingContainer : null}>
+        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+      </View>
     </SafeAreaView>
   );
 };
@@ -179,5 +187,15 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 10,
     paddingHorizontal: 20,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 });

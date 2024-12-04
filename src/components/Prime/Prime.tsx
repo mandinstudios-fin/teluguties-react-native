@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   FlatList,
@@ -11,79 +12,98 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import firestore, {Timestamp} from '@react-native-firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import firestore, { Timestamp } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { compareDate, getTodaysDate, parseDate } from '../../utils';
+import { compareDate, formatDate, getTodaysDate, parseDate } from '../../utils';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const membershipData = [
-  {id: '1', title: 'Silver Package', price: '₹499'},
-  {id: '2', title: 'Gold Package', price: '₹999'},
-  {id: '3', title: 'Diamond Plus', price: '₹6000'},
+  { id: '1', title: 'Silver Package', price: '₹499' },
+  { id: '2', title: 'Gold Package', price: '₹999' },
+  { id: '3', title: 'Diamond Plus', price: '₹6000' },
 ];
 
-const Prime = ({navigation}) => {
+const Prime = ({ navigation }) => {
   const [user, setUser] = useState();
-  const [paymentData, setPaymentData] = useState({
-    packageName: 'Gold',
-    status: 'success',
-    phoneNumber: 1234567890,
-    amount: 4,
-    createdAt: 'December 3, 2024 at 2:08:56 PM UTC+5:30',
-    expiryDate:'March 3, 2025 at 3:00:06 PM UTC+5:30'
-  });
-  const isValidSubscription = paymentData?.status === 'success'
-  console.log(isValidSubscription)
+  const [paymentData, setPaymentData] = useState();
+  const [loading, setLoading] = useState(false);
+
+  const getCurrentUserDetails = async () => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        return;
+      }
+
+      const userRef = firestore().collection('profiles').doc(currentUser.uid);
+      const userDoc = await userRef.get();
+
+      if (!userDoc.exists) {
+        return;
+      }
+
+      const data = userDoc?.data();
+
+      setUser(data);
+    } catch (error) { }
+  };
+
+  const getUserPaymentDetails = async () => {
+    setLoading(true);
+    try {
+      const userId = auth().currentUser?.uid;
+      const userDoc = await firestore()
+        .collection('profiles')
+        .doc(userId)
+        .get();
+
+      if (!userDoc.exists) {
+        return;
+      }
+
+      const userData = userDoc.data();
+      const phone = userData?.contact_info?.phone;
+
+      const paymentsRef = firestore()
+        .collection('payments')
+        .where('userId', '==', userId)
+        .where('userDetails.phone', '==', phone)
+        .get();
+
+      const paymentsSnapshot = await paymentsRef;
+
+      if (!paymentsSnapshot.empty) {
+        const paymentDoc = paymentsSnapshot.docs[0];
+
+        const data = paymentDoc.data();
+        const expiryDate = data.expiryDate;
+        const formattedExpiryDate = new Date(
+          expiryDate.seconds * 1000 + expiryDate.nanoseconds / 1000000,
+        );
+
+        const timestamp = data.timestamp;
+        const formattedTimestamp = new Date(
+          timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000,
+        );
+
+        const updated = {
+          ...data,
+          formattedExpiryDate,
+          formattedTimestamp,
+        };
+        setPaymentData(updated);
+      } else {
+      }
+    } catch (error) { }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const getCurrentUserDetails = async () => {
-      try {
-        const currentUser = auth().currentUser;
-        if (!currentUser) {
-          return;
-        }
-
-        const userRef = firestore().collection('profiles').doc(currentUser.uid);
-        const userDoc = await userRef.get();
-
-        if (!userDoc.exists) {
-          return;
-        }
-
-        const data = userDoc?.data();
-
-        setUser(data);
-      } catch (error) {}
-    };
-
     getCurrentUserDetails();
+    getUserPaymentDetails();
   }, []);
-
-  // useEffect(() => {
-  //   const getUserPaymentDetails = async () => {
-  //     try {
-  //       const currentUser = auth().currentUser;
-  //       if (!currentUser) {
-  //         return;
-  //       }
-
-  //       const userRef = firestore().collection('payments').doc(currentUser.uid);
-  //       const userDoc = await userRef.get();
-
-  //       if (!userDoc.exists) {
-  //         return;
-  //       }
-
-  //       const data = userDoc?.data();
-
-  //       setPaymentData(data);
-  //     } catch (error) {}
-  //   };
-
-  //   getUserPaymentDetails();
-  // }, []);
 
   const openPaymentWebsite = () => {
     Linking.openURL(
@@ -91,7 +111,7 @@ const Prime = ({navigation}) => {
     ).catch(err => Alert.alert('Failed to initiate Payment'));
   };
 
-  const renderItem = ({item}) => (
+  const renderItem = ({ item }) => (
     <View style={styles.box}>
       <View style={styles.membershipcontainer}>
         <Text style={styles.membershiptext}>{item.title}</Text>
@@ -119,19 +139,25 @@ const Prime = ({navigation}) => {
         </View>
 
         <View style={styles.boxesholder}>
-          {isValidSubscription ? (
+          {paymentData && !compareDate(paymentData?.formattedExpiryDate) ? (
             <View style={styles.box}>
               <View style={styles.membershipcontainer}>
-                <Text style={styles.membershiptext}>{paymentData?.packageName}</Text>
+                <Text style={styles.membershiptext}>
+                  {paymentData?.packageName}
+                </Text>
                 <Text style={styles.validity}>3months validity</Text>
               </View>
               <View>
-                <Text style={styles.price}>Rs. {paymentData.amount}</Text>
-                <Text style={styles.price}>Expiry Date: {paymentData.expiryDate}</Text>
+                <Text style={styles.price}>Rs. {paymentData?.amount}</Text>
+                <Text style={styles.price}>
+                  Created Date: {formatDate(paymentData?.formattedTimestamp)}
+                </Text>
+                <Text style={styles.price}>
+                  Expiry Date: {formatDate(paymentData?.formattedExpiryDate)}
+                </Text>
               </View>
               <View style={styles.boxContainer}>
-                <TouchableOpacity
-                  style={styles.subscribe}>
+                <TouchableOpacity style={styles.subscribe}>
                   <Text style={styles.subscribetext}>Active</Text>
                 </TouchableOpacity>
               </View>
@@ -150,6 +176,9 @@ const Prime = ({navigation}) => {
           )}
         </View>
       </ScrollView>
+      <View style={loading ? styles.loadingContainer : null}>
+        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+      </View>
     </SafeAreaView>
   );
 };
@@ -183,8 +212,8 @@ const styles = StyleSheet.create({
     paddingLeft: width / 25,
     marginRight: width / 25,
     gap: 25,
-    alignItems:'center',
-    justifyContent:'center'
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   boxContainer: {
     display: 'flex',
@@ -229,6 +258,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: width / 50,
   },
   price: {
-    color: 'black',
+    color: '#7b2a38',
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 });

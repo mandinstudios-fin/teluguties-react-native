@@ -35,18 +35,24 @@ const UserProfileDetails = ({ route, navigation }) => {
 
     setLoading(true)
     try {
-      const existingRequestQuery = await firestore()
+      const requestRef = firestore()
         .collection('requests')
         .where('fromUid', '==', fromUid)
-        .where('toUid', '==', toUid)
-        .get();
-
-      const data = existingRequestQuery.docs[0].data();
-      setRequestData(data)
-
+        .where('toUid', '==', toUid);
+  
+      const unsubscribe = requestRef.onSnapshot((snapshot) => {
+        if (!snapshot.empty) {
+          const data = snapshot.docs[0].data();
+          setRequestData(data);
+        } else {
+          setRequestData(null); 
+        }
+      });
+  
     } catch (error) {
+    } finally {
+      setLoading(false);
     }
-    setLoading(false)
   };
 
   useEffect(() => {
