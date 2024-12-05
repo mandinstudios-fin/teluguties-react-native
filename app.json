@@ -1,4 +1,9 @@
 {
   "name": "teluguties",
-  "displayName": "teluguties"
+  "displayName": "teluguties",
+  "extra": {
+    "eas": {
+      "projectId": "eebdff3e-33b1-4d4f-a525-2ae613171ff1"
+    }
+  }
 }

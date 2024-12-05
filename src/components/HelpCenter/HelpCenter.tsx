@@ -42,7 +42,7 @@ const HelpCenter = ({navigation}) => {
       successToast('Message sent successfully...');
       setMessage('');
     } catch (error) {
-      errorToast('Error sending message. Plese try after some time...');
+      errorToast('Error sending message. Please try after some time...');
     }
     setLoading(false);
   };
@@ -68,7 +68,7 @@ const HelpCenter = ({navigation}) => {
             <View style={styles.msgbox}>
               <Text style={styles.msg}>Give more information</Text>
               <Text style={styles.msg}>
-                about your problem plese drop your query
+                about your problem please drop your query
               </Text>
             </View>
 
@@ -79,6 +79,7 @@ const HelpCenter = ({navigation}) => {
                 style={styles.input}
                 multiline={true}
                 placeholder="Message..."
+                placeholderTextColor={'black'}
               />
             </View>
             <View style={styles.submitbox}>
@@ -89,6 +90,7 @@ const HelpCenter = ({navigation}) => {
               </TouchableOpacity>
             </View>
           </View>
+          
         </View>
       </ScrollView>
       <View style={loading ? styles.loadingContainer : null}>
@@ -106,10 +108,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   scrollview: {
-    flex: 1,
+    flexGrow: 1,
   },
   main: {
-    flexGrow: 1,
+    flex: 1,
   },
   boxContainer: {
     paddingHorizontal: 10,
