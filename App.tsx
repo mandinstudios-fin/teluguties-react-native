@@ -2,9 +2,9 @@ import { View, Text, SafeAreaView, LogBox } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import '@react-native-firebase/app';
 import firebase from '@react-native-firebase/app';
-import SplashScreen from './src/components/SplashScreen/SplashScreen';
 import Navigator from './src/components/Navigation/Navigator';
 import { ToastProvider } from 'react-native-toast-notifications';
+import SplashScreen from 'react-native-splash-screen';
 import Icon from 'react-native-vector-icons/Entypo'
 
 LogBox.ignoreLogs([
@@ -35,15 +35,7 @@ const DangerIcon = () => {
 }
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
+ 
 
   useEffect(() => {
     if (!firebase.apps.length) {
@@ -53,9 +45,11 @@ const App = () => {
     }
   }, []);
 
-  if (loading) {
-    return <SplashScreen />;
-  }
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
+
+  
 
   return (
     <ToastProvider

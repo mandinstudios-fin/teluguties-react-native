@@ -3,7 +3,15 @@
   "displayName": "teluguties",
   "extra": {
     "eas": {
-      "projectId": "eebdff3e-33b1-4d4f-a525-2ae613171ff1"
+      "projectId": "e1b3b791-1d09-43a7-8698-7b1c8cfbc1a9"
+    }
+  },
+  "expo": {
+    "sdkVersion": "52.0.24",
+    "extra": {
+      "eas": {
+        "projectId": "e1b3b791-1d09-43a7-8698-7b1c8cfbc1a9"
+      }
     }
   }
 }
