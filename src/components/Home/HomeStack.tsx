@@ -9,6 +9,7 @@ import Shortlist from '../Shortlist/Shortlist';
 import RecentlyViewed from '../RecentlyViewed/RecentlyViewed';
 import UserProfileDetails from '../Profiles/UserProfileDetails';
 import Likely from '../Likely/Likely';
+import UserNotifications from '../Header/UserNotifications';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ const HomeStack = () => {
       <Stack.Screen name="RecentlyViewed" component={RecentlyViewed} options={{ presentation: 'transparentModal' }}/>
       <Stack.Screen name="Likely" component={Likely} options={{ presentation: 'transparentModal' }}/>
       <Stack.Screen name="UserProfileDetails" component={UserProfileDetails}  options={{presentation:'modal'}}/>
+      <Stack.Screen name="UserNotifications" component={UserNotifications}  options={{presentation:'card'}}/>
     </Stack.Navigator>
   );
 };

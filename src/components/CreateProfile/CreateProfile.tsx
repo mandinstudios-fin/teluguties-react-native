@@ -1,77 +1,34 @@
 import { ActivityIndicator, Alert, Button, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
-
-
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage';
-
 import { Picker } from '@react-native-picker/picker'
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import useToastHook from '../../utils/useToastHook'
+import useUpdateUserDetails from '../../hooks/useUpdateUserDetails'
+import RNPickerSelect from 'react-native-picker-select';
 
 const { width, height } = Dimensions.get("window")
 
 const CreateProfile = ({ navigation }) => {
-    const [uploading, setUploading] = useState(false);
     const [userData, setUserData] = useState<any>();
-    const [firestoreData, setFiretoreData] = useState<any>();
+    const [firestoreData, setFirestoreData] = useState<any>();
     const { successToast, errorToast } = useToastHook();
-
-
-    const getCurrentUserDetails = async () => {
-        const currentUser = auth().currentUser;
-
-        if (currentUser) {
-            try {
-                const userDoc = await firestore()
-                    .collection('profiles')
-                    .doc(currentUser.uid)
-                    .get();
-
-                if (userDoc.exists) {
-                    const userDataFirestore = userDoc.data();
-                    setFiretoreData(userDataFirestore);
-                    setUserData(userDataFirestore);
-                }
-            } catch (error) {
-            }
-        }
-    }
+    const {
+        uploading,
+        getCurrentUserDetails,
+        handleUserUpdate,
+        handleProfileImages,
+        deleteProfileImage
+    } = useUpdateUserDetails();
 
     useEffect(() => {
-        getCurrentUserDetails();
+        getCurrentUserDetails(setUserData, setFirestoreData);
     }, []);
-
-    const handleUserUpdate = async () => {
-        const currentUser = auth().currentUser;
-
-        const updatedData = {
-            ...userData,
-            updatedAt: firestore.FieldValue.serverTimestamp()
-        }
-
-        setUploading(true);
-
-        if (currentUser) {
-            try {
-                await firestore()
-                    .collection('profiles')
-                    .doc(currentUser.uid)
-                    .update(updatedData);
-
-                    successToast("Updated Details")
-                getCurrentUserDetails();
-            } catch (error) {
-                errorToast("Something Went Wrong")
-            }
-        }
-
-        setUploading(false);
-    }
 
     const handleInputChange = (section: string, parameter: string, value: string, subsection?: string) => {
         setUserData((prev) => {
@@ -92,67 +49,10 @@ const CreateProfile = ({ navigation }) => {
                 [section]: {
                     ...prev[section],
                     [parameter]: value
-                }
+                } 
             };
         });
     };
-
-    const uploadImageToFirebase = async (imageUri: string) => {
-        if (!imageUri) return null;
-
-        const fileName = imageUri.split('/').pop();
-        const uniqueFileName = `${Date.now()}_${fileName}`;
-
-        const reference = storage().ref(`profile-images/${uniqueFileName}`);
-
-        setUploading(true);
-
-        try {
-            const task = reference.putFile(imageUri);
-            task.on('state_changed', (taskSnapshot) => {
-                const progress = (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100;
-            });
-
-            await task;
-
-            const downloadUrl = await reference.getDownloadURL();
-
-            setUploading(false);
-
-            return downloadUrl;
-
-        } catch (error) {
-            errorToast( 'There was an error uploading the image.');
-            setUploading(false);
-            return null;
-        }
-    }
-
-    const handleProfileImages = async (imageUri: string) => {
-        const currentUser = auth().currentUser;
-        const downloadUrl = await uploadImageToFirebase(imageUri);
-
-
-        const updatedData = {
-            ...userData,
-            profile_pic: downloadUrl,
-            updatedAt: firestore.FieldValue.serverTimestamp()
-        }
-
-        if (currentUser) {
-            try {
-                await firestore()
-                    .collection('profiles')
-                    .doc(currentUser.uid)
-                    .update(updatedData);
-
-                    successToast("Updated");
-                getCurrentUserDetails();
-            } catch (error) {
-                errorToast('Something Went Wrong')
-            }
-        }
-    }
 
     const handleUploadImages = async (imageUris: string[]) => {
         const currentUser = auth().currentUser;
@@ -211,7 +111,7 @@ const CreateProfile = ({ navigation }) => {
             } else if (response.error) {
             } else {
                 let imageUri = response.uri || response.assets?.[0]?.uri;
-                handleProfileImages(imageUri);
+                handleProfileImages(imageUri, userData, setUserData, setFirestoreData);
             }
         });
     };
@@ -239,32 +139,6 @@ const CreateProfile = ({ navigation }) => {
         });
     };
 
-    const deleteProfileImage = async () => {
-        const currentUser = auth().currentUser;
-        const updatedData = {
-            ...userData,
-            profile_pic: "",
-            images: [],
-            updatedAt: firestore.FieldValue.serverTimestamp()
-        }
-
-        if (currentUser) {
-            try {
-                await firestore()
-                    .collection('profiles')
-                    .doc(currentUser.uid)
-                    .update(updatedData);
-
-                    successToast("Updated");
-                getCurrentUserDetails();
-            } catch (error) {
-                errorToast('Something Went Wrong')
-            }
-        }
-    };
-
-
-
     const ActivityIndicatorComponent = () => {
         return (
             <View style={styles.activityContainer}>
@@ -279,7 +153,7 @@ const CreateProfile = ({ navigation }) => {
                 <Header navigation={navigation} />
                 <View style={styles.container}>
                     <View style={styles.profile}>
-                        <Text style={styles.profiletext}>CREATE PROFILE</Text>
+                        <Text style={styles.profiletext}>EDIT PROFILE</Text>
                     </View>
 
                     <View>
@@ -291,10 +165,10 @@ const CreateProfile = ({ navigation }) => {
                                         firestoreData?.profile_pic ?
                                             (
                                                 <Image source={{ uri: firestoreData?.profile_pic }}
-                                                   style={{ height:'100%',resizeMode:'cover',width:'100%',aspectRatio:1,borderRadius:500 }} />
+                                                    style={{ height: '100%', resizeMode: 'cover', width: '100%', aspectRatio: 1, borderRadius: 500 }} />
                                             ) :
                                             (
-                                                <View style={styles.emptyview}/>
+                                                <View style={styles.emptyview} />
                                             )
                                     }
                                     <Icon name="add-circle" size={40} color="#e4bd9e" style={styles.photoicon} />
@@ -310,7 +184,7 @@ const CreateProfile = ({ navigation }) => {
                                 </View>
 
                                 <View style={styles.deleteimagebox}>
-                                    <TouchableOpacity style={styles.deleteimagecontainer} onPress={deleteProfileImage}>
+                                    <TouchableOpacity style={styles.deleteimagecontainer} onPress={() => deleteProfileImage(userData, setUserData, setFiretoreData)}>
                                         <MIcon name="delete" size={24} color="#7b2a38" />
                                         <Text style={styles.deleteimage}>Delete image</Text>
                                     </TouchableOpacity>
@@ -355,35 +229,58 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Marital Status</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.personal_info.marital_status}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('personal_info', 'marital_status', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.personal_info.marital_status}
-                                    >
-                                        <Picker.Item label="Never Married" value="Never Married" />
-                                        <Picker.Item label="Divorced" value="Divorced" />
-                                        <Picker.Item label="Widowed" value="Widowed" />
-                                    </Picker>
+
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select your marital status',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Never Married', value: 'Never Married', color: 'white' },
+                                            { label: 'Divorced', value: 'Divorced', color: 'white' },
+                                            { label: 'Widowed', value: 'Widowed', color: 'white' },
+                                        ]}
+                                    />
                                 </View>
                             </View>
 
                             <View>
                                 <Text style={styles.label}>Gender</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.personal_info.gender}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('personal_info', 'gender', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.personal_info.gender}
-                                    >
-                                        <Picker.Item label="Male" value="Male" />
-                                        <Picker.Item label="Female" value="Female" />
-                                    </Picker>
+
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select your gender',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Male', value: 'Male', color: 'white' },
+                                            { label: 'Female', value: 'Female', color: 'white' },
+
+                                        ]}
+                                    />
                                 </View>
                             </View>
 
@@ -402,23 +299,35 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Blood Group</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.personal_info.blood_group}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('personal_info', 'blood_group', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.personal_info.blood_group}
-                                    >
-                                        <Picker.Item label="A+" value="A+" />
-                                        <Picker.Item label="A-" value="A-" />
-                                        <Picker.Item label="B+" value="B+" />
-                                        <Picker.Item label="B-" value="B-" />
-                                        <Picker.Item label="O+" value="O+" />
-                                        <Picker.Item label="O-" value="O-" />
-                                        <Picker.Item label="AB+" value="AB+" />
-                                        <Picker.Item label="AB-" value="AB-" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select your blood group',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'A+', value: 'A+', color: 'white' },
+                                            { label: 'A-', value: 'A-', color: 'white' },
+                                            { label: 'B+', value: 'B+', color: 'white' },
+                                            { label: 'B-', value: 'B-', color: 'white' },
+                                            { label: 'O+', value: 'O+', color: 'white' },
+                                            { label: 'O-', value: 'O-', color: 'white' },
+                                            { label: 'AB+', value: 'AB+', color: 'white' },
+                                            { label: 'AB-', value: 'AB-', color: 'white' },
+                                        ]}
+                                        value={userData?.personal_info.blood_group}
+                                        disabled={!!firestoreData?.personal_info.blood_group}
+                                    />
                                 </View>
                             </View>
 
@@ -538,17 +447,29 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Family Type</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.family_background?.family_type}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('family_background', 'family_type', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.family_background?.family_type}
-                                    >
-                                        <Picker.Item label="Joint" value="Joint" />
-                                        <Picker.Item label="Nuclear" value="Nuclear" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select family type',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Joint', value: 'Joint', color: 'white' },
+                                            { label: 'Nuclear', value: 'Nuclear', color: 'white' },
+                                        ]}
+                                        value={userData?.family_background?.family_type}
+                                        disabled={!!firestoreData?.family_background?.family_type}
+                                    />
                                 </View>
                             </View>
 
@@ -603,37 +524,62 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Family Status</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.family_background?.family_status}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('family_background', 'family_status', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.family_background?.family_status}
-                                    >
-                                        <Picker.Item label="Middle" value="Middle" />
-                                        <Picker.Item label="Upper Middle" value="Upper Middle" />
-                                        <Picker.Item label="Rich" value="Rich" />
-                                        <Picker.Item label="Affluent" value="Affluent" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select family status',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Middle', value: 'Middle', color: 'white' },
+                                            { label: 'Upper Middle', value: 'Upper Middle', color: 'white' },
+                                            { label: 'Rich', value: 'Rich', color: 'white' },
+                                            { label: 'Affluent', value: 'Affluent', color: 'white' },
+                                        ]}
+                                        value={userData?.family_background?.family_status}
+                                        disabled={!!firestoreData?.family_background?.family_status}
+                                    />
+
                                 </View>
                             </View>
 
                             <View>
                                 <Text style={styles.label}>Family Values</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.family_background?.family_values}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('family_background', 'family_values', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.family_background?.family_values}
-                                    >
-                                        <Picker.Item label="Traditional" value="Traditional" />
-                                        <Picker.Item label="Moderate" value="Moderate" />
-                                        <Picker.Item label="Modern" value="Modern" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select family values',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Traditional', value: 'Traditional', color: 'white' },
+                                            { label: 'Moderate', value: 'Moderate', color: 'white' },
+                                            { label: 'Modern', value: 'Modern', color: 'white' },
+                                        ]}
+                                        value={userData?.family_background?.family_values}
+                                        disabled={!!firestoreData?.family_background?.family_values}
+                                    />
                                 </View>
                             </View>
 
@@ -646,19 +592,32 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Highest Education</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.education?.highest_education}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('education', 'highest_education', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.education?.highest_education}
-                                    >
-                                        <Picker.Item label="Bachelor's Degree" value="Bachelor's Degree" />
-                                        <Picker.Item label="Master's Degree" value="Master's Degree" />
-                                        <Picker.Item label="Ph.D" value="Ph.D" />
-                                        <Picker.Item label="Diploma" value="Diploma" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select highest education',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: "Bachelor's Degree", value: "Bachelor's Degree", color: 'white' },
+                                            { label: "Master's Degree", value: "Master's Degree", color: 'white' },
+                                            { label: 'Ph.D', value: 'Ph.D', color: 'white' },
+                                            { label: 'Diploma', value: 'Diploma', color: 'white' },
+                                        ]}
+                                        value={userData?.education?.highest_education}
+                                        disabled={!!firestoreData?.education?.highest_education}
+                                    />
+
                                 </View>
                             </View>
 
@@ -757,20 +716,33 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Religion</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.religious_cultural?.religion}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('religious_cultural', 'religion', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.religious_cultural?.religion}
-                                    >
-                                        <Picker.Item label="Hindu" value="Hindu" />
-                                        <Picker.Item label="Muslim" value="Muslim" />
-                                        <Picker.Item label="Christian" value="Christian" />
-                                        <Picker.Item label="Sikh" value="Sikh" />
-                                        <Picker.Item label="Other" value="Other" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select religion',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Hindu', value: 'Hindu', color: 'white' },
+                                            { label: 'Muslim', value: 'Muslim', color: 'white' },
+                                            { label: 'Christian', value: 'Christian', color: 'white' },
+                                            { label: 'Sikh', value: 'Sikh', color: 'white' },
+                                            { label: 'Other', value: 'Other', color: 'white' },
+                                        ]}
+                                        value={userData?.religious_cultural?.religion}
+                                        disabled={!!firestoreData?.religious_cultural?.religion}
+                                    />
+
                                 </View>
                             </View>
 
@@ -825,25 +797,33 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Manglik Status</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.religious_cultural?.manglik_status}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('religious_cultural', 'manglik_status', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.religious_cultural?.manglik_status}
-                                    >
-                                        <Picker.Item label="Manglik" value="Manglik" />
-                                        <Picker.Item label="Non-Manglik" value="Non-Manglik" />
-                                        <Picker.Item label="Anshik Manglik" value="Anshik Manglik" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select Manglik status',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Manglik', value: 'Manglik', color: 'white' },
+                                            { label: 'Non-Manglik', value: 'Non-Manglik', color: 'white' },
+                                            { label: 'Anshik Manglik', value: 'Anshik Manglik', color: 'white' },
+                                        ]}
+                                        value={userData?.religious_cultural?.manglik_status}
+                                        disabled={!!firestoreData?.religious_cultural?.manglik_status}
+                                    />
+
                                 </View>
                             </View>
-
-
-
-
-
                         </View>
                     </View>
 
@@ -853,54 +833,93 @@ const CreateProfile = ({ navigation }) => {
                             <View>
                                 <Text style={styles.label}>Drinking Habits</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.lifestyle_preferences?.drinking_habits}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('lifestyle_preferences', 'drinking_habits', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.lifestyle_preferences?.drinking_habits}
-                                    >
-                                        <Picker.Item label="Never" value="Never" />
-                                        <Picker.Item label="Occasionally" value="Occasionally" />
-                                        <Picker.Item label="Regular" value="Regular" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select drinking habits',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Never', value: 'Never', color: 'white' },
+                                            { label: 'Occasionally', value: 'Occasionally', color: 'white' },
+                                            { label: 'Regular', value: 'Regular', color: 'white' },
+                                        ]}
+                                        value={userData?.lifestyle_preferences?.drinking_habits}
+                                        disabled={!!firestoreData?.lifestyle_preferences?.drinking_habits}
+                                    />
+
                                 </View>
                             </View>
 
                             <View>
                                 <Text style={styles.label}>Smoking Habits</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.lifestyle_preferences?.smoking_habits}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('lifestyle_preferences', 'smoking_habits', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.lifestyle_preferences?.smoking_habits}
-                                    >
-                                        <Picker.Item label="Non-Smoker" value="Non-Smoker" />
-                                        <Picker.Item label="Occasionally Smoker" value="Occasionally Smoker" />
-                                        <Picker.Item label="Regular Smoker" value="Regular Smoker" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select smoking habits',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Non-Smoker', value: 'Non-Smoker', color: 'white' },
+                                            { label: 'Occasionally Smoker', value: 'Occasionally Smoker', color: 'white' },
+                                            { label: 'Regular Smoker', value: 'Regular Smoker', color: 'white' },
+                                        ]}
+                                        value={userData?.lifestyle_preferences?.smoking_habits}
+                                        disabled={!!firestoreData?.lifestyle_preferences?.smoking_habits}
+                                    />
+
                                 </View>
                             </View>
 
                             <View>
                                 <Text style={styles.label}>Diet Preferences</Text>
                                 <View style={styles.input}>
-                                    <Picker
-                                        selectedValue={userData?.lifestyle_preferences?.diet_preferences}
+                                    <RNPickerSelect
                                         onValueChange={(itemValue) => {
                                             handleInputChange('lifestyle_preferences', 'diet_preferences', itemValue);
                                         }}
-                                        style={styles.picker}
-                                        enabled={!firestoreData?.lifestyle_preferences?.diet_preferences}
-                                    >
-                                        <Picker.Item label="Vegetarian" value="Vegetarian" />
-                                        <Picker.Item label="Non-Vegetarian" value="Non-Vegetarian" />
-                                        <Picker.Item label="Eggetarian" value="Eggetarian" />
-                                    </Picker>
+                                        useNativeAndroidPickerStyle={false}
+                                        placeholder={{
+                                            label: 'Select diet preference',
+                                            value: '',
+                                            color: '#EBC7B1',
+                                            fontWeight: 'bold',
+                                        }}
+                                        style={{
+                                            inputIOS: styles.pickerText,
+                                            inputAndroid: styles.pickerText,
+                                            placeholder: styles.placeholderText,
+                                        }}
+                                        items={[
+                                            { label: 'Vegetarian', value: 'Vegetarian', color: 'white' },
+                                            { label: 'Non-Vegetarian', value: 'Non-Vegetarian', color: 'white' },
+                                            { label: 'Eggetarian', value: 'Eggetarian', color: 'white' },
+                                        ]}
+                                        value={userData?.lifestyle_preferences?.diet_preferences}
+                                        disabled={!!firestoreData?.lifestyle_preferences?.diet_preferences}
+                                    />
+
                                 </View>
                             </View>
 
@@ -1058,13 +1077,11 @@ const CreateProfile = ({ navigation }) => {
                                     }}
                                 />
                             </View>
-
-
                         </View>
                     </View>
 
-                    <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
-                        <Text style={styles.creattext}>Create Profile</Text>
+                    <TouchableOpacity style={styles.creat} onPress={() => handleUserUpdate(userData, setUserData, setFirestoreData)}>
+                        <Text style={styles.creattext}>Update Profile</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -1177,7 +1194,7 @@ const styles = StyleSheet.create({
 
     addimagetext: {
         color: '#7b2a38',
-        fontWeight:'bold'
+        fontWeight: 'bold'
     },
 
     deleteimagebox: {
@@ -1193,7 +1210,7 @@ const styles = StyleSheet.create({
 
     deleteimage: {
         color: '#7b2a38',
-        fontWeight:'bold'
+        fontWeight: 'bold'
     },
     creat: {
         borderRadius: 12,
@@ -1213,10 +1230,10 @@ const styles = StyleSheet.create({
         width: width * 0.50,
         borderRadius: 500,
         borderColor: '#782A37',
-        aspectRatio:1,
+        aspectRatio: 1,
         borderWidth: 2,
-        display:'flex',
-        alignItems:'center',
+        display: 'flex',
+        alignItems: 'center',
     },
     photoicon: {
         position: 'absolute',
@@ -1234,10 +1251,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
-    emptyview:{
-        height:height * 0.25,
-        width:width * 0.50,
-       borderRadius:500,
-    }
+    emptyview: {
+        height: height * 0.25,
+        width: width * 0.50,
+        borderRadius: 500,
+    },
+    pickerText: {
+        fontSize: 16,
+        color: '#EBC7B1',
+    },
+    placeholderText: {
+        fontSize: 16,
+        color: '#EBC7B1',
+    },
 
 })

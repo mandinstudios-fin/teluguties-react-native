@@ -1,31 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AuthNavigation from './AuthNavigation';
 import Layout from './_layout';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View, Text } from 'react-native';
+import Steps from '../Steps/Steps';
+import AgentsLayout from './AgentsLayout';
+import firestore from '@react-native-firebase/firestore';
+import auth, { connectAuthEmulator } from '@react-native-firebase/auth'
+
+import { navigate, navigationRef, resetNavigation } from './Navigation';
+import { getUserCategoryFromToken } from '../../utils';
 
 const Stack = createStackNavigator();
 
 const Navigator = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true); // Add a loading state
+  const [category, setCategory] = useState('');
 
-  const checkAuthenticatedUser = async () => {
-    try {
-      const userToken = await AsyncStorage.getItem('userToken');
-      setIsAuthenticated(!!userToken); 
-    } catch (error) {
-      console.error("Error checking authentication:", error);
-    } finally {
-      setIsLoading(false); 
-    }
-  };
+  
 
   useEffect(() => {
-    checkAuthenticatedUser(); 
+    const checkAuthenticatedUser = async () => {
+      try {
+        const userToken = await AsyncStorage.getItem('userToken');
+        
+        if (userToken) {
+          try {
+            const categoryMain = await getUserCategoryFromToken(userToken);
+            setCategory(categoryMain || '');
+          } catch (categoryError) {
+            console.error("Error getting user category:", categoryError);
+            setCategory('');
+          }
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          setCategory('');
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        setIsAuthenticated(false);
+        setCategory('');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthenticatedUser();
   }, []);
+
+  const getInitialRouteName = () => {
+    if (!isAuthenticated) {
+      return 'Auth';
+    }
+    
+    if (category === 'profiles') {
+      return 'Layout';
+    } else {
+      return 'AgentsLayout';
+    }
+  };
 
   if (isLoading) {
     return (
@@ -37,12 +74,14 @@ const Navigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        initialRouteName={isAuthenticated ? 'Layout' : 'Auth'}
+        initialRouteName={getInitialRouteName()}
         screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Auth" component={AuthNavigation} />
         <Stack.Screen name="Layout" component={Layout} />
+        <Stack.Screen name="AgentsLayout" component={AgentsLayout} />
+        <Stack.Screen name="Steps" component={Steps} />
       </Stack.Navigator>
     </NavigationContainer>
   );

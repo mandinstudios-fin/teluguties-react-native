@@ -1,3 +1,4 @@
 <resources>
     <color name="splash_background">#7b2a38</color> <!-- Optional, status bar color -->
+    <color name="primary_dark">#7b2a38</color>
 </resources>

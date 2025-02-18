@@ -1,26 +1,39 @@
 import { Dimensions, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, ActivityIndicator, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import ImageSlider from 'react-native-image-slider';
 import Header from '../Header/Header'
 import Slider from './Slider';
-import auth from '@react-native-firebase/auth'
-import firestore from '@react-native-firebase/firestore'
 import { useNavigationState } from '@react-navigation/native';
-import useToastHook from '../../utils/useToastHook';
-import { getUsersAge } from '../../utils';
+import { getUsersAge, isUserAccepted, isUserRejected } from '../../utils';
+import useFirestore from '../../hooks/useFirestore';
+import useAgent from '../../hooks/useAgent';
 
 const { width, height, fontScale } = Dimensions.get("window")
 
 const UserProfileDetails = ({ route, navigation }) => {
-  const [routeName, setRouteName] = useState();
-  const [loading, setLoading] = useState(false);
-  const [requestData, setRequestData] = useState();
-  const { successToast, errorToast } = useToastHook();
   const { user } = route.params;
-  const images = (user && user.profile_pic && user.images && user.images.length > 0) 
-  ? [user.profile_pic, ...user.images] 
-  : (user && user.profile_pic ? [user.profile_pic] : []);
+  const images = (user && user.profile_pic && user.images && user.images.length > 0)
+    ? [user.profile_pic, ...user.images]
+    : (user && user.profile_pic ? [user.profile_pic] : []);
+  const [routeName, setRouteName] = useState();
+  const [agentsData, setAgentsData] = useState();
+  const [status, setStatus] = useState(null);
   const state = useNavigationState(state => state);
+  const {
+    loading,
+    requestData,
+    fetchRequestDetails,
+    addToShortlist,
+    makeAMatch,
+    sendContactRequest,
+  } = useFirestore();
+  const { getAgentsCurrentDetails, acceptAssignRequest, rejectAssignRequest } = useAgent();
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchRequestDetails(user.id);
+    }
+  }, [user, fetchRequestDetails]);
+
 
   useEffect(() => {
     if (state && state.index > 0) {
@@ -29,129 +42,24 @@ const UserProfileDetails = ({ route, navigation }) => {
     }
   }, [state]);
 
-  const getRequestDetail = async () => {
-    const fromUid = auth().currentUser.uid;
-    const toUid = user.id;
+  useEffect(() => {
+    getAgentsCurrentDetails(setAgentsData);
+  }, [user]);
 
-    setLoading(true)
-    try {
-      const requestRef = firestore()
-        .collection('requests')
-        .where('fromUid', '==', fromUid)
-        .where('toUid', '==', toUid);
-  
-      const unsubscribe = requestRef.onSnapshot((snapshot) => {
-        if (!snapshot.empty) {
-          const data = snapshot.docs[0].data();
-          setRequestData(data);
-        } else {
-          setRequestData(null); 
-        }
-      });
-  
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
-  };
+   // Track accepted/rejected status
 
   useEffect(() => {
-    getRequestDetail()
-  }, [])
+    const checkStatus = async () => {
+      const accepted = await isUserAccepted(user.id);
+      const rejected = await isUserRejected(user.id);
 
-  const addToShortlist = async () => {
-    setLoading(true);
-    try {
-      const currentUser = auth().currentUser;
-      if (!currentUser) {
-        return;
-      }
+      if (accepted) setStatus('Accepted');
+      else if (rejected) setStatus('Rejected');
+      else setStatus(null);
+    };
 
-      const userRef = firestore().collection('profiles').doc(currentUser.uid);
-
-      const userDoc = await userRef.get();
-      const shortlistedProfiles = userDoc.data()?.shortlisted || [];
-
-      if (shortlistedProfiles.includes(user.id)) {
-        successToast('Profile is already in your shortlist');
-        setLoading(false);
-        return;
-      }
-
-      await userRef.update({
-        shortlisted: firestore.FieldValue.arrayUnion(user.id),
-      });
-
-      successToast('Added to shortlist');
-    } catch (error) {
-      errorToast('Something Went Wrong');
-    }
-    setLoading(false);
-  };
-
-
-  const makeAMatch = async () => {
-    setLoading(true);
-    try {
-      const currentUser = auth().currentUser;
-      if (!currentUser) {
-        return;
-      }
-
-      const userRef = firestore().collection('profiles').doc(currentUser.uid);
-
-      const userDoc = await userRef.get();
-      const matchedProfiles = userDoc.data()?.matches || [];
-
-      if (matchedProfiles.includes(user.id)) {
-        successToast('Profile is already in your matches');
-        setLoading(false);
-        return;
-      }
-
-      await userRef.update({
-        matches: firestore.FieldValue.arrayUnion(user.id)
-      });
-
-
-      successToast('Added to Matches')
-    } catch (error) {
-      errorToast('Something Went Wrong')
-    }
-    setLoading(false);
-  };
-
-  const sendContactRequest = async () => {
-    setLoading(true);
-    const fromUid = auth().currentUser.uid;
-    const toUid = user.id;
-
-    try {
-      const existingRequestQuery = await firestore()
-        .collection('requests')
-        .where('fromUid', '==', fromUid)
-        .where('toUid', '==', toUid)
-        .get();
-
-      if (!existingRequestQuery.empty) {
-        errorToast('Request already sent.');
-        setLoading(false);
-        return;
-      }
-
-      await firestore().collection('requests').add({
-        fromUid,
-        toUid,
-        status: 'pending',
-        timestamp: firestore.FieldValue.serverTimestamp(),
-      });
-      successToast('Request sent successfully');
-      getRequestDetail();
-    } catch (error) {
-      errorToast('Something Went Wrong')
-    }
-    setLoading(false);
-  };
+    checkStatus();
+  }, [user.id]);
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -164,7 +72,8 @@ const UserProfileDetails = ({ route, navigation }) => {
           <Slider images={images} />
           <View style={styles.userdetails}>
             <View style={styles.name}>
-              <Text style={styles.username}>{user?.personal_info?.name} <Text style={styles.userage}>{user?.personal_info.age ? user.personal_info.age : getUsersAge(user?.personal_info.date_of_birth)}</Text></Text>
+              <Text style={styles.username}>{user?.personal_info?.name} <Text style={styles.userage}>{user?.personal_info?.age ? user.personal_info.age : user?.personal_info?.date_of_birth ? getUsersAge(user.personal_info.date_of_birth) : null}</Text></Text>
+
             </View>
             <View>
               <Text style={styles.namesubdata}>
@@ -549,38 +458,71 @@ const UserProfileDetails = ({ route, navigation }) => {
             }
           </View>
 
-          {
-            routeName == 'Shortlist' || routeName == 'Matches' ?
-              (
-                <View style={styles.contactmain}>
-                  <View style={styles.contactbox}>
-                    <TouchableOpacity style={styles.contact} onPress={() => {
-                      if (!requestData) {
-                        sendContactRequest();
-                      }
-                    }}>
-                      <Text style={styles.contacttext}>{requestData?.status ? requestData.status : 'Contact'}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )
-              :
-              (
-                <View style={styles.shortmatchbox}>
-                  <View style={styles.shortlistbox}>
-                    <TouchableOpacity style={styles.shortlist} onPress={addToShortlist}>
-                      <Text style={styles.shortlisttext}>Shortlist</Text>
-                    </TouchableOpacity>
-                  </View>
+          {routeName &&
+        (routeName === 'Shortlist' || routeName === 'Matches' ? (
+          <View style={styles.contactmain}>
+            <View style={styles.contactbox}>
+              <TouchableOpacity
+                style={styles.contact}
+                onPress={() => {
+                  if (!requestData) sendContactRequest();
+                }}>
+                <Text style={styles.contacttext}>{requestData?.status ? requestData.status : 'Contact'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : routeName === 'HomeStack' ? (
+          <View style={styles.shortmatchbox}>
+            <View style={styles.shortlistbox}>
+              <TouchableOpacity
+                style={styles.shortlist}
+                onPress={() => addToShortlist(user.id)}>
+                <Text style={styles.shortlisttext}>Shortlist</Text>
+              </TouchableOpacity>
+            </View>
 
-                  <View style={styles.matchbox}>
-                    <TouchableOpacity style={styles.match} onPress={makeAMatch}>
-                      <Text style={styles.matchtext}>Make a Match</Text>
-                    </TouchableOpacity>
-                  </View>
+            <View style={styles.matchbox}>
+              <TouchableOpacity
+                style={styles.match}
+                onPress={() => makeAMatch(user.id)}>
+                <Text style={styles.matchtext}>Make a Match</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : routeName === 'AllAssignedUser' || routeName === 'AgentsAssign' ? (
+          <View style={styles.shortmatchbox}>
+            {status === 'Accepted' ? (
+              <TouchableOpacity
+              style={styles.shortlist}>
+              <Text style={styles.shortlisttext}>Accepted</Text>
+            </TouchableOpacity>
+            ) : status === 'Rejected' ? (
+              <TouchableOpacity
+                style={styles.shortlist}>
+                <Text style={styles.shortlisttext}>Rejected</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <View style={styles.shortlistbox}>
+                  <TouchableOpacity
+                    style={styles.shortlist}
+                    onPress={() => acceptAssignRequest(user.id)}>
+                    <Text style={styles.shortlisttext}>Accept</Text>
+                  </TouchableOpacity>
                 </View>
-              )
-          }
+
+                <View style={styles.matchbox}>
+                  <TouchableOpacity
+                    style={styles.match}
+                    onPress={() => rejectAssignRequest(user.id)}>
+                    <Text style={styles.shortlisttext}>Reject</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        ) : null)}
+
 
         </View>
       </ScrollView>
@@ -737,7 +679,7 @@ const styles = StyleSheet.create({
     paddingVertical: width * 0.04,
     backgroundColor: '#7b2a38',
     borderRadius: 5,
-
+    marginHorizontal: 'auto'
   },
   shortlisttext: {
     fontWeight: 'bold',

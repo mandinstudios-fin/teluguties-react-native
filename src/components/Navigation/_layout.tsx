@@ -4,9 +4,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import IIcon from 'react-native-vector-icons/Ionicons';
+import MCIcon from 'react-native-vector-icons/MaterialIcons';
 import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView } from 'react-native';
 import HelpCenter from '../HelpCenter/HelpCenter';
-
+import Steps from '../Steps/Steps'
 import Chat from '../Chat/Chat';
 import Home from '../Home/Home';
 import Inbox from '../Inbox/Inbox';
@@ -23,6 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import useToastHook from '../../utils/useToastHook';
+import AgentsStack from '../Agents/AgentsStack';
 
 
 const Tab = createBottomTabNavigator();
@@ -68,7 +70,17 @@ const BottomTabs = () => {
           tabBarIcon: ({ color, size }) => (
             <IIcon name="star-outline" color={color} size={size} />
           ),
-          title: 'Prime',
+          title: 'Packages',
+        }}
+      />
+      <Tab.Screen
+        name="AgentsStack"
+        component={AgentsStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MCIcon name="support-agent" color={color} size={size} />
+          ),
+          title: 'Agent',
         }}
       />
     </Tab.Navigator>
@@ -162,7 +174,7 @@ const Layout = ({ navigation }) => {
           drawerItemStyle: { height: 0 },
         }}
       />
-      <Drawer.Screen name="Create Profile" component={CreateProfile} options={{
+      <Drawer.Screen name="Edit Profile" component={CreateProfile} options={{
         drawerIcon: ({ focused, size }) => (
           <MIcon
             name="create"
@@ -186,5 +198,7 @@ const Layout = ({ navigation }) => {
     </Drawer.Navigator>
   );
 };
+
+
 
 export default Layout;

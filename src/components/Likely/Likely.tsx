@@ -13,69 +13,22 @@ import Header from '../Header/Header';
 import ProfileGrid from '../Profiles/ProfileGrid';
 import firestore, {Timestamp} from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import useFirestore from '../../hooks/useFirestore';
 
 const {width, height, fontScale} = Dimensions.get('window');
 
 const Likely = ({navigation}) => {
   const [data, setData] = useState<any>([]);
+  const {getLikelyData} = useFirestore();
 
   useEffect(() => {
-    const unsubscribe = firestore()
-      .collection('profiles')
-      .onSnapshot(async (snapshot) => {
-        try {
-          const currentUser = auth().currentUser;
-  
-          if (!currentUser) {
-            return;
-          }
-  
-          const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
-          if (!userDoc.exists) {
-            return;
-          }
-  
-          const userDataFirestore = userDoc.data();
-          const religion = userDataFirestore?.religious_cultural?.religion;
-          const gender = userDataFirestore?.personal_info?.gender;  
-  
-          if (!religion || !gender) {
-            return;
-          }
-  
-          const oppositeGender = gender === 'Male' ? 'Female' : 'Male';  
-  
-          const matchingDocs = snapshot.docs.filter(doc => {
-            const data = doc.data();
-            return (
-              data.religious_cultural?.religion === religion &&  
-              data.personal_info?.gender === oppositeGender  
-            );
-          });
-  
-          const matchedUsersData = matchingDocs.map(doc => {
-            if (doc.id !== currentUser.uid) {
-              return { id: doc.id, ...doc.data() };
-            }
-            return null;  
-          });
-  
-          const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
-  
-          if (filteredMatchedUsers.length === 0) {
-            console.log('No matching users found');
-            return;
-          }
-  
-          setData(filteredMatchedUsers);
-  
-        } catch (error) {
-          console.error('Error in onSnapshot:', error);  
-        }
-      });
-  
-    return () => unsubscribe();  
-  }, []);  
+    const likelyData = async() => {
+      const dataL = await getLikelyData();
+      setData(dataL);
+    }
+    likelyData();
+  },[])
+
   
   return (
     <SafeAreaView style={styles.safearea}>
@@ -94,9 +47,9 @@ const Likely = ({navigation}) => {
               <TouchableOpacity onPress={() => navigation.push('New')}>
                 <Text style={styles.subnavigationtext}>New</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
+              {/* <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
                 <Text style={styles.subnavigationtext}>Shortlist</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity
                 onPress={() => navigation.push('RecentlyViewed')}>
                 <Text style={styles.subnavigationtext}>Recently Viewed</Text>

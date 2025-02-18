@@ -4,57 +4,32 @@ import Header from '../Header/Header'
 import ProfileGrid from '../Profiles/ProfileGrid'
 import firestore, { Timestamp } from '@react-native-firebase/firestore'
 import auth from '@react-native-firebase/auth'
+import useFirestore from '../../hooks/useFirestore'
 
 const { width, height, fontScale } = Dimensions.get("window")
 
 const Shortlist = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
+  const { getShortListData } = useFirestore();
 
   useEffect(() => {
-    const getShortlistedProfiles = async () => {
-      try {
-        const currentUser = auth().currentUser;
-        if (!currentUser) {
-          return;
-        }
+    const shortListData = async () => {
+      const dataS = await getShortListData();
+      setData(dataS);
+      console.log(dataS, 'datas')
 
-        const userRef = firestore().collection('profiles').doc(currentUser.uid);
-        const userDoc = await userRef.get();
+    }
 
-        if (!userDoc.exists) {
-          return;
-        }
+    shortListData();
+  }, [])
 
-        const shortlistedProfiles = userDoc?.data().shortlisted || [];
 
-        if (shortlistedProfiles.length === 0) {
-          return;
-        }
-
-        const userPromises = shortlistedProfiles.map(async (userId) => {
-          const userSnapshot = await firestore().collection('profiles').doc(userId).get();
-          if (userSnapshot.exists) {
-            return { id: userSnapshot.id, ...userSnapshot.data() };
-          }
-          return null;
-        });
-
-        const usersData = await Promise.all(userPromises);
-
-        const filteredUsersData = usersData.filter(user => user !== null);
-        setData(filteredUsersData);
-      } catch (error) {
-      }
-    };
-
-    getShortlistedProfiles();
-  }, []);
 
   return (
     <SafeAreaView style={styles.safearea}>
       <ScrollView contentContainerStyle={styles.scrollview}>
         <View style={styles.main}>
-          <Header navigation={navigation} />
+          <Header navigation={navigation} /> 
           <View style={styles.boxContainer}>
             <View style={styles.box}></View>
           </View>
@@ -81,15 +56,17 @@ const Shortlist = ({ navigation }) => {
             </View>
           </View>
           {
-            data.length === 0 ? (
+            Array.isArray(data) && data.length > 0 ? (
+              <ProfileGrid navigation={navigation} data={data} />
+            ) : (
               <View style={styles.warncontainer}>
-
                 <View style={styles.imagecontainer}>
                   <Image style={styles.image} source={require('../../assets/star.png')} />
                 </View>
                 <Text style={styles.warn}>Woo...!</Text>
-                <Text style={styles.warn2}>something awaits on your way! </Text>
-              </View>) : (<ProfileGrid navigation={navigation} data={data} />)
+                <Text style={styles.warn2}>Something awaits on your way!</Text>
+              </View>
+            )
           }
         </View>
       </ScrollView>
@@ -159,14 +136,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 20
   },
-  imagecontainer:{
-    height:height*0.1,
-    width:width,
-    display:'flex',
-    alignItems:'center'
+  imagecontainer: {
+    height: height * 0.1,
+    width: width,
+    display: 'flex',
+    alignItems: 'center'
   },
-  image:{
-    height:'100%',
-    resizeMode:'contain'
+  image: {
+    height: '100%',
+    resizeMode: 'contain'
   }
 })

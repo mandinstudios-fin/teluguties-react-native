@@ -14,53 +14,22 @@ import ProfileGrid from '../Profiles/ProfileGrid';
 
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import useFirestore from '../../hooks/useFirestore';
 
 const {width, height, fontScale} = Dimensions.get('window');
 
 const RecentlyViewed = ({navigation}) => {
   const [data, setData] = useState<any>([]);
-
-  const fetchRecentlyViewedData = async () => {
-    try {
-      const currentUser = auth().currentUser;
-      if (!currentUser) {
-        return;
-      }
-
-      const userRef = firestore().collection('profiles').doc(currentUser.uid);
-      const userDoc = await userRef.get();
-
-      if (!userDoc.exists) {
-        return;
-      }
-
-      const recentlyViewed = userDoc?.data().recentlyViewed || [];
-
-      if (recentlyViewed.length === 0) {
-        return;
-      }
-
-      const userPromises = recentlyViewed.map(async userId => {
-        const userSnapshot = await firestore()
-          .collection('profiles')
-          .doc(userId)
-          .get();
-        if (userSnapshot.exists) {
-          return {id: userSnapshot.id, ...userSnapshot.data()};
-        }
-        return null;
-      });
-
-      const usersData = await Promise.all(userPromises);
-
-      const filteredUsersData = usersData.filter(user => user !== null);
-      setData(filteredUsersData);
-    } catch (error) {}
-  };
+  const {getRecentlyViewedData} = useFirestore();
 
   useEffect(() => {
-    fetchRecentlyViewedData();
-  }, []);
+    const recentlyViewedData = async() => {
+      const dataR = await getRecentlyViewedData();
+      setData(dataR);
+
+    }
+    recentlyViewedData();
+  },[])
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -79,9 +48,9 @@ const RecentlyViewed = ({navigation}) => {
               <TouchableOpacity onPress={() => navigation.push('New')}>
                 <Text style={styles.subnavigationtext}>New</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
+              {/* <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
                 <Text style={styles.subnavigationtext}>Shortlist</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity>
                 <Text style={styles.subnavigationactivetext}>
                   Recently Viewed

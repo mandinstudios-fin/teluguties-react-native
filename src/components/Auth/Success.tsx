@@ -13,27 +13,51 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
 import auth from '@react-native-firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import firestore from '@react-native-firebase/firestore';
+import Agents from '../Agents/Agents';
+import { getUserCategory } from '../../utils';
 
 const { width, height } = Dimensions.get('window');
 
-const Success = ({ navigation }) => {
+const Success = ({ navigation, route }) => {
+  const { isRegistration, updatedFormData } = route.params;
+  const [category, setCategory] = useState('');
+  const currentUser = auth().currentUser;
+
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      
-      return true;  
-    });
+    const handleGetUserCategory = async () => {
+      const categoryLocal = await getUserCategory();
+      setCategory(categoryLocal)
+    }
 
-    const timeoutId = setTimeout(() => {
-      navigation.replace("Layout");
+    handleGetUserCategory()
+  }, [category])
 
-      
-    }, 2000);  
+  useEffect(() => {
+    let timeoutId;
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
+
+    if (isRegistration !== undefined) {
+      timeoutId = setTimeout(() => {
+        // navigation.replace(isRegistration && updatedFormData.category === 'individual' ? "Steps" : "AgentsSteps");
+
+        navigation.replace(
+          isRegistration
+            ? updatedFormData.category === "individual"
+              ? "Steps"
+              : "AgentsSteps"
+            : category === 'agents' ?
+                "AgentsLayout"
+              : "Layout"
+        );
+      }, 2000);
+    }
 
     return () => {
       clearTimeout(timeoutId);
       backHandler.remove();
     };
-  }, [navigation]);
+  }, [navigation, isRegistration, category]);
 
   const saveUserToAsyncStorage = () => {
     const user = auth().currentUser;
@@ -44,7 +68,6 @@ const Success = ({ navigation }) => {
   useEffect(() => {
     saveUserToAsyncStorage();
   }, [])
-
 
   return (
     <SafeAreaView style={styles.safearea}>

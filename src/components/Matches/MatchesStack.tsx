@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ProfileDetails from '../ProfileDetails/ProfileDetails';
 import Matches from './Matches';
 import UserProfileDetails from '../Profiles/UserProfileDetails';
+import UserNotifications from '../Header/UserNotifications';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ const MatchesStack = () => {
         options={{ presentation: 'transparentModal' }}
       />
       <Stack.Screen name="UserProfileDetails" component={UserProfileDetails}  options={{presentation:'modal'}}/>
+      <Stack.Screen name="UserNotifications" component={UserNotifications}  options={{presentation:'card'}}/>
     </Stack.Navigator>
   )
 }

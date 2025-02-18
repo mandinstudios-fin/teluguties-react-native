@@ -20,9 +20,9 @@ import { compareDate, formatDate, getTodaysDate, parseDate } from '../../utils';
 const { width, height } = Dimensions.get('window');
 
 const membershipData = [
-  { id: '1', title: 'Silver Package', price: '₹499' },
-  { id: '2', title: 'Gold Package', price: '₹999' },
-  { id: '3', title: 'Diamond Plus', price: '₹6000' },
+  { id: '1', title: 'Silver Package', price: '₹499',agent:'Without Agent'},
+  { id: '2', title: 'Gold Package', price: '₹999',agent:'Single Agent'},
+  { id: '3', title: 'Diamond Plus', price: '₹6000',agent:'Multiple Agents'},
 ];
 
 const Prime = ({ navigation }) => {
@@ -119,6 +119,7 @@ const Prime = ({ navigation }) => {
       </View>
       <View>
         <Text style={styles.price}>{item.price}</Text>
+        <Text style={styles.price}>{item.agent}</Text>
       </View>
       <View style={styles.boxContainer}>
         <TouchableOpacity style={styles.subscribe} onPress={openPaymentWebsite}>

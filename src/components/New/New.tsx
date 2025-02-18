@@ -13,59 +13,25 @@ import Header from '../Header/Header';
 import ProfileGrid from '../Profiles/ProfileGrid';
 import firestore, {Timestamp} from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import useFirestore from '../../hooks/useFirestore';
 
 const {width, height, fontScale} = Dimensions.get('window');
 
 const New = ({navigation}) => {
-  const [data, setData] = useState<any>([]);
+  const [data, setData] = useState<any>(() => []);
+  const{getNewData} = useFirestore();
 
-  useEffect(() => {
-    const getUsersCreatedToday = async () => {
-      const currentUser = auth().currentUser;
-      const today = new Date();
-      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  useEffect( () => {
 
-      const startTimestamp = Timestamp.fromDate(startOfDay);
-      const endTimestamp = Timestamp.fromDate(endOfDay);
+    const newData =async () =>{
+      const dataN = await getNewData();
+      setData(dataN || []);
+      console.log(dataN)
 
-      const userDoc = await firestore()
-        .collection('profiles')
-        .doc(currentUser?.uid)
-        .get();
-      const userData = userDoc.data();
+    }
 
-      if (!userData) {
-        return;
-      }
-
-      const userGender = userData.personal_info.gender;
-      const genderFilter = userGender === 'Male' ? 'Female' : 'Male';
-
-      try {
-        firestore()
-          .collection('profiles')
-          .where('createdAt', '>=', startTimestamp)
-          .where('createdAt', '<=', endTimestamp)
-          .where('personal_info.gender', '==', genderFilter)
-          .onSnapshot(
-            snapshot => {
-              const users = snapshot.docs
-                .map(doc => ({
-                  id: doc.id,
-                  ...doc.data(),
-                }))
-                .filter(user => user.id !== currentUser.uid);
-              // Update the state with the users
-              setData(users);
-            },
-            error => {},
-          );
-      } catch (error) {}
-    };
-
-    getUsersCreatedToday();
-  }, []);
+    newData();
+}, []);
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -84,9 +50,9 @@ const New = ({navigation}) => {
               <TouchableOpacity >
                 <Text style={styles.subnavigationactivetext}>New</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
+              {/* <TouchableOpacity onPress={() => navigation.push('Shortlist')}>
                 <Text style={styles.subnavigationtext}>Shortlist</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity
                 onPress={() => navigation.push('RecentlyViewed')}>
                 <Text style={styles.subnavigationtext}>Recently Viewed</Text>
@@ -97,7 +63,7 @@ const New = ({navigation}) => {
               </TouchableOpacity>
             </View>
           </View>
-          {data.length === 0 ? (
+          {data?.length === 0 ? (
             <View style={styles.warncontainer}>
               <View style={styles.imagecontainer}>
               <Image style={styles.image} source={require('../../assets/star.png')}/>

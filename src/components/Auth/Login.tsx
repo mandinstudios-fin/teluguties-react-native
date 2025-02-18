@@ -32,12 +32,18 @@ const Login = ({ navigation }) => {
         .where('contact_info.phone', '==', phoneNumber)
         .get();
 
-      if (userSnapshot.empty) {
-        return false;
-      } else {
-        return true;
+      const agentSnapshot = await firestore()
+        .collection('agents')
+        .where('selectedcode', '==', selectedCode)
+        .where('phonenumber', '==', phoneNumber)
+        .get();
+
+      if (!userSnapshot.empty || !agentSnapshot.empty) {
+        return true; // Phone number exists in either collection
       }
+      return false; // Phone number does not exist
     } catch (error) {
+      console.error("Error checking phone number:", error);
       return false;
     }
   };
@@ -57,7 +63,7 @@ const Login = ({ navigation }) => {
 
       const isRegistration = false;
       setLoading(false);
-      navigation.navigate("Otp", { confirmation, isRegistration })
+      navigation.navigate("Otp", { confirmation, isRegistration, fullPhoneNumber })
     } catch (error) {
     }
   };
@@ -82,14 +88,14 @@ const Login = ({ navigation }) => {
         <View style={styles.bottomformcontainer}>
           <View style={styles.bottomformbody}>
             <View>
-              <Text style={styles.account}>Login to Your Account</Text>
+              <Text style={styles.account}>LOGIN ACCOUNT</Text>
             </View>
 
-            <View style={styles.numbercontainer}>
+            {/* <View style={styles.numbercontainer}>
               <View style={styles.numberbody}>
                 <Text style={styles.number}>Phone Number</Text>
               </View>
-            </View>
+            </View> */}
 
             <View style={styles.phonenobody}>
               <View style={styles.phonecode}>
@@ -197,6 +203,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#BE7356',
     fontSize: 20,
+    fontWeight: '800'
   },
   numbercontainer: {
     display: 'flex',

@@ -5,80 +5,90 @@ import ProfileGrid from '../Profiles/ProfileGrid'
 
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import useFirestore from '../../hooks/useFirestore';
 
 const { width, height } = Dimensions.get('window');
 
 const Matches = ({ navigation }) => {
   const [data, setData] = useState<any>([]);
+  const {getMatchesData} = useFirestore();
 
   useEffect(() => {
-    const unsubscribe = async () => {
-      try {
-        const currentUser = auth().currentUser;
-        if (!currentUser) {
-          return;
-        }
+    const matchesData = async() => {
+      const dataM = await getMatchesData();
+      setData(dataM);
+    }
+    matchesData();
+  },[])
 
-        const userRef = firestore().collection('profiles').doc(currentUser.uid);
+  // useEffect(() => {
+  //   const unsubscribe = async () => {
+  //     try {
+  //       const currentUser = auth().currentUser;
+  //       if (!currentUser) {
+  //         return;
+  //       }
+
+  //       const userRef = firestore().collection('profiles').doc(currentUser.uid);
         
-        // Listen for real-time updates to the user's profile
-        const unsubscribeProfile = userRef.onSnapshot((userDoc) => {
-          if (!userDoc.exists) {
-            return;
-          }
+  //       // Listen for real-time updates to the user's profile
+  //       const unsubscribeProfile = userRef.onSnapshot((userDoc) => {
+  //         if (!userDoc.exists) {
+  //           return;
+  //         }
 
-          const shortlistedProfiles = userDoc.data().matches || [];
+  //         const shortlistedProfiles = userDoc.data().matches || [];
 
-          if (shortlistedProfiles.length === 0) {
-            setData([]);
-            return;
-          }
+  //         if (shortlistedProfiles.length === 0) {
+  //           setData([]);
+  //           return;
+  //         }
 
-          // Fetch the profiles in real-time as well
-          const userPromises = shortlistedProfiles.map(async (userId) => {
-            const userSnapshot = await firestore().collection('profiles').doc(userId).get();
-            if (userSnapshot.exists) {
-              return { id: userSnapshot.id, ...userSnapshot.data() };
-            }
-            return null;
-          });
+  //         // Fetch the profiles in real-time as well
+  //         const userPromises = shortlistedProfiles.map(async (userId) => {
+  //           const userSnapshot = await firestore().collection('profiles').doc(userId).get();
+  //           if (userSnapshot.exists) {
+  //             return { id: userSnapshot.id, ...userSnapshot.data() };
+  //           }
+  //           return null;
+  //         });
 
-          // Subscribe to changes for each shortlisted profile
-          const unsubscribeProfiles = shortlistedProfiles.map(userId => {
-            return firestore()
-              .collection('profiles')
-              .doc(userId)
-              .onSnapshot(userSnapshot => {
-                if (userSnapshot.exists) {
-                  setData(prevData => {
-                    const updatedData = prevData.filter(item => item.id !== userSnapshot.id);
-                    updatedData.push({ id: userSnapshot.id, ...userSnapshot.data() });
-                    return updatedData;
-                  });
-                }
-              });
-          });
+  //         // Subscribe to changes for each shortlisted profile
+  //         const unsubscribeProfiles = shortlistedProfiles.map(userId => {
+  //           return firestore()
+  //             .collection('profiles')
+  //             .doc(userId)
+  //             .onSnapshot(userSnapshot => {
+  //               if (userSnapshot.exists) {
+  //                 setData(prevData => {
+  //                   const updatedData = prevData.filter(item => item.id !== userSnapshot.id);
+  //                   updatedData.push({ id: userSnapshot.id, ...userSnapshot.data() });
+  //                   return updatedData;
+  //                 });
+  //               }
+  //             });
+  //         });
 
-          // Clean up the real-time listeners for each profile when done
-          return () => {
-            unsubscribeProfiles.forEach(unsub => unsub());
-          };
-        });
+  //         // Clean up the real-time listeners for each profile when done
+  //         return () => {
+  //           unsubscribeProfiles.forEach(unsub => unsub());
+  //         };
+  //       });
 
-        // Cleanup the profile listener on component unmount
-        return () => unsubscribeProfile();
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  //       // Cleanup the profile listener on component unmount
+  //       return () => unsubscribeProfile();
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
 
-    unsubscribe();
+  //   unsubscribe();
 
-    // Clean up the listeners on component unmount
-    return () => {
-      setData([]);
-    };
-  }, []);
+  //   // Clean up the listeners on component unmount
+  //   return () => {
+  //     setData([]);
+  //   };
+  // }, []);
 
 
 

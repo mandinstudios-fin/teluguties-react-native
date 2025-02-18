@@ -11,21 +11,58 @@ import React, {useEffect, useState} from 'react';
 import auth from '@react-native-firebase/auth';
 
 import ProfileImage from './ProfileImage';
+import AgentsProfileImage from '../AgentsProfileImage/AgentsProfileImage';
 
 const numColumns = 2;
 const {width} = Dimensions.get('window');
 const itemSize = width / numColumns;
 const gap = 20;
 
-const ProfileGrid: React.FC = ({data, navigation}) => {
+interface ProfileGridProps {
+  data: [];
+  navigation:any;
+  isAgent?: boolean
+}
+
+const ProfileGrid = ({data, navigation, isAgent} : ProfileGridProps) => {
   return (
-    <FlatList
+    isAgent ? 
+    (<FlatList
       data={data}
       contentContainerStyle={[
         styles.container,
         
       ]}
-      initialNumToRender={data.length}
+      initialNumToRender={data?.length | 0}
+      renderItem={({item}) => (
+        <AgentsProfileImage agent={item} navigation={navigation} />
+      )}
+      keyExtractor={item => item.id}
+      numColumns={numColumns}
+      showsVerticalScrollIndicator={false}
+      
+      columnWrapperStyle={{ gap: 15 }}
+
+      ListHeaderComponent={
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>{''}</Text>
+        </View>
+      }
+    
+      ListFooterComponent={
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>{''}</Text>
+        </View>
+      }
+    />)
+    :
+    (<FlatList
+      data={data}
+      contentContainerStyle={[
+        styles.container,
+        
+      ]}
+      initialNumToRender={data?.length | 0}
       renderItem={({item}) => (
         <ProfileImage user={item} navigation={navigation} />
       )}
@@ -46,7 +83,7 @@ const ProfileGrid: React.FC = ({data, navigation}) => {
           <Text style={styles.footerText}>{''}</Text>
         </View>
       }
-    />
+    />)
   );
 };
 

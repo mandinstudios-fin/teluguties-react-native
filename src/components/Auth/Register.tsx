@@ -26,12 +26,10 @@ const Register = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [formData, setFormData] = useState<TRegisterFormData>({
-    fullname: '',
+  const [formData, setFormData] = useState({
     dob: '',
     phoneNumber: '',
     selectedCode: '+91',
-    gender: 'Male'
   });
 
   const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
@@ -42,12 +40,18 @@ const Register = ({ navigation }) => {
         .where('contact_info.phone', '==', phoneNumber)
         .get();
 
-      if (userSnapshot.empty) {
-        return false;
-      } else {
-        return true;                                 
+      const agentSnapshot = await firestore()
+        .collection('agents')
+        .where('selected_code', '==', selectedCode)
+        .where('phone', '==', phoneNumber)
+        .get();
+
+      if (!userSnapshot.empty || !agentSnapshot.empty) {
+        return true; // Phone number exists in either collection
       }
+      return false; // Phone number does not exist
     } catch (error) {
+      console.error("Error checking phone number:", error);
       return false;
     }
   };
@@ -82,11 +86,10 @@ const Register = ({ navigation }) => {
     }
 
     try {
-      const confirmation = await auth().signInWithPhoneNumber(formData.selectedCode + formData.phoneNumber);
-
-      const isRegistration = true;
       setLoading(false)
-      navigation.navigate("Otp", { confirmation, isRegistration, formData })
+      navigation.navigate("Category", {
+        formData,
+      });
     } catch (error) {
       console.error(error)
     }
@@ -113,21 +116,21 @@ const Register = ({ navigation }) => {
         <View style={styles.bottomformcontainer}>
           <View style={styles.bottomformbody}>
             <View style={styles.welcometextbody}>
-              <Text style={styles.welcometext}>Welcome to TeluguTies</Text>
+              <Text style={styles.welcometext}>CREATE ACCOUNT</Text>
             </View>
-            <TextInput
+            {/* <TextInput
               style={styles.name}
               placeholder="Enter Your Full Name"
               placeholderTextColor="#AFAFAF"
               value={formData.fullname}
               onChangeText={value => handleInputChange('fullname', value)}
-            />
+            /> */}
             <TextInput
               style={styles.name}
               placeholder="DOB"
               placeholderTextColor="#AFAFAF"
               value={formData.dob}
-              onFocus={showDatepicker} 
+              onFocus={showDatepicker}
             />
             {show && (
               <DateTimePicker
@@ -169,7 +172,7 @@ const Register = ({ navigation }) => {
                 />
               </View>
             </View>
-            <View style={styles.gender}>
+            {/* <View style={styles.gender}>
                 <Picker
                   selectedValue={formData.gender}
                   style={styles.picker}
@@ -179,7 +182,7 @@ const Register = ({ navigation }) => {
                   <Picker.Item label={`Male`} value={`Male`} />
                   <Picker.Item label={`Female`} value={`Female`} />
                 </Picker>
-              </View>
+              </View> */}
             <TouchableOpacity style={styles.otpbox} onPress={handleRegister}>
               <Text style={styles.otp}>Send OTP</Text>
             </TouchableOpacity>
@@ -249,6 +252,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     color: '#BE7356',
+    fontWeight: 'bold'
   },
   name: {
     borderColor: '#EBC7B1',

@@ -59,7 +59,7 @@ const ProfileImage = ({ user, navigation }) => {
         </ShimmerPlaceholder>
         :
         <TouchableOpacity style={styles.touchable} onPress={handleProfile}>
-          {user?.profile_pic ? <Image source={{ uri: user.profile_pic }} style={styles.image} /> : <View style={styles.image}/>}
+          {user?.profile_pic ? <Image key={user?.profile_pic} source={{ uri: user.profile_pic || 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg?w=996' }} style={styles.image}  /> : <View style={styles.image}/>}
           <LinearGradient
             colors={['rgba(255, 255, 255, 0.3)', 'rgba(0, 0, 0, 0.5)']}
             style={styles.overlay}
