@@ -10,6 +10,7 @@ import RecentlyViewed from '../RecentlyViewed/RecentlyViewed';
 import UserProfileDetails from '../Profiles/UserProfileDetails';
 import Likely from '../Likely/Likely';
 import UserNotifications from '../Header/UserNotifications';
+import AssignAgentForMatch from '../Profiles/AssignAgentForMatch';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ const HomeStack = () => {
       <Stack.Screen name="Likely" component={Likely} options={{ presentation: 'transparentModal' }}/>
       <Stack.Screen name="UserProfileDetails" component={UserProfileDetails}  options={{presentation:'modal'}}/>
       <Stack.Screen name="UserNotifications" component={UserNotifications}  options={{presentation:'card'}}/>
+      <Stack.Screen name="AssignAgentForMatch" component={AssignAgentForMatch}  options={{presentation:'card'}}/>
     </Stack.Navigator>
   );
 };

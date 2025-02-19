@@ -3,19 +3,22 @@ import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import Slider from './Slider';
 import { useNavigationState } from '@react-navigation/native';
-import { getUsersAge, isUserAccepted, isUserRejected } from '../../utils';
+import { getUsersAge, isAgentAssignedForProfileB, isProfileBInMatches, isUserAccepted, isUserRejected } from '../../utils';
 import useFirestore from '../../hooks/useFirestore';
 import useAgent from '../../hooks/useAgent';
+import auth from '@react-native-firebase/auth';
 
 const { width, height, fontScale } = Dimensions.get("window")
 
 const UserProfileDetails = ({ route, navigation }) => {
+  const currentUser = auth().currentUser;
   const { user } = route.params;
   const images = (user && user.profile_pic && user.images && user.images.length > 0)
     ? [user.profile_pic, ...user.images]
     : (user && user.profile_pic ? [user.profile_pic] : []);
   const [routeName, setRouteName] = useState();
-  const [agentsData, setAgentsData] = useState();
+  const [isAgentAssigned, setIsAgentAssigned] = useState();
+  const [isProfileInMatches, setIsProfileInMatches] = useState();
   const [status, setStatus] = useState(null);
   const state = useNavigationState(state => state);
   const {
@@ -28,38 +31,62 @@ const UserProfileDetails = ({ route, navigation }) => {
   } = useFirestore();
   const { getAgentsCurrentDetails, acceptAssignRequest, rejectAssignRequest } = useAgent();
 
+  // First useEffect - fetch request details
   useEffect(() => {
     if (user?.id) {
       fetchRequestDetails(user.id);
     }
   }, [user, fetchRequestDetails]);
 
-
+  // Second useEffect - track navigation state
   useEffect(() => {
     if (state && state.index > 0) {
-      const previousRoute = state.routes[state.index - 1]; // Get the previous route
+      const previousRoute = state.routes[state.index - 1];
       setRouteName(previousRoute.name);
     }
   }, [state]);
 
+  // Third useEffect - agent assignment check
   useEffect(() => {
-    getAgentsCurrentDetails(setAgentsData);
-  }, [user]);
+    const handleIsAgentAssignedForProfileB = async () => {
+      if (currentUser?.uid && user?.id) {
+        const result = await isAgentAssignedForProfileB(currentUser.uid, user.id);
+        setIsAgentAssigned(result);
+      }
+    }
 
-   // Track accepted/rejected status
+    handleIsAgentAssignedForProfileB();
+  }, [currentUser?.uid, user?.id]);
 
+  // Fourth useEffect - match status check
+  useEffect(() => {
+    const handleIsProfileBInMatches = async () => {
+      if (currentUser?.uid && user?.id) {
+        const result = await isProfileBInMatches(currentUser.uid, user.id);
+        setIsProfileInMatches(result);
+      }
+    }
+
+    handleIsProfileBInMatches();
+  }, [currentUser?.uid, user?.id]);
+
+  // Fifth useEffect - acceptance/rejection status check
   useEffect(() => {
     const checkStatus = async () => {
-      const accepted = await isUserAccepted(user.id);
-      const rejected = await isUserRejected(user.id);
+      if (user?.id) {
+        const accepted = await isUserAccepted(user.id);
+        const rejected = await isUserRejected(user.id);
 
-      if (accepted) setStatus('Accepted');
-      else if (rejected) setStatus('Rejected');
-      else setStatus(null);
+        if (accepted) setStatus('Accepted');
+        else if (rejected) setStatus('Rejected');
+        else setStatus(null);
+      }
     };
 
     checkStatus();
-  }, [user.id]);
+  }, [user?.id]);
+
+  console.log(isProfileInMatches, isAgentAssigned, 'matches', 'agent')
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -459,69 +486,98 @@ const UserProfileDetails = ({ route, navigation }) => {
           </View>
 
           {routeName &&
-        (routeName === 'Shortlist' || routeName === 'Matches' ? (
-          <View style={styles.contactmain}>
-            <View style={styles.contactbox}>
-              <TouchableOpacity
-                style={styles.contact}
-                onPress={() => {
-                  if (!requestData) sendContactRequest();
-                }}>
-                <Text style={styles.contacttext}>{requestData?.status ? requestData.status : 'Contact'}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : routeName === 'HomeStack' ? (
-          <View style={styles.shortmatchbox}>
-            <View style={styles.shortlistbox}>
-              <TouchableOpacity
-                style={styles.shortlist}
-                onPress={() => addToShortlist(user.id)}>
-                <Text style={styles.shortlisttext}>Shortlist</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.matchbox}>
-              <TouchableOpacity
-                style={styles.match}
-                onPress={() => makeAMatch(user.id)}>
-                <Text style={styles.matchtext}>Make a Match</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : routeName === 'AllAssignedUser' || routeName === 'AgentsAssign' ? (
-          <View style={styles.shortmatchbox}>
-            {status === 'Accepted' ? (
-              <TouchableOpacity
-              style={styles.shortlist}>
-              <Text style={styles.shortlisttext}>Accepted</Text>
-            </TouchableOpacity>
-            ) : status === 'Rejected' ? (
-              <TouchableOpacity
-                style={styles.shortlist}>
-                <Text style={styles.shortlisttext}>Rejected</Text>
-              </TouchableOpacity>
-            ) : (
-              <>
-                <View style={styles.shortlistbox}>
+            (routeName === 'Shortlist' || routeName === 'Matches' ? (
+              <View style={styles.contactmain}>
+                <View style={styles.contactbox}>
                   <TouchableOpacity
-                    style={styles.shortlist}
-                    onPress={() => acceptAssignRequest(user.id)}>
-                    <Text style={styles.shortlisttext}>Accept</Text>
+                    style={styles.contact}
+                    onPress={() => {
+                      if (!requestData) sendContactRequest(user.id);
+                    }}>
+                    <Text style={styles.contacttext}>{requestData?.status ? requestData.status : 'Contact'}</Text>
                   </TouchableOpacity>
                 </View>
+              </View>
+            ) : routeName === 'Home' ? (
+              <View style={styles.shortmatchbox}>
+                {/* CASE 1: If an agent is assigned → Show "Agent Assigned" and hide "Make a Match" */}
+                {isAgentAssigned && (
+                  <View style={styles.shortlistbox}>
+                    <TouchableOpacity style={[styles.shortlist, { backgroundColor: 'gray' }]} disabled={true}>
+                      <Text style={styles.shortlisttext}>Agent Assigned</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
-                <View style={styles.matchbox}>
+                {/* CASE 2: If a match is already pending → Show "Pending" and hide "Assign Agent" */}
+                {isProfileInMatches && (
+                  <View style={styles.matchbox}>
+                    <TouchableOpacity style={[styles.match, { backgroundColor: 'gray' }]} disabled={true}>
+                      <Text style={styles.matchtext}>Pending</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* CASE 3: If both agent is NOT assigned and no match is pending → Show both "Assign Agent" & "Make a Match" */}
+                {!isAgentAssigned && !isProfileInMatches && (
+                  <>
+                    <View style={styles.shortlistbox}>
+                      <TouchableOpacity
+                        style={styles.shortlist}
+                        onPress={() =>
+                          navigation.navigate('AssignAgentForMatch', {
+                            profile_a_id: currentUser?.uid,
+                            profile_b_id: user?.id
+                          })
+                        }
+                      >
+                        <Text style={styles.shortlisttext}>Assign Agent</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.matchbox}>
+                      <TouchableOpacity style={styles.match} onPress={() => makeAMatch(user.id)}>
+                        <Text style={styles.matchtext}>Make a Match</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+              </View>
+
+
+            ) : routeName === 'AllAssignedUser' || routeName === 'AgentsAssign' ? (
+              <View style={styles.shortmatchbox}>
+                {status === 'Accepted' ? (
                   <TouchableOpacity
-                    style={styles.match}
-                    onPress={() => rejectAssignRequest(user.id)}>
-                    <Text style={styles.shortlisttext}>Reject</Text>
+                    style={styles.shortlist}>
+                    <Text style={styles.shortlisttext}>Accepted</Text>
                   </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </View>
-        ) : null)}
+                ) : status === 'Rejected' ? (
+                  <TouchableOpacity
+                    style={styles.shortlist}>
+                    <Text style={styles.shortlisttext}>Rejected</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <>
+                    <View style={styles.shortlistbox}>
+                      <TouchableOpacity
+                        style={styles.shortlist}
+                        onPress={() => acceptAssignRequest(user.id)}>
+                        <Text style={styles.shortlisttext}>Accept</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.matchbox}>
+                      <TouchableOpacity
+                        style={styles.match}
+                        onPress={() => rejectAssignRequest(user.id)}>
+                        <Text style={styles.shortlisttext}>Reject</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+              </View>
+            ) : null)}
 
 
         </View>
@@ -724,5 +780,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
+  shortlistbox: {
+    marginHorizontal: 'auto'
+  },
+  matchbox: {
+    marginHorizontal: 'auto'
+  }
 
 });

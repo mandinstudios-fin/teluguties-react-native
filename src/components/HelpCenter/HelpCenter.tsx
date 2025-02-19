@@ -11,16 +11,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Header from '../Header/Header';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
+import { getUserCategory } from '../../utils';
 
 const {width, height} = Dimensions.get('window');
 
 const HelpCenter = ({navigation}) => {
   const [loading, setLoading] = useState(false);
+  const [category, setCategory] = useState('');
   const [message, setMessage] = useState('');
   const { successToast, errorToast } = useToastHook();
 
@@ -34,10 +36,10 @@ const HelpCenter = ({navigation}) => {
     setLoading(true);
     try {
       await firestore().collection('queries').add({
-        message, // The message sent by the user
-        userId, // The ID of the user
+        message,
+        userId,
         sentAt: firestore.FieldValue.serverTimestamp(),
-        userType: 'user', // Mark the sender as a user
+        userType: category === 'profiles' ? 'Individual' : 'Agent'
       });
       successToast('Message sent successfully...');
       setMessage('');
@@ -46,6 +48,15 @@ const HelpCenter = ({navigation}) => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    const handleSetCategory = async () => {
+      const result = await getUserCategory();
+      setCategory(result)
+    }
+
+    handleSetCategory();
+  }, [])
 
   return (
     <SafeAreaView style={styles.safearea}>

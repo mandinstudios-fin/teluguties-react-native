@@ -314,7 +314,6 @@ const useAgent = () => {
         }
     }
 
-
     return { getAgentsDetails, getAgentsCurrentDetails, getAgentsData, getProfilesData, getMatchingRequestData, getProfilesUploadedByAgent, acceptAssignRequest, rejectAssignRequest, getAgentsAcceptedProfiles }
 }
 

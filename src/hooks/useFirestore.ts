@@ -3,12 +3,14 @@ import firestore from '@react-native-firebase/firestore';
 import { Timestamp } from '@react-native-firebase/firestore';
 import useToastHook from '../utils/useToastHook';
 import { useCallback, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 const useFirestore = () => {
     const currentUser = auth().currentUser;
     const { successToast, errorToast } = useToastHook();
     const [loading, setLoading] = useState(false);
     const [requestData, setRequestData] = useState(null);
+    const navigation = useNavigation();
 
     const getHomeData = () => {
         return new Promise((resolve, reject) => {
@@ -427,6 +429,7 @@ const useFirestore = () => {
             });
 
             successToast('Added to matches');
+            navigation.replace('Layout')
         } catch {
             errorToast('Something went wrong');
         } finally {
@@ -496,6 +499,65 @@ const useFirestore = () => {
           }
     }
 
+    const sendMatchingRequestToAgent = async (profile_a_id, profile_b_id, agent_id) => {
+        try {
+            const agentRef = firestore().collection('agents').doc(agent_id);
+            const agentDoc = await agentRef.get();
+
+            const requests = agentDoc.data()?.requests || [];
+
+            if (requests.includes(profile_a_id)) {
+                successToast('Request already sent');
+                return;
+            }
+
+            const alreadyRequested = requests.some(
+                (req) => req.profile_a_id === profile_a_id && req.profile_b_id === profile_b_id
+            );
+    
+            if (alreadyRequested) {
+                successToast('Request already sent');
+                return;
+            }
+
+            const profile_a_id_Ref = firestore().collection('profiles').doc(profile_a_id);
+            const profile_a_id_Doc = await profile_a_id_Ref.get();
+
+            const agent_assigned = profile_a_id_Doc.data()?.agent_assigned || [];
+            const alreadyAssigned = agent_assigned.some(
+                (req) => req.agent_id === agent_id && req.profile_b_id === profile_b_id
+            );
+
+            if (alreadyAssigned) {
+                successToast('Request already sent');
+                return;
+            }
+
+            const newProfileInAssignedAgents = {
+                agent_id: agent_id,
+                profile_b_id: profile_b_id
+            }
+
+            await profile_a_id_Ref.update({
+                agent_assigned: firestore.FieldValue.arrayUnion(newProfileInAssignedAgents)
+              });
+
+            const newRequest = {
+                profile_a_id: profile_a_id,
+                profile_b_id: profile_b_id
+            }
+
+            await agentRef.update({
+                requests: firestore.FieldValue.arrayUnion(newRequest)
+              });
+        
+            successToast('Request sent successfully');
+            navigation.replace("Layout");
+          } catch (error) {
+            errorToast('Request already sent')
+          }
+    }
+
 
     return {
         getHomeData,
@@ -511,7 +573,8 @@ const useFirestore = () => {
         makeAMatch,
         sendContactRequest,
         sendRequestToAgent,
-        getNotificationsData
+        getNotificationsData,
+        sendMatchingRequestToAgent
     };
 };
 

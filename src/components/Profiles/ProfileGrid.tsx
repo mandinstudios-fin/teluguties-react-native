@@ -24,7 +24,7 @@ interface ProfileGridProps {
   isAgent?: boolean
 }
 
-const ProfileGrid = ({data, navigation, isAgent} : ProfileGridProps) => {
+const ProfileGrid = ({data, navigation, isAgent = false} : ProfileGridProps) => {
   return (
     isAgent ? 
     (<FlatList

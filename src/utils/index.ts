@@ -26,28 +26,28 @@ export const data = [
 
 export const MANAGED_PROFILES = [
   {
-      id: 1,
-      label: 'Delete',
-      logo: '',
-      screen: 'DeleteUserProfiles'
+    id: 1,
+    label: 'Delete',
+    logo: '',
+    screen: 'DeleteUserProfiles'
   },
   {
-      id: 2,
-      label: 'Edit',
-      logo: '',
-      screen: 'EditUserProfiles'
+    id: 2,
+    label: 'Edit',
+    logo: '',
+    screen: 'EditUserProfiles'
   },
   {
-      id: 1,
-      label: 'Uploaded Profiles',
-      logo: '',
-      screen: 'AgentUploadProfiles'
+    id: 1,
+    label: 'Uploaded Profiles',
+    logo: '',
+    screen: 'AgentUploadProfiles'
   },
   {
-      id: 1,
-      label: 'Accepted',
-      logo: '',
-      screen: 'AgentAcceptedProfiles'
+    id: 1,
+    label: 'Accepted',
+    logo: '',
+    screen: 'AgentAcceptedProfiles'
   }
 ]
 
@@ -71,7 +71,7 @@ export const getUsersAge = (date_of_birth: string | null | undefined): number =>
     let age = today.getFullYear() - birthDate.getFullYear();
 
     if (
-      today.getMonth() < birthDate.getMonth() || 
+      today.getMonth() < birthDate.getMonth() ||
       (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
     ) {
       age--;
@@ -128,7 +128,6 @@ export const isUserAccepted = async (userId) => {
     const agentDoc = await agentRef.get();
 
     if (!agentDoc.exists) {
-      console.error("Agent document not found");
       return false;
     }
 
@@ -210,7 +209,7 @@ export const getUserDetailsByCategory = async (category) => {
       return null;
     }
 
-    return userDoc.data(); 
+    return userDoc.data();
 
   } catch (error) {
     console.error(`Error fetching user details from category "${category}":`, error);
@@ -291,3 +290,31 @@ export const sendPushNotification = async (userId, title, body) => {
     throw error;
   }
 };
+
+export const isAgentAssignedForProfileB = async (profile_a_id, profile_b_id) => {
+  const profile_a_id_Ref = firestore().collection('profiles').doc(profile_a_id);
+  const profile_a_id_Doc = await profile_a_id_Ref.get();
+
+  const agent_assigned = profile_a_id_Doc.data()?.agent_assigned || [];
+  const alreadyAssigned = agent_assigned?.some((assigned) => assigned.profile_b_id === profile_b_id);
+
+  if(alreadyAssigned) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export const isProfileBInMatches = async (profile_a_id, profile_b_id) => {
+  const profile_a_id_Ref = firestore().collection('profiles').doc(profile_a_id);
+  const profile_a_id_Doc = await profile_a_id_Ref.get();
+
+  const matches = profile_a_id_Doc.data()?.matches || [];
+  const alreadyAssigned = matches.includes(profile_b_id)
+
+  if(alreadyAssigned) {
+    return true;
+  } else {
+    return false;
+  }
+}
