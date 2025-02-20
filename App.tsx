@@ -1,11 +1,13 @@
-import { View, Text, SafeAreaView, LogBox } from 'react-native';
+import { View, Text, SafeAreaView, LogBox, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import '@react-native-firebase/app';
 import firebase from '@react-native-firebase/app';
+import messaging from '@react-native-firebase/messaging';
 import SplashScreen from './src/components/SplashScreen/SplashScreen';
 import Navigator from './src/components/Navigation/Navigator';
 import { ToastProvider } from 'react-native-toast-notifications';
 import Icon from 'react-native-vector-icons/Entypo'
+import { refreshFCMTokenIfNeeded, requestUserMessagingPermission } from './src/utils';
 
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
@@ -43,6 +45,20 @@ const App = () => {
     }, 3000);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    requestUserMessagingPermission();
+    refreshFCMTokenIfNeeded();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('New notification:', remoteMessage);
+      Alert.alert(remoteMessage.notification.title, remoteMessage.notification.body);
+    });
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {

@@ -7,7 +7,7 @@ import { getUsersAge, isAgentAssignedForProfileB, isProfileBInMatches, isUserAcc
 import useFirestore from '../../hooks/useFirestore';
 import useAgent from '../../hooks/useAgent';
 import auth from '@react-native-firebase/auth';
-
+ 
 const { width, height, fontScale } = Dimensions.get("window")
 
 const UserProfileDetails = ({ route, navigation }) => {

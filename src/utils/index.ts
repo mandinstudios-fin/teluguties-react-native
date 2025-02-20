@@ -1,17 +1,17 @@
 import firestore from '@react-native-firebase/firestore'
 import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
-
+import { Platform, PermissionsAndroid } from 'react-native';
 import AIcon from 'react-native-vector-icons/AntDesign';
 
 const FCM_SERVER_KEY = "c4e5433f9d4bff9cab1de709533218061b4cdbab";
+export const notificationBackend = `http://192.168.1.13:5000/`
 
 export const DATA = Array.from({ length: 20 }, (_, i) => ({
   id: `${i + 1}`,
   imgSource: { uri: `https://picsum.photos/200/200?random=${i}` }, // Random image with a unique signature
   name: `Item ${i + 1}`,
 }));
-
 
 export const data = [
   { id: '1', heading: 'Boosted Profile Visibility: ', text: 'Stand out in searches.' },
@@ -54,6 +54,7 @@ export const MANAGED_PROFILES = [
 export const getFirstName = (name: string) => {
   return name && name.split(' ')[0];
 };
+
 export const getUsersAge = (date_of_birth: string | null | undefined): number => {
   if (!date_of_birth) return 0;
 
@@ -84,7 +85,6 @@ export const getUsersAge = (date_of_birth: string | null | undefined): number =>
   }
 };
 
-
 export const getTodaysDate = () => {
   const isoDate = new Date();
 
@@ -98,7 +98,6 @@ export const getTodaysDate = () => {
   const customFormattedDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   return customFormattedDate;
 };
-
 
 export const compareDate = (dateToCompare) => {
   const today = new Date();
@@ -243,54 +242,6 @@ export const getUserCategoryFromToken = async (token) => {
   }
 }
 
-export const sendPushNotification = async (userId, title, body) => {
-  try {
-    // Get user's FCM token from Firestore
-    const userDoc = await firestore().collection('profiles').doc(userId).get();
-    const fcmToken = userDoc.data()?.fcmToken;
-
-    if (!fcmToken) {
-      console.log("No FCM token found for this user.");
-      return;
-    }
-
-    // Send message using Firebase Messaging
-    const message = {
-      data: {
-        type: 'notification',
-      },
-      notification: {
-        title,
-        body,
-      },
-      android: {
-        notification: {
-          sound: 'default',
-          channelId: 'default',
-          priority: 'high',
-        },
-      },
-      apns: {
-        payload: {
-          aps: {
-            sound: 'default',
-            badge: 1,
-          },
-        },
-      },
-      token: fcmToken,
-    };
-
-    const response = await messaging().send(message);
-    console.log('Successfully sent message:', response);
-    return response;
-
-  } catch (error) {
-    console.error("Error sending notification:", error);
-    throw error;
-  }
-};
-
 export const isAgentAssignedForProfileB = async (profile_a_id, profile_b_id) => {
   const profile_a_id_Ref = firestore().collection('profiles').doc(profile_a_id);
   const profile_a_id_Doc = await profile_a_id_Ref.get();
@@ -318,3 +269,68 @@ export const isProfileBInMatches = async (profile_a_id, profile_b_id) => {
     return false;
   }
 }
+
+export const fetchProfile = async (profileId) => {
+  const profileDoc = await firestore().collection('profiles').doc(profileId).get();
+  if (profileDoc.exists) {
+      return { id: profileId, ...profileDoc.data() };
+  }
+  return null;
+};
+
+export const requestUserMessagingPermission = async () => {
+  if (Platform.OS === 'ios') {
+    await messaging().requestPermission();
+  } else if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  }
+};
+
+export const refreshFCMTokenIfNeeded = async () => {
+  const user = auth().currentUser;
+  if (!user) return;
+
+  const userDoc = await firestore().collection('profiles').doc(user.uid).get();
+  if (!userDoc.exists || !userDoc.data()?.fcmToken) {
+    console.log("FCM token missing, refreshing...");
+    
+    const newToken = await messaging().getToken();
+    await firestore().collection('profiles').doc(user.uid).update({ fcmToken: newToken });
+
+    console.log("Updated FCM Token:", newToken);
+  }
+};
+
+export const getFCMToken = async () => {
+  try {
+    const token = await messaging().getToken();
+    console.log('FCM Token:', token);
+    return token;
+  } catch (error) {
+    console.error('Error getting FCM token:', error);
+  }
+};
+
+export const sendPushNotification = async (userId, title, body) => {
+  try {
+    const response = await fetch(`${notificationBackend}send-notification`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, title, body }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Notification sent successfully:", data);
+    } else {
+      console.error("Failed to send notification:", data.error);
+    }
+  } catch (error) {
+    console.error("Error sending notification:", error);
+  }
+};

@@ -3,10 +3,14 @@ import React from 'react'
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../utils/useToastHook';
+import { fetchProfile, sendPushNotification } from '../utils';
+import { navigate } from '../components/Navigation/Navigation';
+import { useNavigation } from '@react-navigation/native';
 
 const useAgent = () => {
     const { successToast, errorToast } = useToastHook();
     const currentUser = auth().currentUser;
+    const navigation = useNavigation();
 
     const getAgentsDetails = async (setAgentFormData) => {
         if (!currentUser) return;
@@ -92,17 +96,20 @@ const useAgent = () => {
             }
 
             const profilesData = await Promise.all(
-                requests.map(async (id) => {
-                    const profileDoc = await firestore().collection('profiles').doc(id).get();
-                    if (profileDoc.exists) {
-                        return { id, ...profileDoc.data() };
+                requests.map(async (request) => {
+                    if (typeof request === "string") {
+                        return fetchProfile(request);
+                    } else if (typeof request === "object") {
+                        const profileA = request.profile_a_id ? await fetchProfile(request.profile_a_id) : null;
+                        const profileB = request.profile_b_id ? await fetchProfile(request.profile_b_id) : null;
+                        return [profileA, profileB].filter(profile => profile !== null);
                     }
                     return null;
                 })
             );
 
-            const filteredData = profilesData.filter(profile => profile !== null);
-            setAssignedData(filteredData)
+            const filteredData = profilesData.flat().filter(profile => profile !== null);
+            setAssignedData(filteredData);
 
         } catch (error) {
             console.error("Error fetching matching request data:", error);
@@ -179,14 +186,13 @@ const useAgent = () => {
                     `Agent ${agentDoc.data()?.fullname} has accepted your request.`
                 )
             });
+            navigation.replace('AgentsLayout')
 
-            const title = 'Request Accepted';
-            const body = `Agent ${agentDoc.data()?.fullname} has accepted your request.`;
-            await sendNotification(userId, title, body);
-
+            await sendPushNotification(userId, 'Accepted', "Accepted")
             successToast('Request accepted successfully')
         } catch (error) {
             errorToast('Something Went Wrong...')
+            console.log(error)
         }
     }
 
@@ -220,7 +226,7 @@ const useAgent = () => {
 
             const title = 'Request Rejected';
             const body = `Agent ${agentDoc.data()?.fullname} has rejected your request.`;
-            await sendNotification(userId, title, body);
+            navigation.replace('AgentsLayout')
 
             successToast('Request rejected successfully')
         } catch (error) {

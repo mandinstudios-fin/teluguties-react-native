@@ -27,6 +27,7 @@ const AgentsAssign = ({ navigation }) => {
 
         fetchData();
     }, []);
+    console.log(assignedData)
 
     return (
 
