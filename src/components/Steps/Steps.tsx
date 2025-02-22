@@ -106,13 +106,26 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep }) => {
       <View style={styles.inputcontainer}>
         <TextInput
           style={styles.input}
-          placeholder="Full Name"
+          placeholder="First Name"
           placeholderTextColor="#EBC7B1"
-          value={formData?.personal_info.name || ''}
+          value={formData?.personal_info.firstname || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personal_info: { ...prevData.personal_info, name: value },
+              personal_info: { ...prevData.personal_info, firstname: value },
+            }))
+          }
+        />
+
+<TextInput
+          style={styles.input}
+          placeholder="Last Name"
+          placeholderTextColor="#EBC7B1"
+          value={formData?.personal_info.lastname || ''}
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              personal_info: { ...prevData.personal_info, lastname: value },
             }))
           }
         />
@@ -1334,15 +1347,14 @@ const Steps = (
     is_bride: '',
     profile_pic: '',
     personal_info: {
-      name: '',
+      firstname: '',
+      lastname: '',
       gender: '',
       date_of_birth: '',
-      age: '',
       height: '',
-      weight: '',
-      blood_group: '',
-      marital_status: '',
-      num_children: 0,
+      denomination:'',
+      mother_tongue:'',
+      current_location:'',
     },
     contact_info: {
       phone: '',

@@ -16,6 +16,7 @@ import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
+import { ChevronLeft } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -117,7 +118,7 @@ const ProfileDetailsAgents: React.FC = ({ navigation }) => {
             <View style={styles.main}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="chevron-left" size={30} color="white" />
+                    <ChevronLeft size={27} strokeWidth={1} color={'white'} />
                     </TouchableOpacity>
                     <View style={styles.headertext}>
                         <Text style={styles.headertextmain}>Profile</Text>
@@ -312,12 +313,14 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: '#7b2a38',
         padding: width / 30,
+        marginTop:width/30,
     },
     creattext: {
         color: 'white',
         textAlign: 'center',
     },
     footerbody: {
+        marginTop:width/15,
     },
     footer: {
         textAlign: 'center',
@@ -325,6 +328,7 @@ const styles = StyleSheet.create({
     footertext: {
         textAlign: 'center',
         color: 'black',
+        fontSize:12,
     },
     loadingContainer: {
         position: 'absolute',

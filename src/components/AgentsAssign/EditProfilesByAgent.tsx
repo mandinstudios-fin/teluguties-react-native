@@ -11,6 +11,7 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 import useToastHook from '../../utils/useToastHook'
 import useUpdateUserDetails from '../../hooks/useUpdateUserDetails'
 import RNPickerSelect from 'react-native-picker-select';
+import AgentsHeader from '../Header/AgentsHeader'
 
 const { width, height } = Dimensions.get("window")
 
@@ -236,7 +237,7 @@ const EditProfilesByAgent = ({ navigation, route }) => {
     return (
         <SafeAreaView style={styles.safearea}>
             <ScrollView style={styles.main}>
-                <Header navigation={navigation} />
+                <AgentsHeader navigation={navigation} />
                 <View style={styles.container}>
                     <View style={styles.profile}>
                         <Text style={styles.profiletext}>EDIT PROFILE</Text>

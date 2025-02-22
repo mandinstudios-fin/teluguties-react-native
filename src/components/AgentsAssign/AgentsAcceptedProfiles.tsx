@@ -3,6 +3,15 @@ import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import useAgent from '../../hooks/useAgent';
 import { getFirstName } from '../../utils';
+import AgentsHeader from '../Header/AgentsHeader';
+
+const LIGHT_BG = '#fbf1ec'
+
+const EmptyUser = ({ message }) => (
+    <TouchableOpacity style={styles.imagetextview}>
+        <Text style={styles.detailtext}>{message}</Text>
+    </TouchableOpacity>
+)
 
 const AgentsAcceptedProfiles = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -23,13 +32,14 @@ const AgentsAcceptedProfiles = ({ navigation }) => {
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
                 <View style={styles.main}>
-                    <Header navigation={navigation} />
+                    <AgentsHeader navigation={navigation} />
                     <View>
                         <Text style={styles.assigntext}>Accepted Profiles</Text>
                     </View>
 
-                    {acceptedData.length > 0 &&
+                    
                     <View style={styles.maincontent}>
+                    {acceptedData.length > 0 &&
                         <View style={styles.imagecontainer}>
                             {acceptedData.map((user) => (
                                 <TouchableOpacity key={user.id} style={styles.imagetextview}>
@@ -39,8 +49,11 @@ const AgentsAcceptedProfiles = ({ navigation }) => {
                                     </View>
                                 </TouchableOpacity>
                             ))}
-                        </View>
-                    </View>}
+                        </View>}
+                        {acceptedData.length == 0 &&
+                            <EmptyUser message='No Profiles Available' />
+                        }
+                    </View>
                 </View>
             </ScrollView>
             <View style={loading ? styles.loadingContainer : null}>
@@ -72,7 +85,6 @@ const styles = StyleSheet.create({
         color: '#000',
         alignItems: 'center',
         fontSize: 25,
-        fontWeight: 'bold',
         textAlign: 'center',
     },
 
@@ -104,22 +116,21 @@ const styles = StyleSheet.create({
         borderRadius: 25
     },
     imagetextview: {
-        backgroundColor: '#e3ccc1',
-        borderRadius: 25,
+        backgroundColor: LIGHT_BG,
+        borderRadius: 8,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        height: 50,
+        height: 65,
         paddingLeft: 15,
-        overflow: 'hidden'
     },
 
     detailtext: {
         color: 'black',
         fontSize: 16,
         width: '80%',
-        fontWeight: 'bold'
+        fontWeight: '500'
     },
 
     imagebox: {

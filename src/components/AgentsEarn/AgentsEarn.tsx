@@ -1,13 +1,14 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import Header from '../Header/Header'
+import AgentsHeader from '../Header/AgentsHeader'
 
 const AgentsEarn = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
                 <View style={styles.main}>
-                    <Header navigation={navigation} />
+                    <AgentsHeader navigation={navigation} />
                     <View>
                         <Text style={styles.earntext}>Total Earnings</Text>
                     </View>
@@ -35,6 +36,5 @@ const styles = StyleSheet.create({
         color:'#000',
         textAlign:'center',
         fontSize:25,
-        fontWeight:'bold'
     }
 })

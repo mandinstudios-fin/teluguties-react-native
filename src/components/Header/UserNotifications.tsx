@@ -82,8 +82,7 @@ const styles = StyleSheet.create({
     },
     dashboardtext: {
         color: 'black',
-        fontSize: 30,
-        fontWeight: 'bold',
+        fontSize: 25,
         alignSelf: 'center'
     },
     uploadtext: {
@@ -102,7 +101,7 @@ const styles = StyleSheet.create({
     },
     detailtext: {
         color: 'black',
-        fontSize: 16,
+        fontSize: 12,
         width: '80%',
     },
     assignedbox: {

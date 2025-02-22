@@ -4,6 +4,7 @@ import {
     Dimensions,
     Image,
     SafeAreaView,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -17,6 +18,7 @@ import Header from '../Header/Header';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useToastHook from '../../utils/useToastHook';
+import { ChevronLeft } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -135,10 +137,11 @@ const ProfileDetails: React.FC = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.safearea}>
+            <ScrollView contentContainerStyle={styles.scrollview}>
             <View style={styles.main}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="chevron-left" size={30} color="white" />
+                    <ChevronLeft size={27} strokeWidth={1} color={'white'} />
                     </TouchableOpacity>
                     <View style={styles.headertext}>
                         <Text style={styles.headertextmain}>Profile</Text>
@@ -219,6 +222,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
             <View style={loading ? styles.loadingContainer : null}>
                 {loading && <ActivityIndicator size="large" color="#a4737b" />}
             </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };
@@ -229,6 +233,9 @@ const styles = StyleSheet.create({
     safearea: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+    },
+    scrollview: {
+        flexGrow: 1
     },
     main: {
         flexGrow: 1,
@@ -287,6 +294,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         paddingLeft: width / 40,
         color: '#EBC7B1',
+        fontWeight:'bold'
     },
     phonecontainer: {
         display: 'flex',
@@ -306,26 +314,26 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     number1: {
-        textAlign: 'center'
+        textAlign: 'center',
+        fontWeight:'bold'
     },
     number2: {
         textAlign: 'left',
         paddingLeft: width / 40,
+        fontWeight:'bold',
     },
     creat: {
         borderRadius: 12,
         backgroundColor: '#7b2a38',
         padding: width / 30,
+        marginTop:width/30,
     },
     creattext: {
         color: 'white',
         textAlign: 'center',
     },
     footerbody: {
-        position: 'absolute',
-        bottom: width / 40,
-        left: 0,
-        right: 0,
+        marginTop:width/15
     },
     footer: {
         textAlign: 'center',
@@ -333,6 +341,7 @@ const styles = StyleSheet.create({
     footertext: {
         textAlign: 'center',
         color: 'black',
+        fontSize:12,
     },
     loadingContainer: {
         position: 'absolute',

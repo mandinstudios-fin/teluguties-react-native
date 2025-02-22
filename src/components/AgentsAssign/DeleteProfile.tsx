@@ -6,6 +6,16 @@ import AIcon from 'react-native-vector-icons/AntDesign';
 import firestore from '@react-native-firebase/firestore';
 import DeleteModal from './DeleteModal';
 import useToastHook from '../../utils/useToastHook';
+import AgentsHeader from '../Header/AgentsHeader';
+import { Trash2 } from 'lucide-react-native';
+
+const LIGHT_BG = '#fbf1ec'
+
+const EmptyUser = ({ message }) => (
+    <TouchableOpacity style={styles.imagetextview}>
+        <Text style={styles.detailtext}>{message}</Text>
+    </TouchableOpacity>
+)
 
 const DeleteProfile = ({ navigation }) => {
     const [selectedUserId, setSelectedUserId] = useState(null);
@@ -17,7 +27,7 @@ const DeleteProfile = ({ navigation }) => {
 
     const fetchData = async () => {
         setLoading(true);
-        await getProfilesUploadedByAgent(setAcceptedData); 
+        await getProfilesUploadedByAgent(setAcceptedData);
         setLoading(false);
     };
 
@@ -34,7 +44,7 @@ const DeleteProfile = ({ navigation }) => {
                 console.error("Profile ID is required");
                 return;
             }
-    
+
             await firestore().collection('profiles').doc(selectedUserId).delete();
 
             fetchData();
@@ -62,32 +72,38 @@ const DeleteProfile = ({ navigation }) => {
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
                 <View style={styles.main}>
-                    <Header navigation={navigation} />
+                    <AgentsHeader navigation={navigation} />
                     <View>
                         <Text style={styles.assigntext}>Delete Profiles</Text>
                     </View>
 
-                    {acceptedData.length > 0 &&
+
                     <View style={styles.maincontent}>
-                        <View style={styles.imagecontainer}>
-                            {acceptedData.map((user) => (
-                                <TouchableOpacity key={user.id} style={styles.imagetextview}>
-                                    <View style={styles.imagetextviewchild}>
-                                        <Text style={styles.detailtext}>{user?.personal_info?.name}</Text>
-                                        <View style={styles.imagebox}>
-                                            <Image source={{ uri: user?.profile_pic }} style={styles.usersimage} />
+                        {acceptedData.length > 0 &&
+                            <View style={styles.imagecontainer}>
+                                {acceptedData.map((user) => (
+                                    <TouchableOpacity key={user.id} style={styles.imagetextview}>
+                                        <View style={styles.imagetextviewchild}>
+                                            <Text style={styles.detailtext}>{user?.personal_info?.name}</Text>
+                                            <View style={styles.imagebox}>
+                                                <Image source={{ uri: user?.profile_pic }} style={styles.usersimage} />
+                                            </View>
                                         </View>
-                                    </View>
-                                    <TouchableOpacity onPress={() => openModal(user.id)}>
-                                        <AIcon name='delete' size={25} color={'#000'} />
+                                        <TouchableOpacity onPress={() => openModal(user.id)}>
+                                        <Trash2 size={23} strokeWidth={1} />
+                                        </TouchableOpacity>
                                     </TouchableOpacity>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>}
+                                ))}
+                            </View>}
+                        {acceptedData.length == 0 &&
+                            <EmptyUser message='No Profiles Available' />
+                        }
+
+
+                    </View>
                 </View>
             </ScrollView>
-            <DeleteModal 
+            <DeleteModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 onConfirm={handleConfirm}
@@ -121,7 +137,6 @@ const styles = StyleSheet.create({
         color: '#000',
         alignItems: 'center',
         fontSize: 25,
-        fontWeight: 'bold',
         textAlign: 'center',
     },
 
@@ -147,21 +162,18 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        backgroundColor: '#e4d7cf',
         height: 'auto',
-        padding: 17,
-        borderRadius: 25
     },
     imagetextview: {
-        backgroundColor: '#e3ccc1',
-        borderRadius: 25,
+        backgroundColor: LIGHT_BG,
+        borderRadius: 8,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        height: 50,
+        height: 65,
         paddingHorizontal: 15,
-        overflow: 'hidden'
+        paddingVertical:10,
     },
     imagetextviewchild: {
         display: 'flex',
@@ -172,8 +184,8 @@ const styles = StyleSheet.create({
 
     detailtext: {
         color: 'black',
-        fontSize: 16,
-        fontWeight: 'bold'
+        fontSize: 15,
+        fontWeight: '500'
     },
 
     imagebox: {
@@ -199,5 +211,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
-      },
+    },
 })

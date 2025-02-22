@@ -1,32 +1,37 @@
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import useAgent from '../../hooks/useAgent';
 import { getFirstName } from '../../utils';
+import AgentsHeader from '../Header/AgentsHeader';
+
+const LIGHT_BG = '#fbf1ec'
 
 const AllAssignedUser = ({ navigation }) => {
     const [assignedData, setAssignedData] = useState([]);
-
+    const [loading, setLoading] = useState(false);
     const { getMatchingRequestData } = useAgent();
 
     useEffect(() => {
-        getMatchingRequestData(setAssignedData);
-    }, [])
+            const fetchData = async () => {
+                setLoading(true);
+                await getMatchingRequestData(setAssignedData); // Ensure data is fully fetched
+                setLoading(false);
+            };
+    
+            fetchData();
+        }, []);
 
     return (
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
                 <View style={styles.main}>
-                    <Header navigation={navigation} />
+                    <AgentsHeader navigation={navigation} />
                     <View>
                         <Text style={styles.assigntext}>Assigned Users</Text>
                     </View>
 
                     <View style={styles.maincontent}>
-                        <View style={styles.assignedbox}>
-                            <Text style={styles.uploadtext}>Assigned Users</Text>
-                            <TouchableOpacity onPress={() => navigation.navigate("AllAssignedUser")}><Text style={styles.viewalltext}>View All</Text></TouchableOpacity>
-                        </View>
 
                         <View style={styles.imagecontainer}>
                             {assignedData.map((user) => (
@@ -42,6 +47,9 @@ const AllAssignedUser = ({ navigation }) => {
                     </View>
                 </View>
             </ScrollView>
+            <View style={loading ? styles.loadingContainer : null}>
+                {loading && <ActivityIndicator size="large" color="#a4737b" />}
+            </View>
         </SafeAreaView>
     )
 }
@@ -68,7 +76,6 @@ const styles = StyleSheet.create({
         color: '#000',
         alignItems: 'center',
         fontSize: 25,
-        fontWeight: 'bold',
         textAlign: 'center',
     },
     
@@ -94,25 +101,22 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        backgroundColor: '#e4d7cf',
         height: 'auto',
-        padding: 17,
-        borderRadius: 25
     },
     imagetextview: {
-        backgroundColor: '#e3ccc1',
-        borderRadius: 25,
+        backgroundColor: LIGHT_BG,
+        borderRadius: 8,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        height: 43,
+        height: 65,
         paddingLeft: 15,
     },
     
     detailtext: {
         color: 'black',
-        fontSize: 16,
+        fontSize: 12,
         width: '80%',
     },
     
@@ -127,6 +131,16 @@ const styles = StyleSheet.create({
     usersimage: {
         width: '50%',
         resizeMode: 'contain'
+    },
+    loadingContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
 
 

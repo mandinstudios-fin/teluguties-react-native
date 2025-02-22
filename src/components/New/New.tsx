@@ -44,7 +44,7 @@ const New = ({navigation}) => {
 
           <View style={styles.container}>
             <View style={styles.subnavigationbar}>
-              <TouchableOpacity onPress={() => navigation.replace('Layout')}>
+              <TouchableOpacity onPress={() => navigation.push('Home')}>
                 <Text style={styles.subnavigationtext}>Daily</Text>
               </TouchableOpacity>
               <TouchableOpacity >

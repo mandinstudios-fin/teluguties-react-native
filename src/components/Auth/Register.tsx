@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -19,18 +20,34 @@ import useAuth from '../../hooks/useAuth';
 import auth from '@react-native-firebase/auth';
 import { TRegisterFormData } from '../../types';
 import firestore from '@react-native-firebase/firestore';
+import { Calendar } from "react-native-calendars";
 
 const { width, height } = Dimensions.get('window');
 
+const formatDate = (dateString) => {
+  const [year, month, day] = dateString.split("-");
+  return `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
+};
+
+const getYearList = () => {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: 100 }, (_, i) => currentYear - i); // Last 100 years
+};
+
 const Register = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
-  const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [formattedDate, setFormattedDate] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+
   const [formData, setFormData] = useState({
     dob: '',
     phoneNumber: '',
     selectedCode: '+91',
   });
+
+  console.log(formData)
 
   const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
     try {
@@ -118,29 +135,84 @@ const Register = ({ navigation }) => {
             <View style={styles.welcometextbody}>
               <Text style={styles.welcometext}>CREATE ACCOUNT</Text>
             </View>
-            {/* <TextInput
-              style={styles.name}
-              placeholder="Enter Your Full Name"
-              placeholderTextColor="#AFAFAF"
-              value={formData.fullname}
-              onChangeText={value => handleInputChange('fullname', value)}
-            /> */}
-            <TextInput
-              style={styles.name}
-              placeholder="DOB"
-              placeholderTextColor="#AFAFAF"
-              value={formData.dob}
-              onFocus={showDatepicker}
-            />
-            {show && (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                is24Hour={true}
-                display="default"
-                onChange={onChange}
+            <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.7}>
+              <TextInput
+                style={styles.name}
+                placeholder="Choose Date Of Birth"
+                placeholderTextColor="#BE7356"
+                value={formData.dob }
+                editable={false}
               />
-            )}
+            </TouchableOpacity>
+
+            <Modal visible={modalVisible} animationType="fade" transparent>
+              <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+                <View style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, width: 320, elevation: 5 }}>
+                  <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "center", color: "#444" }}>
+                    Select Date of Birth
+                  </Text>
+
+                  {/* Custom Year Picker */}
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
+                    {getYearList().map((year) => (
+                      <TouchableOpacity
+                        key={year}
+                        onPress={() => setSelectedYear(year)}
+                        style={{
+                          padding: 10,
+                          backgroundColor: selectedYear === year ? "#007AFF" : "#f1f1f1",
+                          borderRadius: 5,
+                          marginHorizontal: 5,
+                        }}
+                      >
+                        <Text style={{ color: selectedYear === year ? "#fff" : "#333", fontSize: 16 }}>{year}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+
+                  {/* Calendar */}
+                  <Calendar
+                    key={selectedYear} // Forces re-render when year changes
+                    current={`${selectedYear}-01-01`}
+                    onDayPress={(day) => {
+                      const newFormattedDate = formatDate(day.dateString); 
+                      handleInputChange('dob', newFormattedDate);
+                      setModalVisible(false);
+                    }}
+                    markedDates={{
+                      [selectedDate]: { selected: true, marked: true, selectedColor: "#007AFF" },
+                    }}
+                    maxDate={new Date().toISOString().split("T")[0]} // Prevents future dates
+                    theme={{
+                      todayTextColor: "#007AFF",
+                      arrowColor: "#007AFF",
+                    }}
+                  />
+
+                  {/* Buttons Row */}
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 15 }}>
+                    {/* Cancel Button */}
+                    <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 10 }}>
+                      <Text style={{ color: "red", fontSize: 16 }}>Cancel</Text>
+                    </TouchableOpacity>
+
+                    {/* Clear Date Button */}
+                    {selectedDate && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedDate("");
+                          setFormattedDate("");
+                          setModalVisible(false);
+                        }}
+                        style={{ padding: 10 }}
+                      >
+                        <Text style={{ color: "#007AFF", fontSize: 16 }}>Clear</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              </View>
+            </Modal>
             <View style={styles.phonenobody}>
               <View style={styles.phonecode}>
                 <Picker
@@ -162,7 +234,7 @@ const Register = ({ navigation }) => {
                 <TextInput
                   style={styles.phoneno}
                   placeholder="Enter Phone Number"
-                  placeholderTextColor="#AFAFAF"
+                  placeholderTextColor="#BE7356"
                   value={formData.phoneNumber}
                   onChangeText={value =>
                     handleInputChange('phoneNumber', value)
@@ -258,7 +330,7 @@ const styles = StyleSheet.create({
     borderColor: '#EBC7B1',
     borderWidth: 1,
     borderRadius: 12,
-    color: '#EBC7B1',
+    color: '#BE7356',
     paddingLeft: width / 40,
   },
   phonenobody: {
@@ -281,7 +353,7 @@ const styles = StyleSheet.create({
     color: '#EBC7B1',
   },
   picker: {
-    color: '#AFAFAF',
+    color: '#BE7356',
   },
   phonenomain: {
     flex: 1,

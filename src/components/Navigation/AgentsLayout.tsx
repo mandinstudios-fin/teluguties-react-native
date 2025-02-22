@@ -24,6 +24,7 @@ import Category from '../Auth/Category';
 import AgentsAssign from '../AgentsAssign/AgentsAssign';
 import AgentsAssignStack from '../AgentsAssign/AgentsAssignStack';
 import AgentsEarn from '../AgentsEarn/AgentsEarn';
+import {HandCoins, House, LayoutDashboard, LogOut, PhoneOutgoing, Trash, UserMinus} from 'lucide-react-native'
 
 
 const Tab = createBottomTabNavigator();
@@ -46,9 +47,13 @@ const AgentsBottomTabs = () => {
         component={AgentsHomeStack}
         options={{  
           tabBarIcon: ({ color, size }) => (
-            <IIcon name="home-outline" color={color} size={size} />
+            <House size={23} strokeWidth={1} />
           ),
           title: 'Home',
+          tabBarLabelStyle: {
+            fontSize: 14, 
+            fontWeight: '500',
+          },
         }}
       />
 
@@ -57,9 +62,13 @@ const AgentsBottomTabs = () => {
         component={AgentsAssignStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <FIcon name="dashboard" color={color} size={size} />
+            <LayoutDashboard size={23} strokeWidth={1} />
           ),
           title: 'Dashboard',
+          tabBarLabelStyle: {
+            fontSize: 14, 
+            fontWeight: '500',
+          },
         }}
       />
       <Tab.Screen
@@ -67,9 +76,13 @@ const AgentsBottomTabs = () => {
         component={AgentsEarn}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <IIcon name="star-outline" color={color} size={size} />
+            <HandCoins size={23} strokeWidth={1} />
           ),
           title: 'Earn',
+          tabBarLabelStyle: {
+            fontSize: 14, 
+            fontWeight: '500',
+          },
         }}
       />
     </Tab.Navigator>
@@ -122,16 +135,16 @@ const AgentsLayout = ({ navigation }) => {
           <DrawerItem
             label="Logout"
             onPress={handleLogout}
-            labelStyle={{ color: '#561825', fontWeight: 'bold' }}
-            icon={() => <AIcon name="logout" size={20} color="#561825" />}
+            labelStyle={{ color: '#561825', fontWeight: '500' }}
+            icon={() => <LogOut size={23} strokeWidth={1} color={'#561825'}/>}
           />
         </DrawerContentScrollView>
         <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 10 }}>
           <DrawerItem
             label="Delete Account"
             onPress={handleDeleteAccount}
-            labelStyle={{ color: 'red', fontWeight: 'bold' }}
-            icon={() => <AIcon name="delete" size={20} color="red" />}
+            labelStyle={{ color: 'red', fontWeight: '500' }}
+            icon={() => <Trash size={23} strokeWidth={1} color={'red'} />}
           />
         </View>
       </SafeAreaView>
@@ -147,7 +160,7 @@ const AgentsLayout = ({ navigation }) => {
         },
         drawerLabelStyle: {
           color: '#561825',
-          fontWeight: 'bold',
+          fontWeight: '500',
         },
         drawerActiveTintColor: '#E9BA9B',
         drawerInactiveTintColor: '#000',
@@ -166,11 +179,7 @@ const AgentsLayout = ({ navigation }) => {
 
       <Drawer.Screen name="Help Center" component={HelpCenter} options={{
         drawerIcon: ({ focused, size }) => (
-          <MIcon
-            name="add-call"
-            size={size}
-            color={focused ? '#E9BA9B' : '#561825'}
-          />
+          <PhoneOutgoing size={23} strokeWidth={1} color={'#561825'}/>
         ),
       }} />
 

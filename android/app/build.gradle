@@ -124,6 +124,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-safetynet:18.0.1' 
     implementation 'com.google.firebase:firebase-appcheck-playintegrity'
     implementation "androidx.core:core-splashscreen:1.0.1"
+    implementation "androidx.appcompat:appcompat:1.3.0"
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -136,6 +137,24 @@ allprojects {
     repositories {
         google() 
         mavenCentral()
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == '@react-native-firebase_firestore:bundleDebugAar') {
+        task.dependsOn(':react-native-firebase_firestore:writeDebugAarMetadata')
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'checkDebugAarMetadata') {
+        task.dependsOn(':@react-native-firebase_firestore:writeDebugAarMetadata')
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == '@react-native-firebase_firestore:packageDebugResources') {
+        task.dependsOn(':@react-native-firebase_firestore:generateDebugResValues')
     }
 }
 

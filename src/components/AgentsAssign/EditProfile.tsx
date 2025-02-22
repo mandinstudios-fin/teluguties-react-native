@@ -4,6 +4,16 @@ import Header from '../Header/Header'
 import useAgent from '../../hooks/useAgent';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import { getFirstName } from '../../utils';
+import AgentsHeader from '../Header/AgentsHeader';
+import {PencilLine} from 'lucide-react-native';
+
+const LIGHT_BG = '#fbf1ec'
+
+const EmptyUser = ({ message }) => (
+    <TouchableOpacity style={styles.imagetextview}>
+        <Text style={styles.detailtext}>{message}</Text>
+    </TouchableOpacity>
+)
 
 const EditProfile = ({ navigation }) => {
     const [acceptedData, setAcceptedData] = useState([]);
@@ -13,7 +23,7 @@ const EditProfile = ({ navigation }) => {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            await getProfilesUploadedByAgent(setAcceptedData); 
+            await getProfilesUploadedByAgent(setAcceptedData);
             setLoading(false);
         };
 
@@ -24,13 +34,14 @@ const EditProfile = ({ navigation }) => {
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
                 <View style={styles.main}>
-                    <Header navigation={navigation} />
+                    <AgentsHeader navigation={navigation} />
                     <View>
                         <Text style={styles.assigntext}>Edit Profiles</Text>
                     </View>
 
-                    {acceptedData.length > 0 &&
+
                     <View style={styles.maincontent}>
+                        {acceptedData.length > 0 &&
                         <View style={styles.imagecontainer}>
                             {acceptedData.map((user) => (
                                 <View key={user.id} style={styles.imagetextview}>
@@ -41,12 +52,17 @@ const EditProfile = ({ navigation }) => {
                                         </View>
                                     </View>
                                     <TouchableOpacity onPress={() => navigation.navigate('EditProfilesByAgent', { id: user.id })}>
-                                        <AIcon name='edit' size={25} color={'#000'} />
+                                    <PencilLine size={23} strokeWidth={1} />
                                     </TouchableOpacity>
                                 </View>
                             ))}
-                        </View>
-                    </View>}
+                        </View>}
+                        {acceptedData.length == 0 &&
+                        <EmptyUser message='No Profiles Available' />
+                    }
+                    </View>
+
+                    
                 </View>
             </ScrollView>
             <View style={loading ? styles.loadingContainer : null}>
@@ -78,7 +94,6 @@ const styles = StyleSheet.create({
         color: '#000',
         alignItems: 'center',
         fontSize: 25,
-        fontWeight: 'bold',
         textAlign: 'center',
     },
 
@@ -104,21 +119,18 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        backgroundColor: '#e4d7cf',
         height: 'auto',
-        padding: 17,
-        borderRadius: 25
     },
     imagetextview: {
-        backgroundColor: '#e3ccc1',
-        borderRadius: 25,
+        backgroundColor: LIGHT_BG,
+        borderRadius: 8,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        height: 50,
+        height: 65,
         paddingHorizontal: 15,
-        overflow: 'hidden'
+        paddingVertical:10,
     },
     imagetextviewchild: {
         display: 'flex',
@@ -129,8 +141,8 @@ const styles = StyleSheet.create({
 
     detailtext: {
         color: 'black',
-        fontSize: 16,
-        fontWeight: 'bold'
+        fontSize: 15,
+        fontWeight: '500'
     },
 
     imagebox: {
@@ -156,5 +168,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
-      },
+    },
 })

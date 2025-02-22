@@ -17,14 +17,27 @@ import {
     TouchableOpacity,
     Dimensions,
     ActivityIndicator,
+    Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import FIcon from 'react-native-vector-icons/Fontisto';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import useUpdateUserDetails from '../../hooks/useUpdateUserDetails';
 import useAgent from '../../hooks/useAgent';
+import { Camera } from 'lucide-react-native';
+import { Calendar } from 'react-native-calendars';
 
 const { width, height } = Dimensions.get('window');
+
+const formatDate = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    return `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
+};
+
+const getYearList = () => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 100 }, (_, i) => currentYear - i); // Last 100 years
+};
 
 // Step Components
 const GenderSelection = ({ formData, updateFormData, nextStep }) => (
@@ -98,7 +111,31 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
     </View>
 );
 
-const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep }) => {
+const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToast, errorToast }) => {
+
+    const [selectedDate, setSelectedDate] = useState("");
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [formattedDate, setFormattedDate] = useState("");
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const handleNextStep = () => {
+        if (!formData?.personal_info?.name) {
+            errorToast("Name Required");
+            return
+        }
+
+        if (!formData?.personal_info?.date_of_birth) {
+            errorToast("Date of Birth Required");
+            return
+        }
+
+        if (!formData?.religious_cultural?.religion) {
+            errorToast("Religion Required");
+            return
+        }
+
+        nextStep();
+    }
 
     return (
         <View style={styles.stepContainer}>
@@ -118,27 +155,83 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep }) => {
                     }
                 />
 
-                {/* <View style={styles.pickerinput}>
-        <Picker
-          selectedValue={formData?.personal_info.gender}
-          onValueChange={(itemValue) => {
-            updateFormData(prevData => ({ ...prevData, personal_info: { ...prevData.personal_info, gender: itemValue } }))
-          }}
-          style={styles.picker}
-        >
-          
-          <Picker.Item label="Male" value="Male" />
-          <Picker.Item label="Female" value="Female" />
-        </Picker>
-      </View> */}
+                <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.7}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Choose Date Of Birth"
+                        placeholderTextColor="#EBC7B1"
+                        value={formData?.personal_info?.date_of_birth}
+                        editable={false}
+                    />
+                </TouchableOpacity>
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="DOB (YYYY/MM/DD)"
-                    placeholderTextColor="#EBC7B1"
-                    value={formData?.personal_info.date_of_birth || ''}
-                    onChangeText={(value) => updateFormData(prevData => ({ ...prevData, personal_info: { ...prevData.personal_info, date_of_birth: value } }))}
-                />
+                <Modal visible={modalVisible} animationType="fade" transparent>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+                        <View style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, width: 320, elevation: 5 }}>
+                            <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "center", color: "#444" }}>
+                                Select Date of Birth
+                            </Text>
+
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
+                                {getYearList().map((year) => (
+                                    <TouchableOpacity
+                                        key={year}
+                                        onPress={() => setSelectedYear(year)}
+                                        style={{
+                                            padding: 10,
+                                            backgroundColor: selectedYear === year ? "#007AFF" : "#f1f1f1",
+                                            borderRadius: 5,
+                                            marginHorizontal: 5,
+                                        }}
+                                    >
+                                        <Text style={{ color: selectedYear === year ? "#fff" : "#333", fontSize: 16 }}>{year}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+
+                            <Calendar
+                                key={selectedYear} // Forces re-render when year changes
+                                current={`${selectedYear}-01-01`}
+                                onDayPress={(day) => {
+                                    const newFormattedDate = formatDate(day.dateString);
+                                    updateFormData(prevData => ({ ...prevData, personal_info: { ...prevData.personal_info, date_of_birth: newFormattedDate } }))
+                                    setModalVisible(false);
+                                }}
+                                markedDates={{
+                                    [selectedDate]: { selected: true, marked: true, selectedColor: "#007AFF" },
+                                }}
+                                maxDate={new Date().toISOString().split("T")[0]} // Prevents future dates
+                                theme={{
+                                    todayTextColor: "#007AFF",
+                                    arrowColor: "#007AFF",
+                                }}
+                            />
+
+                            {/* Buttons Row */}
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 15 }}>
+                                {/* Cancel Button */}
+                                <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 10 }}>
+                                    <Text style={{ color: "red", fontSize: 16 }}>Cancel</Text>
+                                </TouchableOpacity>
+
+                                {/* Clear Date Button */}
+                                {selectedDate && (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setSelectedDate("");
+                                            setFormattedDate("");
+                                            setModalVisible(false);
+                                        }}
+                                        style={{ padding: 10 }}
+                                    >
+                                        <Text style={{ color: "#007AFF", fontSize: 16 }}>Clear</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
 
                 <TextInput
                     style={styles.input}
@@ -366,7 +459,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep }) => {
                     <TouchableOpacity onPress={prevStep} style={styles.button}>
                         <Text style={styles.buttontext}>Previous</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={nextStep} style={styles.button}>
+                    <TouchableOpacity onPress={handleNextStep} style={styles.button}>
                         <Text style={styles.buttontext}>Next</Text>
                     </TouchableOpacity>
                 </View>
@@ -1085,6 +1178,20 @@ const ContactVerification = ({
     const currentUser = auth().currentUser;
     const { successToast, errorToast } = useToastHook();
 
+    const handleNextStep = () => {
+        if (!formData.contact_info.phone) {
+            errorToast('Phone Number Requied')
+            return
+        }
+
+        if (!formData?.contact_info.current_city) {
+            errorToast("Current City Required");
+            return
+        }
+
+        submitForm();
+    }
+
     const handleUploadProfilePic = async (imageUri: string) => {
         if (!currentUser) {
             errorToast("User not logged in");
@@ -1162,6 +1269,7 @@ const ContactVerification = ({
                             placeholder="+91"
                             placeholderTextColor="#EBC7B1"
                             value={formData?.contact_info?.selected_code}
+                            editable={false}
                         ></TextInput>
                     </View>
                     <View style={styles.phonenomain}>
@@ -1283,13 +1391,8 @@ const ContactVerification = ({
 
                 <View style={styles.profileimageupload}>
                     <Text style={styles.profiletext}>Profile pics</Text>
-                    <TouchableOpacity>
-                        <Icon
-                            color="#EBC7B1"
-                            size={30}
-                            name="attachment"
-                            onPress={openImagePicker}
-                        />
+                    <TouchableOpacity onPress={openImagePicker}>
+                        <Camera size={23} strokeWidth={1} color={'#EBC7B1'} />
                     </TouchableOpacity>
                 </View>
                 {/* {formData.profile_pic && <View style={{height:200, width:200}}>
@@ -1301,7 +1404,7 @@ const ContactVerification = ({
                     <TouchableOpacity onPress={prevStep} style={styles.button}>
                         <Text style={styles.buttontext}>Previous</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={submitForm}>
+                    <TouchableOpacity style={styles.button} onPress={handleNextStep}>
                         <Text style={styles.buttontext}>Submit</Text>
                     </TouchableOpacity>
                 </View>
@@ -1447,7 +1550,37 @@ const AgentUploadProfiles = ({ navigation }) => {
 
     const updateFormData = updater => setFormData(prev => ({ ...updater(prev) }));
 
+    const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
+        try {
+            const userSnapshot = await firestore()
+                .collection('profiles')
+                .where('contact_info.selected_code', '==', selectedCode)
+                .where('contact_info.phone', '==', phoneNumber)
+                .get();
+
+            const agentSnapshot = await firestore()
+                .collection('agents')
+                .where('selected_code', '==', selectedCode)
+                .where('phone', '==', phoneNumber)
+                .get();
+
+            if (!userSnapshot.empty || !agentSnapshot.empty) {
+                return true;
+            }
+            return false;
+        } catch (error) {
+            return false;
+        }
+    };
+
     const submitForm = async () => {
+        const phoneExists = await checkPhoneNumberExists(formData?.contact_info?.selected_code, formData?.contact_info?.phone);
+
+        if (phoneExists) {
+            errorToast("Phone Number Already Exists!")
+            return;
+        }
+
         await saveUserData();
 
         navigation.replace('AgentsLayout');
@@ -1492,6 +1625,8 @@ const AgentUploadProfiles = ({ navigation }) => {
                             updateFormData={updateFormData}
                             nextStep={nextStep}
                             prevStep={prevStep}
+                            successToast={successToast}
+                            errorToast={errorToast}
                         />
                     )}
                     {step === 3 && (
@@ -1566,7 +1701,6 @@ const styles = StyleSheet.create({
     },
     header: {
         fontSize: 28,
-        fontWeight: 'bold',
         color: 'black',
         textAlign: 'center',
         marginTop: height * 0.05,
@@ -1596,7 +1730,9 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#7b2a38'
     },
     female: {
         display: 'flex',
@@ -1689,7 +1825,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 12,
         borderColor: '#EBC7B1',
-        color: '#BE7356',
+        color: '#EBC7B1',
         height: 'auto',
         paddingLeft: width / 40,
         fontWeight: 'bold',

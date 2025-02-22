@@ -1,0 +1,26 @@
+// This script fixes the task dependency issues with React Native Firebase modules
+
+gradle.taskGraph.whenReady { graph ->
+    graph.allTasks.each { task ->
+        // Fix dependencies for all React Native Firebase Firestore tasks
+        if (task.path.contains('react-native-firebase_firestore') || 
+            task.path.contains('@react-native-firebase_firestore')) {
+            
+            // Find corresponding tasks from the other naming convention
+            def alternatePrefix = task.path.startsWith(':@') ? 
+                task.path.replace(':@', ':') : 
+                task.path.replace(':', ':@')
+            
+            graph.allTasks.each { potentialDependency ->
+                if (potentialDependency.path.startsWith(alternatePrefix)) {
+                    // Add as dependency if it's a generation task that needs to run first
+                    if (potentialDependency.name.contains('generate') || 
+                        potentialDependency.name.contains('write') || 
+                        potentialDependency.name.contains('create')) {
+                        task.dependsOn(potentialDependency)
+                    }
+                }
+            }
+        }
+    }
+}

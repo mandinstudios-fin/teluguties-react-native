@@ -11,7 +11,7 @@ const DeleteModal = ({ visible, onClose, onConfirm }) => {
         >
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
-                    <Text style={styles.modalText}>Are you sure?</Text>
+                    <Text style={styles.modalText}>Are you sure to Delete?</Text>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={styles.noButton} onPress={onClose}>
                             <Text style={styles.noText}>No</Text>

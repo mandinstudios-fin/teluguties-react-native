@@ -151,7 +151,6 @@ export const isUserRejected = async (userId) => {
     const agentDoc = await agentRef.get();
 
     if (!agentDoc.exists) {
-      console.error("Agent document not found");
       return false;
     }
 

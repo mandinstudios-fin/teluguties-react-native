@@ -10,21 +10,15 @@ import {
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getUserCategory, getUserDetailsByCategory } from '../../utils';
+import { Bell, BellDot, BellRing, Menu } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
 const Header = ({ navigation }) => {
-  const [category, setCategory] = useState<string | null>(null);
+  const [category, setCategory] = useState('profiles');
   const [firestoreData, setFirestoreData] = useState<any>(null);
 
-  useEffect(() => {
-    const handleCategory = async () => {
-      const categoryData = await getUserCategory();
-      setCategory(categoryData);
-    }
 
-    handleCategory();
-  }, [])
 
   useEffect(() => {
     if (category) {
@@ -42,7 +36,7 @@ const Header = ({ navigation }) => {
       <View>
         <View style={styles.topsection}>
           <TouchableOpacity
-            onPress={() => navigation.navigate(category === 'profiles' ? 'ProfileDetails' : 'ProfileDetailsAgents')}
+            onPress={() => navigation.navigate('ProfileDetails')}
             style={styles.profile}
           >
             {
@@ -59,12 +53,11 @@ const Header = ({ navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.iconcontainer}>
-            {category === 'profiles' &&
             <TouchableOpacity onPress={() => navigation.navigate('UserNotifications')}>
-              <Icon name="notifications-outline" size={30} color="#AFAFAF" />
-            </TouchableOpacity>}
+              <BellDot size={25} strokeWidth={1} />
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-              <Icon name="menu" size={40} color="#AFAFAF" />
+            <Menu size={27} strokeWidth={1} />
             </TouchableOpacity>
           </View>
 

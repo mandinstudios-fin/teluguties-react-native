@@ -39,9 +39,9 @@ const Login = ({ navigation }) => {
         .get();
 
       if (!userSnapshot.empty || !agentSnapshot.empty) {
-        return true; // Phone number exists in either collection
+        return true; 
       }
-      return false; // Phone number does not exist
+      return false; 
     } catch (error) {
       console.error("Error checking phone number:", error);
       return false;
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     gap: width / 30,
   },
   picker: {
-    color: '#AFAFAF',
+    color: '#BE7356',
   },
   phonecode: {
     width: '30%',
@@ -269,14 +269,17 @@ const styles = StyleSheet.create({
   },
   createtext: {
     color: '#A4737B',
+    fontWeight:'800'
   },
   footerbody: {
     paddingVertical: width / 40,
+    marginTop:width/15
   },
   footer: {},
   footertext: {
     textAlign: 'center',
     color: 'black',
+    fontSize:12
   },
   loadingContainer: {
     position: 'absolute',

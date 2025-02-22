@@ -20,6 +20,7 @@ import {
   } from '@react-navigation/bottom-tabs';
 import Header from '../Header/Header';
 import useAgent from '../../hooks/useAgent';
+import AgentsHeader from '../Header/AgentsHeader';
   
   const Stack = createStackNavigator();
   const { width } = Dimensions.get('window');
@@ -47,7 +48,7 @@ import useAgent from '../../hooks/useAgent';
       <SafeAreaView style={styles.safearea}>
         <ScrollView>
           <View style={styles.main}>
-            <Header navigation={navigation} />
+            <AgentsHeader navigation={navigation} />
             <View style={styles.boxContainer}>
               <View style={styles.box}></View>
             </View>

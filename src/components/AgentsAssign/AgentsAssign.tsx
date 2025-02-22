@@ -5,8 +5,13 @@ import IIcon from 'react-native-vector-icons/SimpleLineIcons';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import useAgent from '../../hooks/useAgent';
 import { getFirstName } from '../../utils';
+import { ArrowUpFromLine, ArrowUpRight, ChevronRight, UserCheck, UserPen, UserX } from 'lucide-react-native';
+import AgentsHeader from '../Header/AgentsHeader';
 
 const { height, width } = Dimensions.get('window');
+
+const LIGHT_BG = '#fbf1ec'
+
 
 
 
@@ -29,12 +34,18 @@ const AgentsAssign = ({ navigation }) => {
     }, []);
     console.log(assignedData)
 
+    const EmptyUser = ({message}) => (
+        <TouchableOpacity style={styles.imagetextview}>
+            <Text style={styles.detailtext}>{message}</Text>
+        </TouchableOpacity>
+    )
+
     return (
 
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
                 <View style={styles.main}>
-                    <Header navigation={navigation} />
+                    <AgentsHeader navigation={navigation} />
 
                     <View style={styles.maincontent}>
                         <View style={styles.dashboardcontainer}>
@@ -44,8 +55,8 @@ const AgentsAssign = ({ navigation }) => {
                         <View>
                             <Text style={styles.uploadtext}>Upload Profiles</Text>
                             <TouchableOpacity style={styles.arrowcontainer} onPress={() => navigation.navigate("AgentUploadProfiles")}>
-                                <Text style={styles.detailtext}>Fill Your Matche Details/Uploads</Text>
-                                <IIcon name="arrow-right" color={'#AF694A'} size={30} />
+                                <Text style={styles.detailtext}>Fill Your Match Details/Uploads</Text>
+                                <ChevronRight size={27} strokeWidth={1} />
                             </TouchableOpacity>
                         </View>
 
@@ -65,7 +76,11 @@ const AgentsAssign = ({ navigation }) => {
                                             </View>
                                         </TouchableOpacity>
                                     ))}
-                                </View>}
+                            </View>}
+
+                            {assignedData.length == 0 &&
+                            <EmptyUser message='No Assigned Users'/>
+                            }
 
                         </View>
 
@@ -86,6 +101,10 @@ const AgentsAssign = ({ navigation }) => {
                                         </View>
                                     ))}
                                 </View>}
+
+                                {matchedData.length == 0 &&
+                            <EmptyUser message='No Matched Users'/>
+                            }
                         </View>
 
                         <View>
@@ -93,27 +112,27 @@ const AgentsAssign = ({ navigation }) => {
 
                             <View style={styles.managechild}>
                                 <View style={styles.manangetwochild}>
-                                    <TouchableOpacity style={styles.managechildcontainer} onPress={() => navigation.navigate('DeleteProfile')}>
-                                        <View><AIcon name='deleteuser' size={27} color={'black'} /></View>
-                                        <View><Text style={styles.managechildtext}>Delete Profile</Text></View>
+                                    <TouchableOpacity style={[styles.managechildcontainer, styles.managechildcontainerbig]} onPress={() => navigation.navigate('EditProfile')}>
+                                        <View><UserPen size={23} strokeWidth={1} /></View>
+                                        <View><Text style={styles.managechildtext}>Edit Profile</Text></View>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity style={styles.managechildcontainer} onPress={() => navigation.navigate('EditProfile')}>
-                                        <View><AIcon name='edit' size={27} color={'black'} /></View>
-                                        <View><Text style={styles.managechildtext}>Edit Profile</Text></View>
+                                    <TouchableOpacity style={[styles.managechildcontainer, styles.managechildcontainersmall]} onPress={() => navigation.navigate('DeleteProfile')}>
+                                        <View><UserX size={23} strokeWidth={1} /></View>
+                                        <View><Text style={styles.managechildtext}>Delete Profile</Text></View>
                                     </TouchableOpacity>
                                 </View>
 
 
                                 <View style={styles.manangetwochild}>
-                                    <TouchableOpacity style={styles.managechildcontainer} onPress={() => navigation.navigate('UploadedProfiles')}>
-                                        <View><AIcon name='clouduploado' size={27} color={'black'} /></View>
-                                        <View><Text style={styles.managechildtext}>Uploaded Profiles</Text></View>
+                                    <TouchableOpacity style={[styles.managechildcontainer, styles.managechildcontainersmall]} onPress={() => navigation.navigate('AgentsAcceptedProfiles')}>
+                                        <View><UserCheck size={23} strokeWidth={1} /></View>
+                                        <View><Text style={styles.managechildtext}>Accepted Profiles</Text></View>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity style={styles.managechildcontainer} onPress={() => navigation.navigate('AgentsAcceptedProfiles')}>
-                                        <View><AIcon name='checkcircleo' size={27} color={'black'} /></View>
-                                        <View><Text style={styles.managechildtext}>Accepted Profiles</Text></View>
+                                    <TouchableOpacity style={[styles.managechildcontainer, styles.managechildcontainerbig]} onPress={() => navigation.navigate('UploadedProfiles')}>
+                                        <View><ArrowUpFromLine size={23} strokeWidth={1} /></View>
+                                        <View><Text style={styles.managechildtext}>Uploaded Profiles</Text></View>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -145,7 +164,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20
     },
     maincontent: {
-        paddingHorizontal: width * 0.04,
+        paddingHorizontal: width * 0.05,
         gap: 15
     },
     dashboardcontainer: {
@@ -154,26 +173,25 @@ const styles = StyleSheet.create({
     dashboardtext: {
         color: 'black',
         fontSize: 30,
-        fontWeight: 'bold'
     },
     uploadtext: {
         color: 'black',
         fontSize: 20,
-        fontWeight: 'bold',
     },
     arrowcontainer: {
         display: 'flex',
+        alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: '#e4d7cf',
+        backgroundColor: LIGHT_BG,
         paddingHorizontal: 27,
-        paddingVertical: 30,
-        borderRadius: 25,
+        paddingVertical: 20,
+        borderRadius: 8,
         marginTop: 5
     },
     detailtext: {
         color: 'black',
-        fontSize: 16,
+        fontSize: 12,
         width: '80%',
     },
     assignedbox: {
@@ -184,26 +202,22 @@ const styles = StyleSheet.create({
 
     viewalltext: {
         color: 'gray',
-        fontSize: 14,
+        fontSize: 12,
     },
     imagecontainer: {
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        backgroundColor: '#e4d7cf',
-        height: 'auto',
-        padding: 17,
-        borderRadius: 25,
         marginTop: 5
     },
     imagetextview: {
-        backgroundColor: '#e3ccc1',
-        borderRadius: 25,
+        backgroundColor: LIGHT_BG,
+        borderRadius: 8,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        height: 43,
+        height: 65,
         paddingLeft: 15,
     },
 
@@ -253,9 +267,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         gap: 10,
         alignItems: 'center',
-        backgroundColor: '#e4d7cf',
-        borderRadius: 25,
-        padding: 20,
         marginTop: 5
     },
     manangetwochild: {
@@ -266,14 +277,21 @@ const styles = StyleSheet.create({
     managechildcontainer: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#e3ccc1',
-        borderRadius: 25,
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between',
+        backgroundColor: LIGHT_BG,
+        borderRadius: 8,
+        paddingVertical: 20,
+        paddingHorizontal: 15
+    },
+    managechildcontainerbig: {
         width: '50%',
-        height: 100
+    },
+    managechildcontainersmall: {
+        width: '50%',
     },
     managechildtext: {
-        fontSize: 16,
+        fontSize: 12,
         color: '#000'
     },
     loadingContainer: {
@@ -286,4 +304,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
+
 })

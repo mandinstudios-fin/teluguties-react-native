@@ -25,6 +25,7 @@ import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import useToastHook from '../../utils/useToastHook';
 import AgentsStack from '../Agents/AgentsStack';
+import { BadgeIndianRupee, Handshake, Heart, House, LogOut, Pencil, PhoneOutgoing, Trash } from 'lucide-react-native';
 
 
 const Tab = createBottomTabNavigator();
@@ -40,14 +41,14 @@ const BottomTabs = () => {
         headerShown: false,
         tabBarStyle: { backgroundColor: '#D9D9D9', height: height / 16 },
         tabBarActiveTintColor: 'black',
-        tabBarLabelStyle: { fontWeight: 'bold', fontSize: 15 },
+        tabBarLabelStyle: { fontWeight: '500', fontSize: 14 },
       }}>
       <Tab.Screen
         name="HomeStack"
         component={HomeStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <IIcon name="home-outline" color={color} size={size} />
+            <House size={23} strokeWidth={1} />
           ),
           title: 'Home',
         }}
@@ -58,7 +59,7 @@ const BottomTabs = () => {
         component={MatchesStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <IIcon name="heart-outline" color={color} size={size} />
+            <Heart size={23} strokeWidth={1} />
           ),
           title: 'Matches',
         }}
@@ -68,7 +69,7 @@ const BottomTabs = () => {
         component={PrimeStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <IIcon name="star-outline" color={color} size={size} />
+            <BadgeIndianRupee size={23} strokeWidth={1} />
           ),
           title: 'Packages',
         }}
@@ -78,7 +79,7 @@ const BottomTabs = () => {
         component={AgentsStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <MCIcon name="support-agent" color={color} size={size} />
+            <Handshake size={20} strokeWidth={1} />
           ),
           title: 'Agent',
         }}
@@ -133,16 +134,16 @@ const Layout = ({ navigation }) => {
           <DrawerItem
             label="Logout"
             onPress={handleLogout}
-            labelStyle={{ color: '#561825', fontWeight: 'bold' }}
-            icon={() => <AIcon name="logout" size={20} color="#561825" />}
+            labelStyle={{ color: '#561825', fontWeight: '500' }}
+            icon={() => <LogOut size={23} strokeWidth={1} color={'#561825'}/>}
           />
         </DrawerContentScrollView>
         <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 10 }}>
           <DrawerItem
             label="Delete Account"
             onPress={handleDeleteAccount}
-            labelStyle={{ color: 'red', fontWeight: 'bold' }}
-            icon={() => <AIcon name="delete" size={20} color="red" />}
+            labelStyle={{ color: 'red', fontWeight: '500' }}
+            icon={() => <Trash size={23} strokeWidth={1} color={'red'} />}
           />
         </View>
       </SafeAreaView>
@@ -158,7 +159,7 @@ const Layout = ({ navigation }) => {
         },
         drawerLabelStyle: {
           color: '#561825',
-          fontWeight: 'bold',
+          fontWeight: '500',
         },
         drawerActiveTintColor: '#E9BA9B',
         drawerInactiveTintColor: '#000',
@@ -176,22 +177,14 @@ const Layout = ({ navigation }) => {
       />
       <Drawer.Screen name="Edit Profile" component={CreateProfile} options={{
         drawerIcon: ({ focused, size }) => (
-          <MIcon
-            name="create"
-            size={size}
-            color={focused ? '#E9BA9B' : '#561825'}
-          />
+          <Pencil size={23} strokeWidth={1} color={'#561825'}/>
         ),
 
       }} />
 
       <Drawer.Screen name="Help Center" component={HelpCenter} options={{
         drawerIcon: ({ focused, size }) => (
-          <MIcon
-            name="add-call"
-            size={size}
-            color={focused ? '#E9BA9B' : '#561825'}
-          />
+          <PhoneOutgoing size={23} strokeWidth={1} color={'#561825'}/>
         ),
       }} />
 
