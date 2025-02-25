@@ -13,12 +13,8 @@ import {
   Modal,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import phoneCodesData from '../../assets/CountryCodes.json';
-import useAuth from '../../hooks/useAuth';
-import auth from '@react-native-firebase/auth';
-import { TRegisterFormData } from '../../types';
 import firestore from '@react-native-firebase/firestore';
 import { Calendar } from "react-native-calendars";
 

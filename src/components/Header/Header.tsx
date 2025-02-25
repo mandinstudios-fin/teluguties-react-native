@@ -11,14 +11,46 @@ import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getUserCategory, getUserDetailsByCategory } from '../../utils';
 import { Bell, BellDot, BellRing, Menu } from 'lucide-react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming
+} from "react-native-reanimated";
 
 const { width, height } = Dimensions.get('window');
 
 const Header = ({ navigation }) => {
   const [category, setCategory] = useState('profiles');
   const [firestoreData, setFirestoreData] = useState<any>(null);
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
 
+  useEffect(() => {
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.07, { duration: 500 }), // Scale up
+        withTiming(1, { duration: 500 }) // Scale down
+      ),
+      -1, // Infinite loop
+      true
+    );
 
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.5, { duration: 500 }), // Fade out
+        withTiming(1, { duration: 500 }) // Fade in
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
 
   useEffect(() => {
     if (category) {
@@ -40,9 +72,9 @@ const Header = ({ navigation }) => {
             style={styles.profile}
           >
             {
-              firestoreData?.profile_pic || firestoreData?.profilepic ? (
+              firestoreData?.contactInformation?.profilePicture ? (
                 <Image
-                  source={{ uri: firestoreData.profile_pic || firestoreData.profilepic }}
+                  source={{ uri: firestoreData?.contactInformation?.profilePicture }}
                   style={{ height: 50, width: 50, borderRadius: 500 }}
                   resizeMode="cover"
                 />
@@ -53,11 +85,13 @@ const Header = ({ navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.iconcontainer}>
-            <TouchableOpacity onPress={() => navigation.navigate('UserNotifications')}>
-              <BellDot size={25} strokeWidth={1} />
+            <TouchableOpacity onPress={() => navigation.navigate("UserNotifications")}>
+              <Animated.View style={animatedStyle}>
+                <BellDot size={25} strokeWidth={1} color={'#7b2a38'}/>
+              </Animated.View>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-            <Menu size={27} strokeWidth={1} />
+              <Menu size={27} strokeWidth={1} />
             </TouchableOpacity>
           </View>
 
@@ -116,7 +150,7 @@ const styles = StyleSheet.create({
   iconcontainer: {
     display: 'flex',
     flexDirection: 'row',
-    gap: 10,
+    gap: 15,
     alignItems: 'center'
   }
 });

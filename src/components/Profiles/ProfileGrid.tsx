@@ -13,7 +13,7 @@ import auth from '@react-native-firebase/auth';
 import ProfileImage from './ProfileImage';
 import AgentsProfileImage from '../AgentsProfileImage/AgentsProfileImage';
 
-const numColumns = 2;
+const numColumns = 1;
 const {width} = Dimensions.get('window');
 const itemSize = width / numColumns;
 const gap = 20;
@@ -38,11 +38,7 @@ const ProfileGrid = ({data, navigation, isAgent = false} : ProfileGridProps) => 
         <AgentsProfileImage agent={item} navigation={navigation} />
       )}
       keyExtractor={item => item.id}
-      numColumns={numColumns}
       showsVerticalScrollIndicator={false}
-      
-      columnWrapperStyle={{ gap: 15 }}
-
       ListHeaderComponent={
         <View style={styles.headerContainer}>
           <Text style={styles.headerText}>{''}</Text>
@@ -67,10 +63,8 @@ const ProfileGrid = ({data, navigation, isAgent = false} : ProfileGridProps) => 
         <ProfileImage user={item} navigation={navigation} />
       )}
       keyExtractor={item => item.id}
-      numColumns={numColumns}
       showsVerticalScrollIndicator={false}
       
-      columnWrapperStyle={{ gap: 15 }}
 
       ListHeaderComponent={
         <View style={styles.headerContainer}>
@@ -94,6 +88,7 @@ const styles = StyleSheet.create({
     flex:1,
     gap: 15,
     alignItems:'center',
+    paddingHorizontal: 15
   },
   oneitem: {
     alignItems: 'center',

@@ -5,6 +5,7 @@ import Agents from './Agents';
 import AgentsProfileDetails from '../AgentsProfileImage/AgentsProfileDetails';
 import ProfileDetails from '../ProfileDetails/ProfileDetails';
 import UserNotifications from '../Header/UserNotifications';
+import DrawerSceneWrapper from '../Navigation/draw';
 
 const Stack = createStackNavigator();
 
@@ -15,12 +16,12 @@ export default function AgentsStack() {
         name={"Agents"}
         component={Agents}
       />
-      <Stack.Screen name="ProfileDetails" component={ProfileDetails} options={{ presentation: 'transparentModal' }}/>
+      <Stack.Screen name="ProfileDetails" component={ProfileDetails} options={{ presentation: 'transparentModal' }} />
       <Stack.Screen
         name={"AgentsProfileDetails"}
         component={AgentsProfileDetails}
       />
-      <Stack.Screen name="UserNotifications" component={UserNotifications}  options={{presentation:'card'}}/>
+      <Stack.Screen name="UserNotifications" component={UserNotifications} options={{ presentation: 'modal' }} />
 
     </Stack.Navigator>
   )

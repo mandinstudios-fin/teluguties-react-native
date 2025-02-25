@@ -46,9 +46,9 @@ const EditProfile = ({ navigation }) => {
                             {acceptedData.map((user) => (
                                 <View key={user.id} style={styles.imagetextview}>
                                     <View style={styles.imagetextviewchild}>
-                                        <Text style={styles.detailtext}>{user?.personal_info?.name}</Text>
+                                        <Text style={styles.detailtext}>{user?.personalInformation?.firstName} {user?.personalInformation?.lastName}</Text>
                                         <View style={styles.imagebox}>
-                                            <Image source={{ uri: user?.profile_pic }} style={styles.usersimage} />
+                                            <Image source={{ uri: user?.contactInformation?.profilePicture || 'https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg' }} style={styles.usersimage} />
                                         </View>
                                     </View>
                                     <TouchableOpacity onPress={() => navigation.navigate('EditProfilesByAgent', { id: user.id })}>

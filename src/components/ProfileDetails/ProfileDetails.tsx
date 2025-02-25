@@ -13,10 +13,7 @@ import {
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import auth from '@react-native-firebase/auth';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import Header from '../Header/Header';
 import firestore from '@react-native-firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import useToastHook from '../../utils/useToastHook';
 import { ChevronLeft } from 'lucide-react-native';
 
@@ -67,7 +64,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     }
 
     const checkEmailValidation = async (email: string) => {
-        const querySnapshot = await firestore().collection('profiles').where('contact_info.email', '==', email)
+        const querySnapshot = await firestore().collection('profiles').where('contactInformation.email', '==', email)
 
         if (querySnapshot.empty) {
             return true;
@@ -79,8 +76,8 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     const handleUserUpdate = async () => {
         const currentUser = auth().currentUser;
 
-        if (!firestoreData?.contact_info?.email && userData?.contact_info?.email) {
-            if (!checkEmailValidation(userData?.contact_info?.email) && !checkEmail(userData?.contact_info?.email)) {
+        if (!firestoreData?.contactInformation?.email && userData?.contactInformation?.email) {
+            if (!checkEmailValidation(userData?.contactInformation?.email) && !checkEmail(userData?.contactInformation?.email)) {
                 Alert.alert("Email already exists or Invalid Email");
                 return;
             }
@@ -163,22 +160,33 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                             <View>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder={userData?.personal_info?.name ?? "Full Name"}
+                                    placeholder={userData?.personalInformation?.firstName ?? "First Name"}
                                     placeholderTextColor="#EBC7B1"
-                                    value={userData?.personal_info?.name ?? ""}
-                                    onChangeText={(value) => handleInputChange('peraonal_info', 'name', value)}
-                                    editable={!firestoreData?.personal_info?.name}
+                                    value={userData?.personalInformation?.firstName ?? ""}
+                                    onChangeText={(value) => handleInputChange('personalInformation', 'fullName', value)}
+                                    editable={!firestoreData?.personalInformation?.firstName}
+                                    ref={nameRef}
+                                />
+                            </View>
+                            <View>
+                            <TextInput
+                                    style={styles.input}
+                                    placeholder={userData?.personalInformation?.lastName ?? "Last Name"}
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.personalInformation?.lastName ?? ""}
+                                    onChangeText={(value) => handleInputChange('personalInformation', 'lastName', value)}
+                                    editable={!firestoreData?.personalInformation?.lastName}
                                     ref={nameRef}
                                 />
                             </View>
                             <View>
                                 <TextInput
-                                    placeholder={userData?.personal_info?.date_of_birth ?? "DOB"}
+                                    placeholder={userData?.personalInformation?.dateOfBirth ?? "DOB"}
                                     style={styles.input}
                                     placeholderTextColor="#EBC7B1"
-                                    value={userData?.personal_info?.date_of_birth ?? ""}
-                                    onChangeText={(value) => handleInputChange('personal_info', 'date_of_birth', value)}
-                                    editable={!firestoreData?.personal_info?.date_of_birth}
+                                    value={userData?.personalInformation?.dateOfBirth ?? ""}
+                                    onChangeText={(value) => handleInputChange('personalInformation', 'dateOfBirth', value)}
+                                    editable={!firestoreData?.personalInformation?.dateOfBirth}
                                     ref={dobRef}
                                 />
                             </View>
@@ -186,19 +194,16 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                                 <TextInput
                                     placeholder={"Email"}
                                     style={styles.input}
-                                    value={userData?.contact_info?.email ?? ""}
-                                    onChangeText={(value) => handleInputChange('contact_info', 'email', value)}
+                                    value={userData?.contactInformation?.email ?? ""}
+                                    onChangeText={(value) => handleInputChange('contactInformation', 'email', value)}
                                     placeholderTextColor="#EBC7B1"
-                                    editable={!firestoreData?.contact_info?.email}
+                                    editable={!firestoreData?.contactInformation?.email}
                                     ref={emailRef}
                                 />
                             </View>
                             <View style={styles.phonecontainer}>
-                                <View style={styles.code}>
-                                    <TextInput placeholder={userData?.contact_info?.selected_code} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly />
-                                </View>
                                 <View style={styles.phone}>
-                                    <TextInput placeholder={userData?.contact_info?.phone} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
+                                    <TextInput placeholder={userData?.contactInformation?.phone} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
                                 </View>
                             </View>
 
@@ -244,7 +249,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#BE7356',
+        backgroundColor: '#7b2a38',
         paddingVertical: width / 40,
     },
     headertext: {

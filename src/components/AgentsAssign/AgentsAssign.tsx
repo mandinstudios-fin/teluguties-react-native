@@ -32,9 +32,8 @@ const AgentsAssign = ({ navigation }) => {
 
         fetchData();
     }, []);
-    console.log(assignedData)
 
-    const EmptyUser = ({message}) => (
+    const EmptyUser = ({ message }) => (
         <TouchableOpacity style={styles.imagetextview}>
             <Text style={styles.detailtext}>{message}</Text>
         </TouchableOpacity>
@@ -66,20 +65,56 @@ const AgentsAssign = ({ navigation }) => {
                                 <TouchableOpacity onPress={() => assignedData.length > 0 && navigation.navigate("AllAssignedUser")}><Text style={styles.viewalltext}>View All</Text></TouchableOpacity>
                             </View>
 
-                            {assignedData.length > 0 &&
+                            {assignedData.length > 0 && (
                                 <View style={styles.imagecontainer}>
-                                    {assignedData.slice(0, 2).map((user) => (
-                                        <TouchableOpacity onPress={() => navigation.navigate("UserProfileDetails", { user })} key={user.id} style={styles.imagetextview}>
-                                            <Text style={styles.detailtext}>{getFirstName(user?.personal_info?.name)} wants to connect with you!</Text>
-                                            <View style={styles.imagebox}>
-                                                <Image source={require('../../assets/users.png')} style={styles.usersimage} />
-                                            </View>
-                                        </TouchableOpacity>
-                                    ))}
-                            </View>}
+                                    {assignedData.slice(0, 3).map((user, index) => {
+                                        const isPair = user?.userADetails || user?.userBDetails;
+
+                                        if (isPair) {
+                                            // Handling paired users
+                                            const { userADetails, userBDetails } = user || {};
+                                            const firstNameA = userADetails?.personalInformation?.firstName || "Someone";
+                                            const firstNameB = userBDetails?.personalInformation?.firstName || "Someone else";
+
+                                            return (
+                                                <TouchableOpacity
+                                                    onPress={() => navigation.navigate("UserProfileDetails", { user: userADetails })}
+                                                    key={userADetails?.id || userBDetails?.id || index} // Unique key
+                                                    style={styles.imagetextview}
+                                                >
+                                                    <Text style={styles.detailtext}>
+                                                        {firstNameA} and {firstNameB} want to connect with you!
+                                                    </Text>
+                                                    <View style={styles.imagebox}>
+                                                        <Image source={require("../../assets/users.png")} style={styles.usersimage} />
+                                                    </View>
+                                                </TouchableOpacity>
+                                            );
+                                        } else {
+                                            // Handling single user
+                                            const firstName = user?.personalInformation?.firstName || "Someone";
+
+                                            return (
+                                                <TouchableOpacity
+                                                    onPress={() => navigation.navigate("UserProfileDetails", { user })}
+                                                    key={user?.id || index} // Unique key
+                                                    style={styles.imagetextview}
+                                                >
+                                                    <Text style={styles.detailtext}>
+                                                        {firstName} wants to connect with you!
+                                                    </Text>
+                                                    <View style={styles.imagebox}>
+                                                        <Image source={require("../../assets/users.png")} style={styles.usersimage} />
+                                                    </View>
+                                                </TouchableOpacity>
+                                            );
+                                        }
+                                    })}
+                                </View>
+                            )}
 
                             {assignedData.length == 0 &&
-                            <EmptyUser message='No Assigned Users'/>
+                                <EmptyUser message='No Assigned Users' />
                             }
 
                         </View>
@@ -102,8 +137,8 @@ const AgentsAssign = ({ navigation }) => {
                                     ))}
                                 </View>}
 
-                                {matchedData.length == 0 &&
-                            <EmptyUser message='No Matched Users'/>
+                            {matchedData.length == 0 &&
+                                <EmptyUser message='No Matched Users' />
                             }
                         </View>
 

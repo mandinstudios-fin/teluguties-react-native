@@ -42,7 +42,6 @@ const Home = ({ navigation }) => {
         setData(data);
     } 
 
-
     homeData();
   }, []);
 

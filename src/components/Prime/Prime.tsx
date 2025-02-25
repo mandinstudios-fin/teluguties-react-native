@@ -20,9 +20,9 @@ import { compareDate, formatDate, getTodaysDate, parseDate } from '../../utils';
 const { width, height } = Dimensions.get('window');
 
 const membershipData = [
-  { id: '1', title: 'Silver Package', price: '₹499',agent:'Without Agent'},
-  { id: '2', title: 'Gold Package', price: '₹999',agent:'Single Agent'},
-  { id: '3', title: 'Diamond Plus', price: '₹6000',agent:'Multiple Agents'},
+  { id: '1', title: 'Silver Package', price: '₹499', agent: 'Without Agent' },
+  { id: '2', title: 'Gold Package', price: '₹999', agent: 'Single Agent' },
+  { id: '3', title: 'Diamond Plus', price: '₹6000', agent: 'Multiple Agents' },
 ];
 
 const Prime = ({ navigation }) => {
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   box: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'white',
     borderColor: '#AFAFAF',
     borderWidth: 0.7,
     width: width - width / 12,
@@ -229,6 +229,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: width * 0.05,
     paddingVertical: width * 0.07,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 12,
+    shadowOpacity: 0.2,
   },
   membershipcontainer: {
     display: 'flex',

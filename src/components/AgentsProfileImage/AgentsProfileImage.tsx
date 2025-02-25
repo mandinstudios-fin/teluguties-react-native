@@ -6,6 +6,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
 import { getFirstName, getUsersAge } from '../../utils';
 import IIcon from 'react-native-vector-icons/FontAwesome6';
+import { ChevronRight, MapPin, Star } from 'lucide-react-native';
 
 const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient)
 const shimmerColors = ['#D0D0D0', '#E5E5E5', '#D0D0D0'];
@@ -42,20 +43,23 @@ const AgentsProfileImage = ({ agent, navigation }) => {
                 }}>
                 </ShimmerPlaceholder>
                 :
-                <TouchableOpacity style={styles.touchable} onPress={handleProfile}>
-                    {agent?.profilepic ? <Image source={{ uri: agent.profilepic || 'https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg?w=996' }} style={styles.image} /> : <View style={styles.image} />}
-                    <LinearGradient
-                        colors={['rgba(255, 255, 255, 0.3)', 'rgba(0, 0, 0, 0.5)']}
-                        style={styles.overlay}
-                    >
-                        <Text style={styles.name}>{getFirstName(agent?.fullname)} </Text>
-                        <Text style={styles.subname}>
-                            <Text>4</Text>
-                            <IIcon name="star" color={'white'} size={17} />
-
-                        </Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+                <View key={agent.id} style={styles.touchable}>
+                    <Image source={{ uri: agent?.profilepic }} style={styles.cardImage} />
+                    <View style={styles.cardContent}>
+                        <Text style={styles.name}>{agent?.fullname || "Name Not Specified"}</Text>
+                        <View style={styles.locationRedirectContainer}>
+                            <View style={styles.locationContainer}>
+                                <MapPin size={16} color="#666" />
+                                <Text style={styles.location}>{agent.location || 'Location Not Specified'}</Text>
+                            </View>
+                            <TouchableOpacity onPress={handleProfile}><ChevronRight size={24} color="#666" /></TouchableOpacity>
+                        </View>
+                        <View style={[styles.locationRedirectContainer, { justifyContent: 'flex-start', gap: 5 }]}>
+                            <Text style={styles.age}>{agent.rating || '4'}</Text>
+                            <Star size={20} color={'#000'} strokeWidth={1} />
+                        </View>
+                    </View>
+                </View>
             }
         </>
     );
@@ -65,20 +69,27 @@ export default AgentsProfileImage;
 
 const styles = StyleSheet.create({
     container: {
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
+        width: '100%',
+        height: 120,
         position: 'relative',
-        aspectRatio: 3 / 4,
         borderRadius: 12,
         overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'row',
+        backgroundColor: 'white',
+        padding: 12
     },
     touchable: {
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
+        width: '100%',
+        height: 120,
         position: 'relative',
-        aspectRatio: 3 / 4,
         borderRadius: 12,
         overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'row',
+        elevation: 5,
+        backgroundColor: 'white',
+        padding: 12
     },
     image: {
         height: '100%',
@@ -91,10 +102,9 @@ const styles = StyleSheet.create({
         right: 0,
     },
     name: {
-        color: 'white',
+        color: 'black',
         fontWeight: 'bold',
-        paddingLeft: width / 80,
-        fontSize: 15,
+        fontSize: 18,
     },
     userage: {
         fontSize: 12,
@@ -103,7 +113,44 @@ const styles = StyleSheet.create({
         paddingLeft: width / 80,
         paddingBottom: width / 80,
         color: 'white',
-        marginTop:width/80
+        marginTop: width / 80
+    },
+    profileCard: {
+        flexDirection: 'row',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        alignItems: 'center',
+    },
+    cardImage: {
+        width: 120,
+        height: '100%',
+        borderRadius: 8,
+        marginRight: 12,
+    },
+    cardContent: {
+        flex: 1,
+        justifyContent: 'space-between',
+        paddingVertical: 7
+    },
+    locationRedirectContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    locationContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 2,
+    },
+    location: {
+        color: '#666',
+        marginLeft: 4,
+        fontSize: 12,
+    },
+    age: {
+        color: '#666',
     },
 
 });

@@ -19,9 +19,6 @@ const useUpdateUserDetails = () => {
                 const userDataFirestore = userDoc.data();
                 setUserData(userDataFirestore);
                 setFirestoreData(userDataFirestore);
-
-                
-                
             }
         } catch (error) {
             errorToast('Failed to fetch user details', error);
@@ -89,7 +86,10 @@ const useUpdateUserDetails = () => {
         const downloadUrl = await uploadImageToFirebase(imageUri);
         const updatedData = {
             ...userData,
-            profile_pic: downloadUrl,
+            contactInformation: {
+                ...userData.contactInformation,
+                profilePicture: downloadUrl,   
+            },
             updatedAt: firestore.FieldValue.serverTimestamp(),
         };
 
@@ -107,7 +107,10 @@ const useUpdateUserDetails = () => {
 
         const updatedData = {
             ...userData,
-            profile_pic: '',
+            contactInformation: {
+                ...userData.contactInformation,
+                profilePicture: ''  
+            },
             images: [],
             updatedAt: firestore.FieldValue.serverTimestamp(),
         };

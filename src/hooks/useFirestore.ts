@@ -30,12 +30,12 @@ const useFirestore = () => {
                         return;
                     }
 
-                    const userGender = userData.personal_info.gender;
+                    const userGender = userData.personalInformation.gender;
                     const genderFilter = userGender === 'Male' ? 'Female' : 'Male';
 
                     const unsubscribe = firestore()
                         .collection('profiles')
-                        .where('personal_info.gender', '==', genderFilter)
+                        .where('personalInformation.gender', '==', genderFilter)
                         .onSnapshot(
                             snapshot => {
                                 const usersList = snapshot.docs
@@ -44,13 +44,28 @@ const useFirestore = () => {
                                         ...doc.data(),
                                     }))
                                     .filter(user => user.id !== currentUser.uid);
-
                                 resolve(usersList);
                             },
                             error => reject(error),
                         );
 
                     return unsubscribe;
+                })
+                .catch(reject);
+        });
+    };
+
+    const getHomeData2 = () => {
+        return new Promise((resolve, reject) => {
+            firestore()
+                .collection('teluguties_user_profiles')
+                .get()
+                .then(snapshot => {
+                    const usersList = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }));
+                    resolve(usersList);
                 })
                 .catch(reject);
         });
@@ -76,14 +91,14 @@ const useFirestore = () => {
                             resolve([]);
                             return;
                         }
-                        const userGender = userData.personal_info.gender;
+                        const userGender = userData.personalInformation.gender;
                         const genderFilter = userGender === 'Male' ? 'Female' : 'Male';
 
                         const unsubscribe = firestore()
                             .collection('profiles')
                             .where('createdAt', '>=', startTimestamp)
                             .where('createdAt', '<=', endTimestamp)
-                            .where('personal_info.gender', '==', genderFilter)
+                            .where('personalInformation.gender', '==', genderFilter)
                             .onSnapshot(
                                 snapshot => {
                                     const users = snapshot.docs
@@ -230,46 +245,35 @@ const useFirestore = () => {
 
                         try {
                             const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
+                            
                             if (!userDoc.exists) {
                                 resolve([]);
                                 return;
                             }
-
+                        
                             const userDataFirestore = userDoc.data();
-                            const religion = userDataFirestore?.religious_cultural?.religion;
-                            const gender = userDataFirestore?.personal_info?.gender;
-
+                            const religion = userDataFirestore?.partnerPreferences?.religion?.[0]; // Prevent undefined issues
+                            const gender = userDataFirestore?.personalInformation?.gender;
+                        
                             if (!religion || !gender) {
                                 resolve([]);
                                 return;
                             }
-
+                        
                             const oppositeGender = gender === 'Male' ? 'Female' : 'Male';
-
-
-                            const matchingDocs = snapshot.docs.filter(doc => {
-                                const data = doc.data();
-                                return (
-                                    data.religious_cultural?.religion === religion &&
-                                    data.personal_info?.gender === oppositeGender
-                                );
-                            });
-
-
-                            const matchedUsersData = matchingDocs.map(doc => {
-                                if (doc.id !== currentUser.uid) {
-                                    return { id: doc.id, ...doc.data() };
-                                }
-                                return null;
-                            });
-
-                            const filteredMatchedUsers = matchedUsersData.filter(user => user !== null);
-
-                            if (filteredMatchedUsers.length === 0) {
-                                resolve([]);
-                                return;
-                            }
-                            resolve(filteredMatchedUsers);
+                        
+                            // 🔥 Fetch matching profiles directly with Firestore query
+                            const matchingDocs = await firestore()
+                                .collection('profiles')
+                                .where('partnerPreferences.religion', 'array-contains', religion) // Use array-contains for lists
+                                .where('personalInformation.gender', '==', oppositeGender)
+                                .get();
+                        
+                            const matchedUsersData = matchingDocs.docs
+                                .filter(doc => doc.id !== currentUser.uid) // Exclude current user
+                                .map(doc => ({ id: doc.id, ...doc.data() }));
+                        
+                            resolve(matchedUsersData.length > 0 ? matchedUsersData : []);
                         } catch (error) {
                             reject(error);
                         }
@@ -415,7 +419,7 @@ const useFirestore = () => {
             const currentUser = auth().currentUser;
             if (!currentUser) return;
 
-            const userRef = firestore().collection('profiles').doc(currentUser.uid);
+            const userRef = firestore().collection('temp_profiles').doc(currentUser.uid);
             const userDoc = await userRef.get();
             const matchedProfiles = userDoc.data()?.matches || [];
 
@@ -574,7 +578,8 @@ const useFirestore = () => {
         sendContactRequest,
         sendRequestToAgent,
         getNotificationsData,
-        sendMatchingRequestToAgent
+        sendMatchingRequestToAgent,
+        getHomeData2
     };
 };
 

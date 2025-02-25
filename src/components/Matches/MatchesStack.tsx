@@ -5,6 +5,7 @@ import ProfileDetails from '../ProfileDetails/ProfileDetails';
 import Matches from './Matches';
 import UserProfileDetails from '../Profiles/UserProfileDetails';
 import UserNotifications from '../Header/UserNotifications';
+import DrawerSceneWrapper from '../Navigation/draw';
 
 const Stack = createStackNavigator();
 
@@ -20,8 +21,8 @@ const MatchesStack = () => {
         component={ProfileDetails}
         options={{ presentation: 'transparentModal' }}
       />
-      <Stack.Screen name="UserProfileDetails" component={UserProfileDetails}  options={{presentation:'modal'}}/>
-      <Stack.Screen name="UserNotifications" component={UserNotifications}  options={{presentation:'card'}}/>
+      <Stack.Screen name="UserProfileDetails" component={UserProfileDetails} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="UserNotifications" component={UserNotifications} options={{ presentation: 'modal' }} />
     </Stack.Navigator>
   )
 }

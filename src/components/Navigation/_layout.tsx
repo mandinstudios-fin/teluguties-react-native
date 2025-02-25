@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import IIcon from 'react-native-vector-icons/Ionicons';
 import MCIcon from 'react-native-vector-icons/MaterialIcons';
-import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView, Animated, Easing } from 'react-native';
 import HelpCenter from '../HelpCenter/HelpCenter';
 import Steps from '../Steps/Steps'
 import Chat from '../Chat/Chat';
@@ -15,41 +15,42 @@ import Matches from '../Matches/Matches';
 import Prime from '../Prime/Prime';
 import { enableScreens } from 'react-native-screens';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
-import ProfileDetails from '../ProfileDetails/ProfileDetails';
 import CreateProfile from '../CreateProfile/CreateProfile';
 import HomeStack from '../Home/HomeStack';
 import MatchesStack from '../Matches/MatchesStack';
 import PrimeStack from '../Prime/PrimeStack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth from '@react-native-firebase/auth'
-import firestore from '@react-native-firebase/firestore'
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import AgentsStack from '../Agents/AgentsStack';
 import { BadgeIndianRupee, Handshake, Heart, House, LogOut, Pencil, PhoneOutgoing, Trash } from 'lucide-react-native';
+import TabBar from './TabBar';
+import DrawerSceneWrapper from './draw';
 
+const { width } = Dimensions.get("window");
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
+const DRAWER_WIDTH = width * 0.75;
 enableScreens();
 
 const { height } = Dimensions.get('window');
 
 const BottomTabs = () => {
   return (
-    <Tab.Navigator
+    <DrawerSceneWrapper>
+      <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: '#D9D9D9', height: height / 16 },
-        tabBarActiveTintColor: 'black',
-        tabBarLabelStyle: { fontWeight: '500', fontSize: 14 },
-      }}>
+      }}
+      tabBar={props => <TabBar {...props}/>}
+      >
       <Tab.Screen
         name="HomeStack"
         component={HomeStack}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <House size={23} strokeWidth={1} />
-          ),
+          
           title: 'Home',
         }}
       />
@@ -58,9 +59,7 @@ const BottomTabs = () => {
         name="MatchesStack"
         component={MatchesStack}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Heart size={23} strokeWidth={1} />
-          ),
+          
           title: 'Matches',
         }}
       />
@@ -68,9 +67,7 @@ const BottomTabs = () => {
         name="PrimeStack"
         component={PrimeStack}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <BadgeIndianRupee size={23} strokeWidth={1} />
-          ),
+          
           title: 'Packages',
         }}
       />
@@ -78,23 +75,67 @@ const BottomTabs = () => {
         name="AgentsStack"
         component={AgentsStack}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Handshake size={20} strokeWidth={1} />
-          ),
+          
           title: 'Agent',
         }}
       />
     </Tab.Navigator>
+    </DrawerSceneWrapper>
   );
 };
 
 const Layout = ({ navigation }) => {
   const { successToast, errorToast } = useToastHook();
+  const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+
+  const openDrawer = () => {
+    Animated.parallel([
+      Animated.spring(translateX, {
+        toValue: 0,
+        bounciness: 8,
+        speed: 10,
+        useNativeDriver: true,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 0.7,
+        duration: 400,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const closeDrawer = () => {
+    Animated.parallel([
+      Animated.timing(translateX, {
+        toValue: -DRAWER_WIDTH,
+        duration: 300,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const animatedOpen = () => {
+    openDrawer();
+    navigation.openDrawer();
+  };
+
+  const animatedClose = () => {
+    closeDrawer();
+    navigation.closeDrawer();
+  };
+
   const CustomDrawerContent = (props) => {
     const handleLogout = async () => {
       await AsyncStorage.removeItem('userToken');
-      successToast('Logout Succcessful');
-
+      successToast('Logout Successful');
       navigation.replace('Auth');
     };
 
@@ -103,6 +144,9 @@ const Layout = ({ navigation }) => {
       try {
         const userRef = firestore().collection('profiles').doc(userId);
         await userRef.delete();
+
+        const tempUserRef = firestore().collection('temp_profiles').doc(userId);
+        await tempUserRef.delete();
 
         const requestsRef = firestore().collection('requests').where('fromUid', '==', userId);
         const requestsSnapshot = await requestsRef.get();
@@ -115,17 +159,15 @@ const Layout = ({ navigation }) => {
         queriesSnapshot.forEach(async (doc) => {
           await doc.ref.delete();
         });
+
         await AsyncStorage.removeItem('userToken');
-
-        successToast(`Account Deleted Successfully`);
-
+        successToast('Account Deleted Successfully');
         navigation.replace('Auth');
       } catch (error) {
-        console.log(error)
-        errorToast('Something Went Wrong')
+        console.log(error);
+        errorToast('Something Went Wrong');
       }
     };
-
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -134,8 +176,8 @@ const Layout = ({ navigation }) => {
           <DrawerItem
             label="Logout"
             onPress={handleLogout}
-            labelStyle={{ color: '#561825', fontWeight: '500' }}
-            icon={() => <LogOut size={23} strokeWidth={1} color={'#561825'}/>}
+            labelStyle={{ color: '#fff', fontWeight: '500' }}
+            icon={() => <LogOut size={23} strokeWidth={1} color={'#fff'} />}
           />
         </DrawerContentScrollView>
         <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 10 }}>
@@ -155,11 +197,15 @@ const Layout = ({ navigation }) => {
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#7b2a38',
+          width:'61%'
         },
         drawerLabelStyle: {
           color: '#561825',
           fontWeight: '500',
+        },
+        sceneContainerStyle: {
+          backgroundColor: 'white',
         },
         drawerActiveTintColor: '#E9BA9B',
         drawerInactiveTintColor: '#000',
@@ -175,19 +221,22 @@ const Layout = ({ navigation }) => {
           drawerItemStyle: { height: 0 },
         }}
       />
-      <Drawer.Screen name="Edit Profile" component={CreateProfile} options={{
-        drawerIcon: ({ focused, size }) => (
-          <Pencil size={23} strokeWidth={1} color={'#561825'}/>
-        ),
-
-      }} />
-
-      <Drawer.Screen name="Help Center" component={HelpCenter} options={{
-        drawerIcon: ({ focused, size }) => (
-          <PhoneOutgoing size={23} strokeWidth={1} color={'#561825'}/>
-        ),
-      }} />
-
+      <Drawer.Screen
+        name="Edit Profile"
+        component={CreateProfile}
+        options={{
+          drawerIcon: ({ focused, size }) => <Pencil size={23} strokeWidth={1} color={'#fff'} />,
+          drawerLabelStyle: { color: '#fff' }
+        }}
+      />
+      <Drawer.Screen
+        name="Help Center"
+        component={HelpCenter}
+        options={{
+          drawerIcon: ({ focused, size }) => <PhoneOutgoing size={23} strokeWidth={1} color={'#fff'} />,
+          drawerLabelStyle: { color: '#fff' }
+        }}
+      />
     </Drawer.Navigator>
   );
 };

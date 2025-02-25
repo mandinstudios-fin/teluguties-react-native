@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
   agenttext: {
     color: '#000',
     fontSize: 25,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   loadingContainer: {

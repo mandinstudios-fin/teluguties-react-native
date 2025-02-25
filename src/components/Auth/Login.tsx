@@ -28,8 +28,7 @@ const Login = ({ navigation }) => {
     try {
       const userSnapshot = await firestore()
         .collection('profiles')
-        .where('contact_info.selected_code', '==', selectedCode)
-        .where('contact_info.phone', '==', phoneNumber)
+        .where('contactInformation.phone', '==', selectedCode + phoneNumber)
         .get();
 
       const agentSnapshot = await firestore()

@@ -18,7 +18,7 @@ import firestore from '@react-native-firebase/firestore'
 import messaging from '@react-native-firebase/messaging';
 import useAuth from '../../hooks/useAuth';
 import { removeListener, startOtpListener } from 'react-native-otp-verify';
-import { getUsersAge } from '../../utils';
+import { calculateAge, getUsersAge } from '../../utils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,14 +31,14 @@ const Otp = ({ navigation, route }) => {
   const getAndStoreFCMToken = async (userId, category) => {
     try {
       await messaging().requestPermission();
-  
+
       const fcmToken = await messaging().getToken();
-  
+
       if (fcmToken) {
         await firestore().collection(category).doc(userId).set({
           fcmToken: fcmToken,
-        }, { merge: true }); 
-  
+        }, { merge: true });
+
         console.log("FCM Token stored successfully:", fcmToken);
       } else {
         console.log("No FCM token found");
@@ -57,90 +57,57 @@ const Otp = ({ navigation, route }) => {
     if (updatedFormData.category === 'individual') {
       try {
         const userData = await firestore().collection('profiles').doc(user.uid).set({
-          phone_number: '',
-          is_bride: '',
-          profile_pic: '',
-          personal_info: {
-            name: '',
+          personalInformation: {
+            firstName: '',
+            lastName: '',
             gender: '',
-            date_of_birth: updatedFormData.dob,
-            age: getUsersAge(updatedFormData.dob),
+            age: calculateAge(updatedFormData.dob),
+            dateOfBirth: updatedFormData.dob,
             height: '',
-            weight: '',
-            blood_group: '',
-            marital_status: '',
-            num_children: 0,
+            motherTongue: '',
+            location: '',
+            profileType: '',
           },
-          contact_info: {
-            phone: updatedFormData.phoneNumber,
-            selected_code: updatedFormData.selectedCode,
+          contactInformation: {
             email: '',
-            current_city: '',
-            permanent_address: {
-              street: '',
-              city: '',
-              state: '',
-              country: 'India',
-              pincode: '',
-            },
+            phone: updatedFormData.selectedCode + updatedFormData.phoneNumber,
+            kycDetails: '',
+            profilePicture: '',
           },
-          family_background: {
-            family_type: '',
-            father_name: '',
-            mother_name: '',
-            num_brothers: 0,
-            num_sisters: 0,
-            family_values: '',
-            family_status: '',
-          },
-          education: {
-            highest_education: '',
-            field_of_study: '',
-            college: '',
-            graduation_year: '',
-          },
-          professional_details: {
+          educationAndCareer: {
+            highestQualification: '',
             occupation: '',
-            employer: '',
-            annual_income: 0,
-            job_location: '',
+            workingPlace: '',
+            annualIncome: 0,
+            aboutOccupation: '',
           },
-          hobbies_interests: [],
-          religious_cultural: {
-            religion: '',
-            caste: '',
-            subcaste: '',
-            gothra: '',
-            star_rashi: '',
-            manglik_status: '',
+          familyInformation: {
+            fatherName: '',
+            fatherOccupation: '',
+            familyType: '',
+            numberOfSiblings: 0,
+            nativePlace: '',
+            aboutFamily: '',
           },
-          lifestyle_preferences: {
-            drinking_habits: '',
-            smoking_habits: '',
-            diet_preferences: '',
-            appearance_preferences: '',
-            personality_preferences: '',
+          lifestyleAndInterests: {
+            maritalStatus: '',
+            drinkingHabits: '',
+            interests: [],
+            aboutLifestyle: '',
           },
-          matrimonial_expectations: {
-            preferred_age_range: {
-              min: 0,
-              max: 0,
-            },
-            preferred_height_range: {
-              min: 0,
-              max: 0,
-            },
-            preferred_location: '',
-            preferred_caste_subcaste: [],
-            preferred_education: '',
-            preferred_occupation: '',
-            preferred_income: 0,
-            other_preferences: '',
+          partnerPreferences: {
+            aboutPreferences: '',
+            ageRange: '',
+            heightRange: '',
+            preferredCity: '',
+            religion: [],
           },
-          about_me: '',
-          agent_id: '',
-          createdAt: firestore.FieldValue.serverTimestamp(),
-          updatedAt: firestore.FieldValue.serverTimestamp(),
+          metadata: {
+            createdAt: firestore.FieldValue.serverTimestamp(),
+            updatedAt: firestore.FieldValue.serverTimestamp(),
+            isVerified: true,
+            agentId: ''
+          },
         });
 
         getAndStoreFCMToken(user?.uid, 'profiles')
@@ -151,15 +118,15 @@ const Otp = ({ navigation, route }) => {
     else {
       try {
         const agentData = await firestore().collection('agents').doc(user.uid).set({
-          agent_id: generateAgentID(), 
+          agent_id: generateAgentID(),
           fullname: '',
-          state:'',
+          state: '',
           district: '',
           aadharnumber: '',
-          selectedcode:updatedFormData.selectedCode,
-          phonenumber:updatedFormData.phoneNumber,
-          mailid:'',
-          profilepic:'',
+          selectedcode: updatedFormData.selectedCode,
+          phonenumber: updatedFormData.phoneNumber,
+          mailid: '',
+          profilepic: '',
           date_of_birth: updatedFormData.dob,
         })
 
@@ -168,7 +135,7 @@ const Otp = ({ navigation, route }) => {
       }
     }
 
-    
+
 
   };
 
@@ -198,7 +165,7 @@ const Otp = ({ navigation, route }) => {
 
   const generateAgentID = () => {
     const randomNumbers = Math.floor(10000000 + Math.random() * 90000000); // Generate 8 random digits
-  return `TT${randomNumbers}`;
+    return `TT${randomNumbers}`;
   }
 
   return (

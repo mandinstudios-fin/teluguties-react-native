@@ -3,12 +3,14 @@ import React from 'react'
 import Header from '../Header/Header'
 import Slider from '../Profiles/Slider'
 import useFirestore from '../../hooks/useFirestore'
+import DetailsCard from '../Profiles/DetailsCard'
 
 const { width, height, fontScale } = Dimensions.get("window")
 
 const AgentsProfileDetails = ({ route, navigation }) => {
 
     const { agent } = route.params;
+    const { id, requests, selectedcode, profilepic, ...restData } = agent
     const {sendRequestToAgent} = useFirestore();
 
     return (
@@ -28,61 +30,7 @@ const AgentsProfileDetails = ({ route, navigation }) => {
                     </View>
 
                     <View style={styles.userdetailsmain}>
-                        <View style={styles.detailscontainer}>
-                            <Text style={styles.detailsnameparamater} numberOfLines={1}>Name</Text>
-                            <Text style={styles.detailsnamecolon}>:</Text>
-                            <Text style={styles.detailsnamevalue} numberOfLines={1}>
-                                {agent?.fullname || 'Not Specified'}
-                            </Text>
-                        </View>
-
-                        <View style={styles.detailscontainer}>
-                            <Text style={styles.detailsnameparamater} numberOfLines={1}>Agent ID</Text>
-                            <Text style={styles.detailsnamecolon}>:</Text>
-                            <Text style={styles.detailsnamevalue} numberOfLines={1}>
-                                {agent?.agent_id || 'Not Specified'}
-                            </Text>
-                        </View>
-
-                        <View style={styles.detailscontainer}>
-                            <Text style={styles.detailsnameparamater} numberOfLines={1}>Code</Text>
-                            <Text style={styles.detailsnamecolon}>:</Text>
-                            <Text style={styles.detailsnamevalue} numberOfLines={1}>
-                                {agent?.selectedcode || 'Not Specified'}
-                            </Text>
-                        </View>
-
-                        <View style={styles.detailscontainer}>
-                            <Text style={styles.detailsnameparamater} numberOfLines={1}>Phone Number</Text>
-                            <Text style={styles.detailsnamecolon}>:</Text>
-                            <Text style={styles.detailsnamevalue} numberOfLines={1}>
-                                {agent?.phonenumber || 'Not Specified'}
-                            </Text>
-                        </View>
-
-                        <View style={styles.detailscontainer}>
-                            <Text style={styles.detailsnameparamater} numberOfLines={1}>Email</Text>
-                            <Text style={styles.detailsnamecolon}>:</Text>
-                            <Text style={styles.detailsnamevalue} numberOfLines={1}>
-                                {agent?.mailid || 'Not Specified'}
-                            </Text>
-                        </View>
-
-                        <View style={styles.detailscontainer}>
-                            <Text style={styles.detailsnameparamater} numberOfLines={1}>State</Text>
-                            <Text style={styles.detailsnamecolon}>:</Text>
-                            <Text style={styles.detailsnamevalue} numberOfLines={1}>
-                                {agent?.state || 'Not Specified'}
-                            </Text>
-                        </View>
-
-                        <View style={styles.detailscontainer}>
-                            <Text style={styles.detailsnameparamater} numberOfLines={1}>District</Text>
-                            <Text style={styles.detailsnamecolon}>:</Text>
-                            <Text style={styles.detailsnamevalue} numberOfLines={1}>
-                                {agent?.district || 'Not Specified'}
-                            </Text>
-                        </View>
+                        <DetailsCard data={restData}/>
 
                         <View style={styles.shortlistbox}>
                             <TouchableOpacity style={styles.shortlist} onPress={() => sendRequestToAgent(agent.id)}>
@@ -142,9 +90,11 @@ const styles = StyleSheet.create({
     },
     userdetailsmain: {
         display: 'flex',
-        alignItems: 'center',
+        flexDirection: 'column',
         marginTop: width / 30,
-        gap: width / 60
+        gap: width / 60,
+        paddingHorizontal: 20,
+
     },
     detailscontainer: {
         display: 'flex',
@@ -167,6 +117,10 @@ const styles = StyleSheet.create({
         color: '#7b2a50',
         fontSize: fontScale * 17,
     },
+    shortlistbox: {
+        display: 'flex',
+        alignItems: 'center'
+    },
     shortlist: {
         marginTop: width * 0.08,
         paddingHorizontal: width * 0.1,
@@ -179,5 +133,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'white',
         fontSize: 15,
+        textAlign: 'center'
     },
 })

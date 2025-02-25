@@ -22,6 +22,7 @@ import Icon from 'react-native-vector-icons/Entypo';
 import FIcon from 'react-native-vector-icons/Fontisto';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import useUpdateUserDetails from '../../hooks/useUpdateUserDetails';
+import { Camera } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -36,18 +37,18 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
         <TouchableOpacity
           style={[
             styles.genderButton,
-            formData.personal_info.gender === 'Male' &&
+            formData.personalInformation.gender === 'Male' &&
             styles.selectedGenderButton,
           ]}
           onPress={() => {
             updateFormData(prevData => ({
               ...prevData,
-              personal_info: { ...prevData.personal_info, gender: 'Male' },
+              personalInformation: { ...prevData.personalInformation, gender: 'Male' },
             }))
 
             updateFormData(prevData => ({
               ...prevData,
-              is_bride: false,
+              profileType: 'Groom',
             }))
           }
           }>
@@ -62,18 +63,18 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
         <TouchableOpacity
           style={[
             styles.genderButton,
-            formData.personal_info.gender === 'Female' &&
+            formData.personalInformation.gender === 'Female' &&
             styles.selectedGenderButton,
           ]}
-          onPress={() =>{
+          onPress={() => {
             updateFormData(prevData => ({
               ...prevData,
-              personal_info: { ...prevData.personal_info, gender: 'Female' },
+              personalInformation: { ...prevData.personalInformation, gender: 'Female' },
             }))
 
             updateFormData(prevData => ({
               ...prevData,
-              is_bride: true,
+              profileType: 'Bride',
             }))
           }
           }>
@@ -89,15 +90,29 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
       onPress={nextStep}
       style={[
         styles.button,
-        { opacity: formData.personal_info.gender ? 1 : 0.5 },
+        { opacity: formData.personalInformation.gender ? 1 : 0.5 },
       ]}
-      disabled={!formData.personal_info.gender}>
+      disabled={!formData.personalInformation.gender}>
       <Text style={styles.buttontext}>Create</Text>
     </TouchableOpacity>
   </View>
 );
 
-const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep }) => {
+const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToast, errorToast }) => {
+
+  const handleNextStep = () => {
+    if (!formData?.personalInformation.firstName || !formData?.personalInformation.lastName) {
+      errorToast("Name Required");
+      return
+    }
+
+    if (!formData?.personalInformation?.location) {
+      errorToast("Location Required");
+      return
+    }
+
+    nextStep();
+  }
 
   return (
     <View style={styles.stepContainer}>
@@ -108,277 +123,97 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep }) => {
           style={styles.input}
           placeholder="First Name"
           placeholderTextColor="#EBC7B1"
-          value={formData?.personal_info.firstname || ''}
+          value={formData?.personalInformation.firstName || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personal_info: { ...prevData.personal_info, firstname: value },
+              personalInformation: { ...prevData.personalInformation, firstName: value },
             }))
           }
         />
-
-<TextInput
-          style={styles.input}
-          placeholder="Last Name"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.personal_info.lastname || ''}
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              personal_info: { ...prevData.personal_info, lastname: value },
-            }))
-          }
-        />
-
-        {/* <View style={styles.pickerinput}>
-        <Picker
-          selectedValue={formData?.personal_info.gender}
-          onValueChange={(itemValue) => {
-            updateFormData(prevData => ({ ...prevData, personal_info: { ...prevData.personal_info, gender: itemValue } }))
-          }}
-          style={styles.picker}
-        >
-          
-          <Picker.Item label="Male" value="Male" />
-          <Picker.Item label="Female" value="Female" />
-        </Picker>
-      </View> */}
-
-        {/* <TextInput
-          style={styles.input}
-          placeholder="DOB (YYYY/MM/DD)"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.personal_info.date_of_birth || ''}
-          onChangeText={(value) => updateFormData(prevData => ({ ...prevData, personal_info: { ...prevData.personal_info, date_of_birth: value } }))}
-        /> */}
 
         <TextInput
           style={styles.input}
-          placeholder="Weight"
+          placeholder="Last Name"
           placeholderTextColor="#EBC7B1"
-          value={formData?.personal_info.weight || ''}
+          value={formData?.personalInformation.lastName || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personal_info: { ...prevData.personal_info, weight: value },
+              personalInformation: { ...prevData.personalInformation, lastName: value },
             }))
           }
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="DOB (YYYY/MM/DD)"
+          placeholderTextColor="#EBC7B1"
+          value={formData?.personalInformation.dateOfBirth || ''}
+          onChangeText={(value) => updateFormData(prevData => ({ ...prevData, personalInformation: { ...prevData.personalInformation, dateOfBirth: value } }))}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Height"
           placeholderTextColor="#EBC7B1"
-          value={formData?.personal_info.height || ''}
+          value={formData?.personalInformation.height || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personal_info: { ...prevData.personal_info, height: value },
-            }))
-          }
-        />
-
-        <View style={styles.pickerinput}>
-          <RNPickerSelect
-            onValueChange={value =>
-              updateFormData(prevData => ({
-                ...prevData,
-                personal_info: { ...prevData.personal_info, blood_group: value },
-              }))
-            }
-            useNativeAndroidPickerStyle={false}
-            placeholder={{
-              label: 'Select your blood group',
-              value: '',
-              color: '#EBC7B1',
-              fontWeight: 'bold',
-            }}
-            style={{
-              inputIOS: styles.pickerText,
-              inputAndroid: styles.pickerText,
-              placeholder: styles.placeholderText,
-            }}
-            items={[
-              { label: 'A+', value: 'A+', color: 'white' },
-              { label: 'A-', value: 'A-', color: 'white' },
-              { label: 'B+', value: 'B+', color: 'white' },
-              { label: 'B-', value: 'B-', color: 'white' },
-              { label: 'O+', value: 'O+', color: 'white' },
-              { label: 'O-', value: 'O-', color: 'white' },
-              { label: 'AB+', value: 'AB+', color: 'white' },
-              { label: 'AB-', value: 'AB-', color: 'white' },
-            ]}
-          />
-        </View>
-
-        <View style={styles.pickerinput}>
-          <RNPickerSelect
-            onValueChange={value =>
-              updateFormData(prevData => ({
-                ...prevData,
-                personal_info: { ...prevData.personal_info, marital_status: value },
-              }))
-            }
-            useNativeAndroidPickerStyle={false}
-            placeholder={{
-              label: 'Select your marital status',
-              value: '',
-              color: '#EBC7B1',
-              fontWeight: 'bold',
-            }}
-            style={{
-              inputIOS: styles.pickerText,
-              inputAndroid: styles.pickerText,
-              placeholder: styles.placeholderText,
-            }}
-            items={[
-              { label: 'Never Married', value: 'Never Married', color: 'white' },
-              { label: 'Divorced', value: 'Divorced', color: 'white' },
-              { label: 'Widowed', value: 'Widowed', color: 'white' },
-            ]}
-          />
-        </View>
-
-        <TextInput
-          style={styles.input}
-          placeholder="No. of Children"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.personal_info.num_children || ''}
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              personal_info: { ...prevData.personal_info, num_children: value },
-            }))
-          }
-        />
-
-        <View style={styles.pickerinput}>
-          <RNPickerSelect
-            onValueChange={value =>
-              updateFormData(prevData => ({
-                ...prevData,
-                religious_cultural: {
-                  ...prevData.religious_cultural,
-                  religion: value,
-                },
-              }))
-            }
-            useNativeAndroidPickerStyle={false}
-            placeholder={{
-              label: 'Select your religion',
-              value: '',
-              color: '#EBC7B1',
-              fontWeight: 'bold',
-            }}
-            style={{
-              inputIOS: styles.pickerText,
-              inputAndroid: styles.pickerText,
-              placeholder: styles.placeholderText,
-            }}
-            items={[
-              { label: 'Hindu', value: 'Hindu', color: 'white' },
-              { label: 'Muslim', value: 'Muslim', color: 'white' },
-              { label: 'Christian', value: 'Christian', color: 'white' },
-              { label: 'Sikh', value: 'Sikh', color: 'white' },
-              { label: 'Other', value: 'Other', color: 'white' },
-            ]}
-          />
-        </View>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Caste"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.religious_cultural?.caste || ''}
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              religious_cultural: { ...prevData.religious_cultural, caste: value },
+              personalInformation: { ...prevData.personalInformation, height: value },
             }))
           }
         />
 
         <TextInput
           style={styles.input}
-          placeholder="SubCaste"
+          placeholder="Mother Tongue"
           placeholderTextColor="#EBC7B1"
-          value={formData?.religious_cultural?.subcaste || ''}
+          value={formData?.personalInformation?.motherTongue || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              religious_cultural: {
-                ...prevData.religious_cultural,
-                subcaste: value,
+              personalInformation: { ...prevData.personalInformation, motherTongue: value },
+            }))
+          }
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Age"
+          placeholderTextColor="#EBC7B1"
+          value={formData?.personalInformation?.age || ''}
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              personalInformation: { ...prevData.personalInformation, age : value },
+            }))
+          }
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder=" Location"
+          placeholderTextColor="#EBC7B1"
+          value={formData?.personalInformation?.location || ''}
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              personalInformation: {
+                ...prevData.personalInformation,
+                location: value,
               },
             }))
           }
         />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Gothra"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.religious_cultural?.gothra || ''}
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              religious_cultural: { ...prevData.religious_cultural, gothra: value },
-            }))
-          }
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Star/Rashi"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.religious_cultural?.star_rashi || ''}
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              religious_cultural: {
-                ...prevData.religious_cultural,
-                star_rashi: value,
-              },
-            }))
-          }
-        />
-
-        <View style={styles.pickerinput}>
-          <RNPickerSelect
-            onValueChange={value =>
-              updateFormData(prevData => ({
-                ...prevData,
-                religious_cultural: {
-                  ...prevData.religious_cultural,
-                  manglik_status: value,
-                },
-              }))
-            }
-            useNativeAndroidPickerStyle={false}
-            placeholder={{
-              label: 'Select your manglik status',
-              value: '',
-              color: '#EBC7B1',
-              fontWeight: 'bold',
-            }}
-            style={{
-              inputIOS: styles.pickerText,
-              inputAndroid: styles.pickerText,
-              placeholder: styles.placeholderText,
-            }}
-            items={[
-              { label: 'Manglik', value: 'Manglik', color: 'white' },
-              { label: 'Non-Manglik', value: 'Non-Manglik', color: 'white' },
-              { label: 'Anshik Manglik', value: 'Anshik Manglik', color: 'white' },
-            ]}
-          />
-        </View>
 
         <View style={styles.prevnextbox}>
           <TouchableOpacity onPress={prevStep} style={styles.button}>
             <Text style={styles.buttontext}>Previous</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={nextStep} style={styles.button}>
+          <TouchableOpacity onPress={handleNextStep} style={styles.button}>
             <Text style={styles.buttontext}>Next</Text>
           </TouchableOpacity>
         </View>
@@ -396,13 +231,13 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
         style={styles.input}
         placeholder="Father's Name"
         placeholderTextColor="#EBC7B1"
-        value={formData?.family_background?.father_name || ''}
+        value={formData?.familyInformation?.fatherName || ''}
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            family_background: {
-              ...prevData.family_background,
-              father_name: value,
+            familyInformation: {
+              ...prevData.familyInformation,
+              fatherName: value,
             },
           }))
         }
@@ -410,47 +245,15 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
 
       <TextInput
         style={styles.input}
-        placeholder="Mother's Name"
+        placeholder="Father Occupation"
         placeholderTextColor="#EBC7B1"
-        value={formData?.family_background?.mother_name || ''}
+        value={formData?.familyInformation?.fatherOccupation || ''}
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            family_background: {
-              ...prevData.family_background,
-              mother_name: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="No. of Brothers"
-        placeholderTextColor="#EBC7B1"
-        value={formData?.family_background?.num_brothers || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            family_background: {
-              ...prevData.family_background,
-              num_brothers: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="No. of Sisters"
-        placeholderTextColor="#EBC7B1"
-        value={formData?.family_background?.num_sisters || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            family_background: {
-              ...prevData.family_background,
-              num_sisters: value,
+            familyInformation: {
+              ...prevData.familyInformation,
+              fatherOccupation: value,
             },
           }))
         }
@@ -461,7 +264,7 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
           onValueChange={value =>
             updateFormData(prevData => ({
               ...prevData,
-              family_background: { ...prevData.family_background, family_type: value },
+              familyInformation: { ...prevData.familyInformation, familyType: value },
             }))
           }
           useNativeAndroidPickerStyle={false}
@@ -483,65 +286,53 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
         />
       </View>
 
-      <View style={styles.pickerinput}>
-        <RNPickerSelect
-          onValueChange={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              family_background: { ...prevData.family_background, family_status: value },
-            }))
-          }
-          useNativeAndroidPickerStyle={false}
-          placeholder={{
-            label: 'Select your family ststus',
-            value: '',
-            color: '#EBC7B1',
-            fontWeight: 'bold',
-          }}
-          style={{
-            inputIOS: styles.pickerText,
-            inputAndroid: styles.pickerText,
-            placeholder: styles.placeholderText,
-          }}
-          items={[
-            { label: 'Middle', value: 'Middle', color: 'white' },
-            { label: 'Upper Middle', value: 'Upper Middle', color: 'white' },
-            { label: 'Rich', value: 'Rich', color: 'white' },
-            { label: 'Affluent', value: 'Affluent', color: 'white' },
+      <TextInput
+        style={styles.input}
+        placeholder="No. of Siblings"
+        placeholderTextColor="#EBC7B1"
+        value={formData?.familyInformation?.numberOfSiblings || ''}
+        onChangeText={value =>
+          updateFormData(prevData => ({
+            ...prevData,
+            familyInformation: {
+              ...prevData.familyInformation,
+              numberOfSiblings: value,
+            },
+          }))
+        }
+      />
 
-          ]}
-        />
-      </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Native Location"
+        placeholderTextColor="#EBC7B1"
+        value={formData?.familyInformation?.nativePlace || ''}
+        onChangeText={value =>
+          updateFormData(prevData => ({
+            ...prevData,
+            familyInformation: {
+              ...prevData.familyInformation,
+              nativePlace: value,
+            },
+          }))
+        }
+      />
 
-      <View style={styles.pickerinput}>
-        <RNPickerSelect
-          onValueChange={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              family_background: { ...prevData.family_background, family_values: value },
-            }))
-          }
-          useNativeAndroidPickerStyle={false}
-          placeholder={{
-            label: 'Select your family value',
-            value: '',
-            color: '#EBC7B1',
-            fontWeight: 'bold',
-          }}
-          style={{
-            inputIOS: styles.pickerText,
-            inputAndroid: styles.pickerText,
-            placeholder: styles.placeholderText,
-          }}
-          items={[
-            { label: 'Traditional', value: 'Traditional', color: 'white' },
-            { label: 'Moderate', value: 'Moderate', color: 'white' },
-            { label: 'Modern', value: 'Modern', color: 'white' },
-
-          ]}
-        />
-      </View>
-
+      <TextInput
+        style={styles.aboutinput}
+        placeholder="About Family"
+        placeholderTextColor="#EBC7B1"
+        value={formData?.familyInformation?.aboutFamily || ''}
+        onChangeText={value =>
+          updateFormData(prevData => ({
+            ...prevData,
+            familyInformation: {
+              ...prevData.familyInformation,
+              aboutFamily: value,
+            },
+          }))
+        }
+      />
       <View style={styles.prevnextbox}>
         <TouchableOpacity onPress={prevStep} style={styles.button}>
           <Text style={styles.buttontext}>Previous</Text>
@@ -569,7 +360,7 @@ const EducationProfession = ({
           onValueChange={(value) =>
             updateFormData((prevData) => ({
               ...prevData,
-              education: { ...prevData.education, highest_education: value },
+              educationAndCareer: { ...prevData.educationAndCareer, highestQualification: value },
             }))
           }
           useNativeAndroidPickerStyle={false}
@@ -594,53 +385,14 @@ const EducationProfession = ({
 
       <TextInput
         style={styles.input}
-        placeholder="Field of Study"
-        placeholderTextColor="#EBC7B1"
-        value={formData?.education?.field_of_study || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            education: { ...prevData.education, field_of_study: value },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="College/ University"
-        placeholderTextColor="#EBC7B1"
-        value={formData?.education?.college || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            education: { ...prevData.education, college: value },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Graduation Year"
-        placeholderTextColor="#EBC7B1"
-        value={formData?.education?.graduation_year || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            education: { ...prevData.education, graduation_year: value },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
         placeholder="Occupation"
         placeholderTextColor="#EBC7B1"
-        value={formData?.professional_details?.occupation || ''}
+        value={formData?.educationAndCareer?.occupation || ''}
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            professional_details: {
-              ...prevData.professional_details,
+            educationAndCareer: {
+              ...prevData.educationAndCareer,
               occupation: value,
             },
           }))
@@ -649,31 +401,15 @@ const EducationProfession = ({
 
       <TextInput
         style={styles.input}
-        placeholder="Employer"
+        placeholder="Work Location"
         placeholderTextColor="#EBC7B1"
-        value={formData?.professional_details?.employer || ''}
+        value={formData?.educationAndCareer?.workingPlace || ''}
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            professional_details: {
-              ...prevData.professional_details,
-              employer: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Job Location"
-        placeholderTextColor="#EBC7B1"
-        value={formData?.professional_details?.job_location || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            professional_details: {
-              ...prevData.professional_details,
-              job_location: value,
+            educationAndCareer: {
+              ...prevData.educationAndCareer,
+              workingPlace: value,
             },
           }))
         }
@@ -683,18 +419,30 @@ const EducationProfession = ({
         style={styles.input}
         placeholder="Annual Income"
         placeholderTextColor="#EBC7B1"
-        value={formData?.professional_details?.annual_income || ''}
+        value={formData?.educationAndCareer?.annualIncome || ''}
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            professional_details: {
-              ...prevData.professional_details,
-              annual_income: value,
+            educationAndCareer: {
+              ...prevData.educationAndCareer,
+              annualIncome: value,
             },
           }))
         }
       />
 
+      <TextInput
+        style={styles.aboutinput}
+        placeholder="About Occupation"
+        placeholderTextColor="#EBC7B1"
+        value={formData?.educationAndCareer?.aboutOccupation || ''}
+        onChangeText={value =>
+          updateFormData(prevData => ({
+            ...prevData,
+            educationAndCareer: { ...prevData.educationAndCareer, aboutOccupation: value },
+          }))
+        }
+      />
       <View style={styles.prevnextbox}>
         <TouchableOpacity onPress={prevStep} style={styles.button}>
           <Text style={styles.buttontext}>Previous</Text>
@@ -712,20 +460,48 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
     <Text style={styles.header}>Marital Preferences & Lifestyle</Text>
 
     <View style={styles.inputcontainer}>
+
+      <View style={styles.pickerinput}>
+        <RNPickerSelect
+          onValueChange={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              lifestyleAndInterests: { ...prevData.lifestyleAndInterests, maritalStatus: value },
+            }))
+          }
+          useNativeAndroidPickerStyle={false}
+          placeholder={{
+            label: 'Select your marital status',
+            value: '',
+            color: '#EBC7B1',
+            fontWeight: 'bold',
+          }}
+          style={{
+            inputIOS: styles.pickerText,
+            inputAndroid: styles.pickerText,
+            placeholder: styles.placeholderText,
+          }}
+          items={[
+            { label: 'Never Married', value: 'Never Married', color: 'white' },
+            { label: 'Divorced', value: 'Divorced', color: 'white' },
+            { label: 'Widowed', value: 'Widowed', color: 'white' },
+          ]}
+        />
+      </View>
       <View style={styles.pickerinput}>
         <RNPickerSelect
           onValueChange={(value) =>
             updateFormData((prevData) => ({
               ...prevData,
-              lifestyle_preferences: {
-                ...prevData.lifestyle_preferences,
-                drinking_habits: value,
+              lifestyleAndInterests: {
+                ...prevData.lifestyleAndInterests,
+                drinkingHabits: value,
               },
             }))
           }
           useNativeAndroidPickerStyle={false}
           placeholder={{
-            label: "Select drinking habit...",
+            label: "Drinking/Smoking habit",
             value: "",
             color: "#EBC7B1",
           }}
@@ -742,124 +518,36 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
         />
       </View>
 
-      <View style={styles.pickerinput}>
-        <RNPickerSelect
-          onValueChange={(value) =>
-            updateFormData((prevData) => ({
-              ...prevData,
-              lifestyle_preferences: {
-                ...prevData.lifestyle_preferences,
-                smoking_habits: value,
-              },
-            }))
-          }
-          useNativeAndroidPickerStyle={false}
-          placeholder={{
-            label: "Select smoking habit...",
-            value: "",
-            color: "#EBC7B1",
-          }}
-          style={{
-            inputIOS: styles.pickerText,
-            inputAndroid: styles.pickerText,
-            placeholder: styles.placeholderText,
-          }}
-          items={[
-            { label: "Non-Smoker", value: "Non-Smoker", color: "white" },
-            { label: "Occasionally Smoker", value: "Occasionally Smoker", color: "white" },
-            { label: "Regular Smoker", value: "Regular Smoker", color: "white" },
-          ]}
-        />
-      </View>
-
-      <View style={styles.pickerinput}>
-        <RNPickerSelect
-          onValueChange={(value) =>
-            updateFormData((prevData) => ({
-              ...prevData,
-              lifestyle_preferences: {
-                ...prevData.lifestyle_preferences,
-                diet_preferences: value,
-              },
-            }))
-          }
-          useNativeAndroidPickerStyle={false}
-          placeholder={{
-            label: "Diet preferences",
-            value: "",
-            color: "#EBC7B1",
-          }}
-          style={{
-            inputIOS: styles.pickerText,
-            inputAndroid: styles.pickerText,
-            placeholder: styles.placeholderText,
-          }}
-          items={[
-            { label: "Vegetarian", value: "Vegetarian", color: "white" },
-            { label: "Non-Vegetarian", value: "Non-Vegetarian", color: "white" },
-            { label: "Eggetarian", value: "Eggetarian", color: "white" },
-          ]}
-        />
-      </View>
-
       <TextInput
         style={styles.input}
-        placeholder="Personality preference"
-        multiline={true}
+        placeholder="Intrests"
         placeholderTextColor="#EBC7B1"
-        value={formData?.lifestyle_preferences?.personality_preferences || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            lifestyle_preferences: {
-              ...prevData.lifestyle_preferences,
-              personality_preferences: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Appearance preferences"
-        multiline={true}
-        placeholderTextColor="#EBC7B1"
-        value={formData?.lifestyle_preferences?.appearance_preferences || ''}
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            lifestyle_preferences: {
-              ...prevData.lifestyle_preferences,
-              appearance_preferences: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Hobbies & Intrests"
-        placeholderTextColor="#EBC7B1"
-        value={formData?.hobbies_interests?.join(', ') || ''}
+        value={formData?.lifestyleAndInterests.interests?.join(', ') || ''}
         onChangeText={value => {
-          updateFormData(prev => ({
-            ...prev,
-            hobbies_interests: value.split(',').map(item => item.trim()),
-          }));
+          updateFormData(prevData => ({
+            ...prevData,
+            lifestyleAndInterests: {
+              ...prevData.lifestyleAndInterests,
+              interests: value.split(',').map(item => item.trim()),
+            },
+          }))
         }}
       />
 
       <TextInput
         style={styles.aboutinput}
         multiline={true}
-        placeholder="About Me"
+        placeholder="About Lifestyle"
         placeholderTextColor="#EBC7B1"
-        value={formData?.about_me || ''}
+        value={formData?.lifestyleAndInterests.aboutLifestyle || ''}
         onChangeText={value => {
-          updateFormData(prev => ({
-            ...prev,
-            about_me: value,
-          }));
+          updateFormData(prevData => ({
+            ...prevData,
+            lifestyleAndInterests: {
+              ...prevData.lifestyleAndInterests,
+              aboutLifestyle: value,
+            },
+          }))
         }}
       />
 
@@ -882,193 +570,103 @@ const PartnerPreferences = ({ formData, updateFormData, nextStep, prevStep }) =>
     <View style={styles.inputcontainer}>
       <TextInput
         style={styles.input}
-        placeholder="Age Range(Min)"
+        placeholder="Age Range"
         placeholderTextColor="#EBC7B1"
         value={
-          formData?.matrimonial_expectations?.preferred_age_range?.min ?? ''
+          formData?.partnerPreferences?.ageRange || ''
         }
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_age_range: {
-                ...prevData.matrimonial_expectations.preferred_age_range,
-                min: value,
+            partnerPreferences: {
+              ...prevData.partnerPreferences,
+              ageRange: value,
+            },
+          }))
+        }
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Height Range"
+        placeholderTextColor="#EBC7B1"
+        value={
+          formData?.partnerPreferences?.heightRange || ''
+        }
+        onChangeText={value =>
+          updateFormData(prevData => ({
+            ...prevData,
+            partnerPreferences: {
+              ...prevData.partnerPreferences,
+              heightRange: value,
+            },
+          }))
+        }
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Preferred City"
+        placeholderTextColor="#EBC7B1"
+        value={
+          formData?.partnerPreferences?.preferredCity || ''
+        }
+        onChangeText={value =>
+          updateFormData(prevData => ({
+            ...prevData,
+            partnerPreferences: {
+              ...prevData.partnerPreferences,
+              preferredCity: value,
+            },
+          }))
+        }
+      />
+
+      <View style={styles.pickerinput}>
+        <RNPickerSelect
+          onValueChange={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              partnerPreferences: {
+                ...prevData.partnerPreferences,
+                religion: value,
               },
-            },
-          }))
-        }
-      />
-
+            }))
+          }
+          useNativeAndroidPickerStyle={false}
+          placeholder={{
+            label: 'Select your religion',
+            value: '',
+            color: '#EBC7B1',
+            fontWeight: 'bold',
+          }}
+          style={{
+            inputIOS: styles.pickerText,
+            inputAndroid: styles.pickerText,
+            placeholder: styles.placeholderText,
+          }}
+          items={[
+            { label: 'Hindu', value: 'Hindu', color: 'white' },
+            { label: 'Muslim', value: 'Muslim', color: 'white' },
+            { label: 'Christian', value: 'Christian', color: 'white' },
+            { label: 'Sikh', value: 'Sikh', color: 'white' },
+            { label: 'Other', value: 'Other', color: 'white' },
+          ]}
+        />
+      </View>
       <TextInput
-        style={styles.input}
-        placeholder="Age Range(Max)"
+        style={styles.aboutinput}
+        placeholder="About Partner Preferences"
         placeholderTextColor="#EBC7B1"
         value={
-          formData?.matrimonial_expectations?.preferred_age_range?.max !=
-            undefined
-            ? formData.matrimonial_expectations.preferred_age_range.max
-            : ''
+          formData?.partnerPreferences?.aboutPreferences || ''
         }
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_age_range: {
-                ...prevData.matrimonial_expectations.preferred_age_range,
-                max: value,
-              },
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Height Range(Min)"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.matrimonial_expectations?.preferred_height_range?.min !=
-            undefined
-            ? formData.matrimonial_expectations.preferred_height_range.min
-            : ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_height_range: {
-                ...prevData.matrimonial_expectations.preferred_height_range,
-                min: value,
-              },
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Height Range(Max)"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.matrimonial_expectations?.preferred_height_range?.max !=
-            undefined
-            ? formData.matrimonial_expectations.preferred_height_range.max
-            : ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_height_range: {
-                ...prevData.matrimonial_expectations.preferred_height_range,
-                max: value,
-              },
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Preferred Location"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.matrimonial_expectations?.preferred_location != undefined
-            ? formData.matrimonial_expectations.preferred_location
-            : ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_location: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Preferred Education"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.matrimonial_expectations?.preferred_education != undefined
-            ? formData.matrimonial_expectations.preferred_education
-            : ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_education: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Preferred Occupation"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.matrimonial_expectations?.preferred_occupation != undefined
-            ? formData.matrimonial_expectations.preferred_occupation
-            : ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_occupation: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Minimum Annual Income"
-        keyboardType="number-pad"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.matrimonial_expectations?.preferred_income != undefined
-            ? formData.matrimonial_expectations.preferred_income
-            : ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              preferred_income: value,
-            },
-          }))
-        }
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Other Preferences"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.matrimonial_expectations?.other_preferences != undefined
-            ? formData.matrimonial_expectations.other_preferences
-            : ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            matrimonial_expectations: {
-              ...prevData.matrimonial_expectations,
-              other_preferences: value,
+            partnerPreferences: {
+              ...prevData.partnerPreferences,
+              aboutPreferences: value,
             },
           }))
         }
@@ -1097,7 +695,7 @@ const ContactVerification = ({
   const [data, setData] = useState({});
   const currentUser = auth().currentUser;
   const { successToast, errorToast } = useToastHook();
-  const {getUserDetails } = useUpdateUserDetails();
+  const { getUserDetails } = useUpdateUserDetails();
 
   useEffect(() => {
     const getData = async () => {
@@ -1106,7 +704,39 @@ const ContactVerification = ({
     }
 
     getData();
-  },[])
+  }, [])
+
+  const checkAadharExists = async () => {
+    try {
+      const userSnapshot = await firestore()
+        .collection('profiles')
+        .where('contactInformation.kycDetails', '==', formData?.contactInformation?.kycDetails)
+        .get();
+
+      const agentSnapshot = await firestore()
+        .collection('agents')
+        .where('aadharnumber', '==', formData?.contactInformation?.kycDetails)
+
+      if (!userSnapshot.empty || !agentSnapshot.empty) {
+        return true;
+      }
+      return false; 
+    } catch (error) {
+      console.error("Error checking phone number:", error);
+      return false;
+    }
+  };
+
+  const handleNextStep = () => {
+    // const isExists = checkAadharExists()
+
+    // if(isExists) {
+    //   errorToast("Aadhar Exixts");
+    //   return;
+    // }
+
+    submitForm();
+  }
 
 
   const handleUploadProfilePic = async (imageUri: string) => {
@@ -1143,12 +773,15 @@ const ContactVerification = ({
 
       updateFormData(prevData => ({
         ...prevData,
-        profile_pic: downloadUrl,
-      }));
+        contactInformation: {
+          ...prevData.contactInformation,
+          profilePicture: downloadUrl,
+        },
+      }))
 
       successToast("Profile Picture Updated");
 
-      
+
     } catch (error) {
       console.error("Error updating profile picture:", error);
       errorToast("Something Went Wrong");
@@ -1173,7 +806,7 @@ const ContactVerification = ({
     });
   };
 
-  
+
 
   return (
     <View style={styles.stepContainer}>
@@ -1181,14 +814,7 @@ const ContactVerification = ({
 
       <View style={styles.inputcontainer}>
         <View style={styles.phonenobody}>
-          <View style={styles.phonecode}>
-            <TextInput
-              style={styles.phoneno}
-              editable={false}
-              placeholder="+91"
-              placeholderTextColor="#EBC7B1"
-              value={data?.contact_info?.selected_code}></TextInput>
-          </View>
+          
           <View style={styles.phonenomain}>
             <TextInput
               style={styles.phoneno}
@@ -1196,130 +822,49 @@ const ContactVerification = ({
               placeholder="Phone Number"
               keyboardType="number-pad"
               placeholderTextColor="#EBC7B1"
-              value={data?.contact_info?.phone}></TextInput>
+              value={formData?.contactInformation?.phone}></TextInput>
           </View>
         </View>
 
         <TextInput
           style={styles.input}
-          placeholder="Current City"
+          placeholder="Email"
           placeholderTextColor="#EBC7B1"
-          value={formData?.contact_info.current_city || ''}
+          value={formData?.contactInformation.email || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              contact_info: { ...prevData.contact_info, current_city: value },
+              contactInformation: { ...prevData.contactInformation, email: value },
             }))
           }
         />
-
-        <TextInput
-          style={styles.input}
-          placeholder="City"
-          placeholderTextColor="#EBC7B1"
-          value={
-            formData?.contact_info?.permanent_address?.city !== undefined
-              ? formData?.contact_info?.permanent_address?.city
-              : ''
-          }
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              contact_info: { ...prevData.permanent_address, city: value },
-            }))
-          }
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="State"
-          placeholderTextColor="#EBC7B1"
-          value={
-            formData?.contact_info?.permanent_address?.state !== undefined
-              ? formData?.contact_info?.permanent_address?.state
-              : ''
-          }
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              contact_info: { ...prevData.permanent_address, state: value },
-            }))
-          }
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Country"
-          placeholderTextColor="#EBC7B1"
-          value={
-            formData?.contact_info?.permanent_address?.country !== undefined
-              ? formData?.contact_info?.permanent_address?.country
-              : ''
-          }
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              contact_info: { ...prevData.permanent_address, country: value },
-            }))
-          }
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Pincode"
-          keyboardType="number-pad"
-          placeholderTextColor="#EBC7B1"
-          value={
-            formData?.contact_info?.permanent_address?.pincode !== undefined
-              ? formData?.contact_info?.permanent_address?.pincode
-              : ''
-          }
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              contact_info: { ...prevData.permanent_address, pincode: value },
-            }))
-          }
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Street"
-          placeholderTextColor="#EBC7B1"
-          value={
-            formData?.contact_info?.permanent_address?.street !== undefined
-              ? formData?.contact_info?.permanent_address?.street
-              : ''
-          }
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              contact_info: { ...prevData.permanent_address, street: value },
-            }))
-          }
-        />
-
         <View style={styles.profileimageupload}>
           <Text style={styles.profiletext}>Profile pics</Text>
-          <TouchableOpacity>
-            <Icon
-              color="#EBC7B1"
-              size={30}
-              name="attachment"
-              onPress={openImagePicker}
-            />
+          <TouchableOpacity onPress={openImagePicker}>
+            <Camera size={23} strokeWidth={1} color={'#EBC7B1'} />
           </TouchableOpacity>
         </View>
         {/* {formData.profile_pic && <View style={{height:200, width:200}}>
           <Image source={formData.profile_pic} style={{height:'100%', width:'100%'}}/>
         </View>} */}
 
-
+        <TextInput
+          style={styles.input}
+          placeholder="Aadhar Number"
+          placeholderTextColor="#EBC7B1"
+          value={formData?.contactInformation.kycDetails || ''}
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              contactInformation: { ...prevData.contactInformation, kycDetails: value },
+            }))
+          }
+        />
         <View style={styles.prevnextbox}>
           <TouchableOpacity onPress={prevStep} style={styles.button}>
             <Text style={styles.buttontext}>Previous</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={submitForm}>
+          <TouchableOpacity style={styles.button} onPress={handleNextStep}>
             <Text style={styles.buttontext}>Submit</Text>
           </TouchableOpacity>
         </View>
@@ -1337,92 +882,64 @@ const Header = () => (
 
 // Main Steps Component
 const Steps = (
-  {navigation}
+  { navigation }
 ) => {
   const [data, setData] = useState({});
   const [uploading, setUploading] = useState();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    phone_number: '',
-    is_bride: '',
-    profile_pic: '',
-    personal_info: {
-      firstname: '',
-      lastname: '',
-      gender: '',
-      date_of_birth: '',
-      height: '',
-      denomination:'',
-      mother_tongue:'',
-      current_location:'',
+    contactInformation: {
+      email: "",
+      kycDetails: "",
+      phone: "",
+      profilePicture: ""
     },
-    contact_info: {
-      phone: '',
-      selected_code: '',
-      email: '',
-      current_city: '',
-      permanent_address: {
-        street: '',
-        city: '',
-        state: '',
-        country: 'India',
-        pincode: '',
-      },
+    educationAndCareer: {
+      aboutOccupation: "",
+      annualIncome: 0,
+      highestQualification: "",
+      occupation: "",
+      workingPlace: ""
     },
-    family_background: {
-      family_type: '',
-      father_name: '',
-      mother_name: '',
-      num_brothers: 0,
-      num_sisters: 0,
-      family_values: '',
-      family_status: '',
+    familyInformation: {
+      aboutFamily: "",
+      familyType: "",
+      fatherName: "",
+      fatherOccupation: "",
+      nativePlace: "",
+      numberOfSiblings: 0
     },
-    education: {
-      highest_education: '',
-      field_of_study: '',
-      college: '',
-      graduation_year: '',
+    lifestyleAndInterests: {
+      aboutLifestyle: "",
+      drinkingHabits: "",
+      interests: [],
+      maritalStatus: "",
     },
-    professional_details: {
-      occupation: '',
-      employer: '',
-      annual_income: 0,
-      job_location: '',
+    metadata: {
+      createdAt: firestore.FieldValue.serverTimestamp(),
+      updatedAt: firestore.FieldValue.serverTimestamp(),
+      isVerified: true,
+      agentId: '',
     },
-    hobbies_interests: [],
-    religious_cultural: {
-      religion: '',
-      caste: '',
-      subcaste: '',
-      gothra: '',
-      star_rashi: '',
-      manglik_status: '',
+    partnerPreferences: {
+      aboutPreferences: "",
+      ageRange: "",
+      heightRange: "",
+      preferredCity: "",
+      religion: [],
     },
-    lifestyle_preferences: {
-      drinking_habits: '',
-      smoking_habits: '',
-      diet_preferences: '',
-      appearance_preferences: '',
-      personality_preferences: '',
+
+    personalInformation: {
+      age: 0,
+      dateOfBirth: "",
+      firstName: "",
+      gender: "",
+      height: "",
+      lastName: "",
+      location: "",
+      motherTongue: "",
     },
-    matrimonial_expectations: {
-      preferred_age_range: {
-        min: 0,
-        max: 0,
-      },
-      preferred_height_range: {
-        min: 0,
-        max: 0,
-      },
-      preferred_location: '',
-      preferred_caste_subcaste: [],
-      preferred_education: '',
-      preferred_occupation: '',
-      preferred_income: 0,
-      other_preferences: '',
-    },
-    about_me: '',
+    profileType: "",
     createdAt: firestore.FieldValue.serverTimestamp(),
     updatedAt: firestore.FieldValue.serverTimestamp(),
   });
@@ -1430,30 +947,26 @@ const Steps = (
   const currentUser = auth().currentUser;
   const { successToast, errorToast } = useToastHook();
 
-  const {getUserDetails } = useUpdateUserDetails();
+  const { getUserDetails } = useUpdateUserDetails();
 
   useEffect(() => {
     const getData = async () => {
       const myData = await getUserDetails()
       updateFormData(prevData => ({
         ...prevData,
-        contact_info: { ...prevData.contact_info, phone: myData.contact_info.phone },
-      }))
-      updateFormData(prevData => ({
-        ...prevData,
-        contact_info: { ...prevData.contact_info, selected_code: myData.contact_info.selected_code },
+        contactInformation: { ...prevData.contactInformation, phone: myData.contactInformation.phone },
       }))
 
       updateFormData(prevData => ({
         ...prevData,
-        personal_info: { ...prevData.personal_info, date_of_birth: myData.personal_info.date_of_birth },
+        personalInformation: { ...prevData.personalInformation, dateOfBirth: myData.personalInformation.dateOfBirth },
       }))
 
       setData(myData);
     }
 
     getData();
-  },[])
+  }, [])
 
   const saveUserData = async () => {
     try {
@@ -1474,6 +987,26 @@ const Steps = (
     }
   }
 
+  const saveTempProfile = async () => {
+    try {
+      const userRef = firestore().collection('temp_profiles').doc(currentUser?.uid);
+
+      const updatedData = {
+        personalInformation: {
+          ...formData.personalInformation,
+        },
+        phoneNumber: formData?.contactInformation.phone,
+        updatedAt: firestore.FieldValue.serverTimestamp()
+      }
+
+      console.log(updatedData)
+
+      await userRef.set(updatedData, { merge: true }); 
+    } catch (error) {
+
+    }
+  }
+
   const nextStep = () => setStep(prev => Math.min(prev + 1, 7));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
@@ -1481,6 +1014,7 @@ const Steps = (
 
   const submitForm = async () => {
     await saveUserData();
+    await saveTempProfile();
 
     navigation.replace('Layout');
   };
@@ -1524,6 +1058,8 @@ const Steps = (
               updateFormData={updateFormData}
               nextStep={nextStep}
               prevStep={prevStep}
+              successToast={successToast}
+              errorToast={errorToast}
             />
           )}
           {step === 3 && (
@@ -1721,7 +1257,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     borderColor: '#EBC7B1',
-    color: '#BE7356',
+    color: '#EBC7B1',
     height: 'auto',
     paddingLeft: width / 40,
     fontWeight: 'bold',

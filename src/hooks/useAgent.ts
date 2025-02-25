@@ -98,17 +98,28 @@ const useAgent = () => {
             const profilesData = await Promise.all(
                 requests.map(async (request) => {
                     if (typeof request === "string") {
-                        return fetchProfile(request);
+                        // Single user case
+                        const userProfile = await fetchProfile(request);
+                        return userProfile ? { ...userProfile } : null;
                     } else if (typeof request === "object") {
                         const profileA = request.profile_a_id ? await fetchProfile(request.profile_a_id) : null;
                         const profileB = request.profile_b_id ? await fetchProfile(request.profile_b_id) : null;
-                        return [profileA, profileB].filter(profile => profile !== null);
+    
+                        return {
+                            userADetails: profileA || null,
+                            userBDetails: profileB || null
+                        };
                     }
                     return null;
                 })
             );
-
-            const filteredData = profilesData.flat().filter(profile => profile !== null);
+    
+            // Filter out any null values
+            const filteredData = profilesData.filter(item => item !== null);
+    
+            filteredData.forEach((item, index) => {
+                console.log(`Item ${index + 1}:`, item);
+            });
             setAssignedData(filteredData);
 
         } catch (error) {
@@ -143,7 +154,7 @@ const useAgent = () => {
             // Step 2: Query profiles with matching agent_id
             const querySnapshot = await firestore()
                 .collection('profiles')
-                .where('agent_id', '==', agentId)
+                .where('metadata.agentId', '==', agentId)
                 .get();
 
             const profiles = querySnapshot.docs.map(doc => ({

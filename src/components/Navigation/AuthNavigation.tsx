@@ -11,16 +11,18 @@ import Category from '../Auth/Category';
 import Steps from '../Steps/Steps';
 import AgentsSteps from '../AgentsSteps/AgentsSteps';
 import AgentsSuccess from '../AgentsSteps/AgentsSuccess';
+import Welcome from '../Auth/Welcome';
 
 const Stack = createStackNavigator();
 
 const AuthNavigation = () => {
   return (
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Otp" component={Otp} />
         <Stack.Screen name="Success" component={Success} />
+        <Stack.Screen name="Welcome" component={Welcome} />
         <Stack.Screen name="Category" component={Category} />
         <Stack.Screen name="Steps" component={Steps} />
         <Stack.Screen name="AgentsSteps" component={AgentsSteps} />

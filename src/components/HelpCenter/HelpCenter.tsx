@@ -11,16 +11,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../Header/Header';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import { getUserCategory } from '../../utils';
+import DrawerSceneWrapper from '../Navigation/draw';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const HelpCenter = ({navigation}) => {
+const HelpCenter = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState('');
   const [message, setMessage] = useState('');
@@ -59,55 +60,57 @@ const HelpCenter = ({navigation}) => {
   }, [])
 
   return (
-    <SafeAreaView style={styles.safearea}>
-      <ScrollView contentContainerStyle={styles.scrollview}>
-        <View style={styles.main}>
-          <Header navigation={navigation} />
-          <View style={styles.boxContainer}>
-            <View style={styles.box}></View>
-          </View>
-          <View style={styles.form}>
-            <View style={styles.imagecontainer}>
-              <Image
-                style={styles.image}
-                source={require('../../assets/message.png')}
-              />
+    < DrawerSceneWrapper>
+      <SafeAreaView style={styles.safearea}>
+        <ScrollView contentContainerStyle={styles.scrollview}>
+          <View style={styles.main}>
+            <Header navigation={navigation} />
+            <View style={styles.boxContainer}>
+              <View style={styles.box}></View>
             </View>
-            <Text style={styles.head}>How can we help</Text>
-            <Text style={styles.head}>you today?</Text>
+            <View style={styles.form}>
+              <View style={styles.imagecontainer}>
+                <Image
+                  style={styles.image}
+                  source={require('../../assets/message.png')}
+                />
+              </View>
+              <Text style={styles.head}>How can we help</Text>
+              <Text style={styles.head}>you today?</Text>
 
-            <View style={styles.msgbox}>
-              <Text style={styles.msg}>Give more information</Text>
-              <Text style={styles.msg}>
-                about your problem please drop your query
-              </Text>
+              <View style={styles.msgbox}>
+                <Text style={styles.msg}>Give more information</Text>
+                <Text style={styles.msg}>
+                  about your problem please drop your query
+                </Text>
+              </View>
+
+              <View style={styles.inputbox}>
+                <TextInput
+                  value={message}
+                  onChangeText={setMessage}
+                  style={styles.input}
+                  multiline={true}
+                  placeholder="Message..."
+                  placeholderTextColor={'black'}
+                />
+              </View>
+              <View style={styles.submitbox}>
+                <TouchableOpacity
+                  style={styles.submitcontainer}
+                  onPress={sendMessageToAdmin}>
+                  <Text style={styles.submittext}>Submit</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={styles.inputbox}>
-              <TextInput
-                value={message}
-                onChangeText={setMessage}
-                style={styles.input}
-                multiline={true}
-                placeholder="Message..."
-                placeholderTextColor={'black'}
-              />
-            </View>
-            <View style={styles.submitbox}>
-              <TouchableOpacity
-                style={styles.submitcontainer}
-                onPress={sendMessageToAdmin}>
-                <Text style={styles.submittext}>Submit</Text>
-              </TouchableOpacity>
-            </View>
           </View>
-          
+        </ScrollView>
+        <View style={loading ? styles.loadingContainer : null}>
+          {loading && <ActivityIndicator size="large" color="#a4737b" />}
         </View>
-      </ScrollView>
-      <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </DrawerSceneWrapper>
   );
 };
 

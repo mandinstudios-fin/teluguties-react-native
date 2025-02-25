@@ -35,7 +35,7 @@ const Slider = ({images}) => {
           <Image
             key={index}
             source={{ uri: image }}
-            style={{ width, height, resizeMode: "contain" }}
+            style={{ width, height, resizeMode: "cover" }}
           />
         ))}
       </ScrollView>

@@ -203,7 +203,6 @@ export const getUserDetailsByCategory = async (category) => {
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
-      console.warn(`No document found in category: ${category}`);
       return null;
     }
 
@@ -333,3 +332,27 @@ export const sendPushNotification = async (userId, title, body) => {
     console.error("Error sending notification:", error);
   }
 };
+
+export function calculateAge(dateOfBirth) {
+  // Split the date string into day, month, and year
+  const [day, month, year] = dateOfBirth.split('/').map(Number);
+
+  // Create a birthdate object
+  const birthDate = new Date(year, month - 1, day); // Month is 0-based in JS
+
+  // Get today's date
+  const today = new Date();
+
+  // Calculate the age
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  // Adjust age if birthday hasn't occurred yet this year
+  if (
+    today.getMonth() < birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  return age;
+}

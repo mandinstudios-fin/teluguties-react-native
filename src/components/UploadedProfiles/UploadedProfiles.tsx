@@ -17,12 +17,12 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useFirestore from '../../hooks/useFirestore';
 import useAgent from '../../hooks/useAgent';
+import AgentsHeader from '../Header/AgentsHeader';
 
 const {width, height, fontScale} = Dimensions.get('window');
 
 const UploadedProfiles = ({navigation}) => {
   const [data, setData] = useState<any>([]);
-  const {getRecentlyViewedData} = useFirestore();
   const { getProfilesUploadedByAgent } = useAgent();
   const [loading, setLoading] = useState(false);
 
@@ -40,7 +40,7 @@ const UploadedProfiles = ({navigation}) => {
     <SafeAreaView style={styles.safearea}>
       <ScrollView contentContainerStyle={styles.scrollview}>
         <View style={styles.main}>
-          <Header navigation={navigation} />
+          <AgentsHeader navigation={navigation} />
           <View style={styles.boxContainer}>
             <View style={styles.box}></View>
           </View>
@@ -52,7 +52,7 @@ const UploadedProfiles = ({navigation}) => {
               </TouchableOpacity>
               <TouchableOpacity>
                 <Text style={styles.subnavigationactivetext}>
-                  Uploded Profiles
+                  Uploaded Profiles
                 </Text>
               </TouchableOpacity>
             </View>

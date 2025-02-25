@@ -83,7 +83,7 @@ const Success = ({ navigation, route }) => {
 
         <View style={styles.verifiedcontainer}>
           <View>
-            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/success.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
+            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/verified2.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
             <Text style={styles.verifiedtext}>Phone Number Verified</Text>
             <View style={styles.textcontainer}>
               <Text style={styles.text}>
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#BE7356',
+    backgroundColor: '#7b2a38',
     paddingVertical: width / 20,
   },
   headertext: {
