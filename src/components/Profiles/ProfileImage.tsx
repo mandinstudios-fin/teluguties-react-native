@@ -14,7 +14,7 @@ const shimmerColors = ['#D0D0D0', '#E5E5E5', '#D0D0D0'];
 const { width } = Dimensions.get('window');
 const IMAGE_SIZE = width / 2 - 25; // Two columns with some spacing
 
-const ProfileImage = ({ user, navigation }) => {
+const ProfileImage = ({ user, navigation, profiles }) => {
   const [loading, setLoading] = useState(true);
 
 
@@ -46,7 +46,8 @@ const ProfileImage = ({ user, navigation }) => {
 
   const handleProfile = () => {
     addToRecelyViewed();
-    navigation.navigate("UserProfileDetails", { user, hideTabBar: true, navigation });
+    const index = profiles.findIndex(profile => profile.id === user.id);
+    navigation.navigate("UserProfileDetails", { navigation, profiles, index });
   }
 
   return (

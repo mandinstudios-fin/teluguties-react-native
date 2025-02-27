@@ -14,7 +14,7 @@ import AssignAgentForMatch from '../Profiles/AssignAgentForMatch';
 
 const Stack = createStackNavigator();
 
-const HomeStack = () => {
+const HomeStack = ({ navigation }) => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, }}>
       <Stack.Screen name="Home" component={Home} options={{ presentation: 'transparentModal' }} />
@@ -24,7 +24,7 @@ const HomeStack = () => {
       <Stack.Screen name="Shortlist" component={Shortlist} options={{ presentation: 'transparentModal' }} />
       <Stack.Screen name="RecentlyViewed" component={RecentlyViewed} options={{ presentation: 'transparentModal' }} />
       <Stack.Screen name="Likely" component={Likely} options={{ presentation: 'transparentModal' }} />
-      <Stack.Screen name="UserProfileDetails" component={UserProfileDetails} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="UserProfileDetails" component={UserProfileDetails} options={{ presentation: 'modal', tabBarStyle: { display: 'none' } }} />
       <Stack.Screen name="UserNotifications" component={UserNotifications} options={{ presentation: 'modal' }} />
       <Stack.Screen name="AssignAgentForMatch" component={AssignAgentForMatch} options={{ presentation: 'card' }} />
     </Stack.Navigator>

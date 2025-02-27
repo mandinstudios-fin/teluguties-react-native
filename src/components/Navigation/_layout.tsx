@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AIcon from 'react-native-vector-icons/AntDesign';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import IIcon from 'react-native-vector-icons/Ionicons';
 import MCIcon from 'react-native-vector-icons/MaterialIcons';
-import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView, Animated, Easing, Modal } from 'react-native';
 import HelpCenter from '../HelpCenter/HelpCenter';
 import Steps from '../Steps/Steps'
 import Chat from '../Chat/Chat';
@@ -14,7 +14,7 @@ import Inbox from '../Inbox/Inbox';
 import Matches from '../Matches/Matches';
 import Prime from '../Prime/Prime';
 import { enableScreens } from 'react-native-screens';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList, useDrawerStatus } from '@react-navigation/drawer';
 import CreateProfile from '../CreateProfile/CreateProfile';
 import HomeStack from '../Home/HomeStack';
 import MatchesStack from '../Matches/MatchesStack';
@@ -24,9 +24,10 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import AgentsStack from '../Agents/AgentsStack';
-import { BadgeIndianRupee, Handshake, Heart, House, LogOut, Pencil, PhoneOutgoing, Trash } from 'lucide-react-native';
+import { BadgeIndianRupee, Handshake, Heart, House, LogOut, Pencil, PhoneOutgoing, Trash, Trash2 } from 'lucide-react-native';
 import TabBar from './TabBar';
 import DrawerSceneWrapper from './draw';
+import LottieView from 'lottie-react-native';
 
 const { width } = Dimensions.get("window");
 
@@ -41,105 +42,69 @@ const BottomTabs = () => {
   return (
     <DrawerSceneWrapper>
       <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-      tabBar={props => <TabBar {...props}/>}
+        screenOptions={{
+          headerShown: false,
+        }}
+        tabBar={props => <TabBar {...props} />}
       >
-      <Tab.Screen
-        name="HomeStack"
-        component={HomeStack}
-        options={{
-          
-          title: 'Home',
-        }}
-      />
+        <Tab.Screen
+          name="HomeStack"
+          component={HomeStack}
+          options={{
 
-      <Tab.Screen
-        name="MatchesStack"
-        component={MatchesStack}
-        options={{
-          
-          title: 'Matches',
-        }}
-      />
-      <Tab.Screen
-        name="PrimeStack"
-        component={PrimeStack}
-        options={{
-          
-          title: 'Packages',
-        }}
-      />
-      <Tab.Screen
-        name="AgentsStack"
-        component={AgentsStack}
-        options={{
-          
-          title: 'Agent',
-        }}
-      />
-    </Tab.Navigator>
+            title: 'Home',
+          }}
+        />
+
+        <Tab.Screen
+          name="MatchesStack"
+          component={MatchesStack}
+          options={{
+
+            title: 'Matches',
+          }}
+        />
+        <Tab.Screen
+          name="PrimeStack"
+          component={PrimeStack}
+          options={{
+
+            title: 'Packages',
+          }}
+        />
+        <Tab.Screen
+          name="AgentsStack"
+          component={AgentsStack}
+          options={{
+
+            title: 'Agent',
+          }}
+        />
+      </Tab.Navigator>
     </DrawerSceneWrapper>
   );
 };
 
 const Layout = ({ navigation }) => {
   const { successToast, errorToast } = useToastHook();
-  const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-
-  const openDrawer = () => {
-    Animated.parallel([
-      Animated.spring(translateX, {
-        toValue: 0,
-        bounciness: 8,
-        speed: 10,
-        useNativeDriver: true,
-      }),
-      Animated.timing(overlayOpacity, {
-        toValue: 0.7,
-        duration: 400,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const closeDrawer = () => {
-    Animated.parallel([
-      Animated.timing(translateX, {
-        toValue: -DRAWER_WIDTH,
-        duration: 300,
-        easing: Easing.in(Easing.ease),
-        useNativeDriver: true,
-      }),
-      Animated.timing(overlayOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const animatedOpen = () => {
-    openDrawer();
-    navigation.openDrawer();
-  };
-
-  const animatedClose = () => {
-    closeDrawer();
-    navigation.closeDrawer();
-  };
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const CustomDrawerContent = (props) => {
     const handleLogout = async () => {
+      setLogoutModalVisible(true); // Show modal
+
       await AsyncStorage.removeItem('userToken');
       successToast('Logout Successful');
-      navigation.replace('Auth');
+
+      setTimeout(() => {
+        setLogoutModalVisible(false);
+        navigation.replace('Auth');
+      }, 1200);
     };
 
     const handleDeleteAccount = async () => {
+      setDeleteModalVisible(true);
       const userId = auth().currentUser?.uid;
       try {
         const userRef = firestore().collection('profiles').doc(userId);
@@ -167,6 +132,7 @@ const Layout = ({ navigation }) => {
         console.log(error);
         errorToast('Something Went Wrong');
       }
+      setDeleteModalVisible(false);
     };
 
     return (
@@ -184,11 +150,26 @@ const Layout = ({ navigation }) => {
           <DrawerItem
             label="Delete Account"
             onPress={handleDeleteAccount}
-            labelStyle={{ color: 'red', fontWeight: '500' }}
-            icon={() => <Trash size={23} strokeWidth={1} color={'red'} />}
+            labelStyle={{ color: '#d3d3d3', fontWeight: '500' }}
+            icon={() => <Animated.View>
+              <Trash2 size={23} strokeWidth={1} color={'#d3d3d3'} />
+            </Animated.View>}
           />
         </View>
-      </SafeAreaView>
+        <Modal visible={logoutModalVisible} transparent animationType="fade">
+          <View style={styles.overlay}>
+            <View style={styles.modalContainer}>
+              <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/logout.json')} autoPlay loop={false} resizeMode='cover' style={styles.lottie} /></Animated.View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal visible={deleteModalVisible} transparent animationType="fade">
+          <View style={styles.overlay}>
+            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/logout.json')} autoPlay loop={false} resizeMode='cover' style={styles.lottie} /></Animated.View>
+          </View>
+        </Modal>
+      </SafeAreaView >
     );
   };
 
@@ -198,7 +179,7 @@ const Layout = ({ navigation }) => {
         headerShown: false,
         drawerStyle: {
           backgroundColor: '#7b2a38',
-          width:'61%'
+          width: '61%'
         },
         drawerLabelStyle: {
           color: '#561825',
@@ -240,6 +221,32 @@ const Layout = ({ navigation }) => {
     </Drawer.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  lottiecontainer: {
+    height: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  lottie: {
+    height: width / 2.5,
+    width: width / 10,
+  },
+});
 
 
 

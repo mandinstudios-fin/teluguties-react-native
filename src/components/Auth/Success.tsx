@@ -23,6 +23,7 @@ const Success = ({ navigation, route }) => {
   const { isRegistration, updatedFormData } = route.params;
   const [category, setCategory] = useState('');
   const currentUser = auth().currentUser;
+  const animationRef = useRef(null);
 
   useEffect(() => {
     const handleGetUserCategory = async () => {
@@ -50,7 +51,7 @@ const Success = ({ navigation, route }) => {
                 "AgentsLayout"
               : "Layout"
         );
-      }, 2000);
+      }, 600);
     }
 
     return () => {
@@ -83,7 +84,7 @@ const Success = ({ navigation, route }) => {
 
         <View style={styles.verifiedcontainer}>
           <View>
-            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/verified2.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
+            <Animated.View style={styles.lottiecontainer}><LottieView ref={animationRef} source={require('../../assets/animations/verified2.json')} autoPlay resizeMode='cover' style={styles.lottie} /></Animated.View>
             <Text style={styles.verifiedtext}>Phone Number Verified</Text>
             <View style={styles.textcontainer}>
               <Text style={styles.text}>
@@ -171,5 +172,6 @@ const styles = StyleSheet.create({
   footertext: {
     textAlign: 'center',
     color: 'black',
+    fontSize: 12 
   },
 });

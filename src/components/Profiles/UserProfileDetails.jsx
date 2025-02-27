@@ -8,13 +8,15 @@ import useFirestore from '../../hooks/useFirestore';
 import useAgent from '../../hooks/useAgent';
 import auth from '@react-native-firebase/auth';
 import DetailsCard from './DetailsCard';
-import { ArrowLeft, ChevronLeft, ChevronRight, Heart } from 'lucide-react-native';
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, Instagram } from 'lucide-react-native';
 
 const { width, height, fontScale } = Dimensions.get("window")
 
 const UserProfileDetails = ({ route, navigation }) => {
   const currentUser = auth().currentUser;
-  const { user } = route.params;
+  const { profiles, index } = route.params;
+  const user = profiles[index];
+
   const images = (user && user.contactInformation?.profilePicture && user.images && user.images.length > 0)
     ? [user.contactInformation?.profilePicture, ...user.images]
     : (user && user.contactInformation?.profilePicture ? [user.contactInformation?.profilePicture] : []);
@@ -33,7 +35,7 @@ const UserProfileDetails = ({ route, navigation }) => {
   } = useFirestore();
   const { getAgentsCurrentDetails, acceptAssignRequest, rejectAssignRequest } = useAgent();
   const { profilePicture, ...filteredContactInfo } = user?.contactInformation || {};
-
+  
   // First useEffect - fetch request details
   useEffect(() => {
     if (user?.id) {
@@ -89,6 +91,20 @@ const UserProfileDetails = ({ route, navigation }) => {
     checkStatus();
   }, [user?.id]);
 
+  console.log(routeName)
+
+  const goToPrevious = () => {
+    if (index > 0) {
+      navigation.push('UserProfileDetails', { navigation, profiles, index: index - 1 });
+    }
+  };
+
+  const goToNext = () => {
+    if (index < profiles.length - 1) {
+      navigation.push('UserProfileDetails', { navigation, profiles, index: index + 1 });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safearea}>
 
@@ -103,7 +119,7 @@ const UserProfileDetails = ({ route, navigation }) => {
           <View style={styles.userdetails}>
             <View style={styles.name}>
               <Text style={styles.username}>{user?.personalInformation?.firstName} <Text style={styles.userage}>{user?.personal_info?.age ? user.personal_info.age : user?.personal_info?.date_of_birth ? getUsersAge(user.personal_info.date_of_birth) : null}</Text></Text>
-
+              
             </View>
             <View>
               <Text style={styles.namesubdata}>
@@ -157,7 +173,7 @@ const UserProfileDetails = ({ route, navigation }) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : routeName === 'Home' ? (
+            ) : routeName === 'Home' || routeName === 'UserProfileDetails' ? (
               <View style={styles.shortmatchbox}>
                 {/* CASE 1: If an agent is assigned → Show "Agent Assigned" and hide "Make a Match" */}
                 {isAgentAssigned && (
@@ -239,14 +255,15 @@ const UserProfileDetails = ({ route, navigation }) => {
             ) : null)}
 
           <View style={styles.prevnextbox}>
-            <TouchableOpacity style={styles.button}>
+            {index > 0 && <TouchableOpacity style={styles.button} onPress={goToPrevious} disabled={index === 0}>
               <ChevronLeft strokeWidth={1} color={'white'} />
               <Text style={styles.buttontext}>Previous</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} >
+            </TouchableOpacity>}
+
+            {index < profiles.length - 1 && <TouchableOpacity style={styles.button} onPress={goToNext} disabled={index === profiles.length - 1}>
               <Text style={styles.buttontext}>Next</Text>
               <ChevronRight strokeWidth={1} color={'white'} />
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
 
 
@@ -479,8 +496,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#7b2a38',
     paddingHorizontal: 18,
-    paddingVertical: 10
-
+    paddingVertical: 10,
+    marginHorizontal: 'auto'
   },
   buttontext: {
     textAlign: 'center',

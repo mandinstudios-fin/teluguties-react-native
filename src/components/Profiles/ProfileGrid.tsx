@@ -60,7 +60,7 @@ const ProfileGrid = ({data, navigation, isAgent = false} : ProfileGridProps) => 
       ]}
       initialNumToRender={data?.length | 0}
       renderItem={({item}) => (
-        <ProfileImage user={item} navigation={navigation} />
+        <ProfileImage user={item} navigation={navigation} profiles={data}/>
       )}
       keyExtractor={item => item.id}
       showsVerticalScrollIndicator={false}

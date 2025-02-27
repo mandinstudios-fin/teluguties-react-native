@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
     },
     main: {
         flexGrow: 1,
+        paddingBottom: 30
     },
     header: {
         display: 'flex',

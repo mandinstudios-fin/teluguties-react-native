@@ -20,6 +20,7 @@ export default function AgentsStack() {
       <Stack.Screen
         name={"AgentsProfileDetails"}
         component={AgentsProfileDetails}
+        options={{ presentation: 'modal' }}
       />
       <Stack.Screen name="UserNotifications" component={UserNotifications} options={{ presentation: 'modal' }} />
 

@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#BE7356',
+    backgroundColor: '#7b2a39',
     paddingVertical: width / 40,
   },
   headertext: {
@@ -321,7 +321,8 @@ const styles = StyleSheet.create({
   },
   footertext: {
     textAlign: 'center',
-    color: 'black'
+    color: 'black',
+    fontSize: 12
   },
   loadingContainer: {
     position: 'absolute',

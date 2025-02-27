@@ -43,7 +43,7 @@ const AgentsProfileImage = ({ agent, navigation }) => {
                 }}>
                 </ShimmerPlaceholder>
                 :
-                <View key={agent.id} style={styles.touchable}>
+                <TouchableOpacity key={agent.id} style={styles.touchable} onPress={handleProfile}>
                     <Image source={{ uri: agent?.profilepic }} style={styles.cardImage} />
                     <View style={styles.cardContent}>
                         <Text style={styles.name}>{agent?.fullname || "Name Not Specified"}</Text>
@@ -59,7 +59,7 @@ const AgentsProfileImage = ({ agent, navigation }) => {
                             <Star size={20} color={'#000'} strokeWidth={1} />
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             }
         </>
     );

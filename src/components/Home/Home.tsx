@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#AFAFAF',
     fontWeight: 'bold',
+    fontFamily: 'inter'
   },
   subnavigationactivetext: {
     fontSize: 15,

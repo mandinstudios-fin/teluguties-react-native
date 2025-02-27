@@ -125,8 +125,8 @@ const AgentsLayout = ({ navigation }) => {
           <DrawerItem
             label="Delete Account"
             onPress={handleDeleteAccount}
-            labelStyle={{ color: 'red', fontWeight: '500' }}
-            icon={() => <Trash size={23} strokeWidth={1} color={'red'} />}
+            labelStyle={{ color: '#d3d3d3', fontWeight: '500' }}
+            icon={() => <Trash size={23} strokeWidth={1} color={'#d3d3d3'} />}
           />
         </View>
       </SafeAreaView>

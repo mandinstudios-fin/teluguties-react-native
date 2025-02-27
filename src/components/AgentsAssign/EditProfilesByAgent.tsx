@@ -12,6 +12,7 @@ import useToastHook from '../../utils/useToastHook'
 import useUpdateUserDetails from '../../hooks/useUpdateUserDetails'
 import RNPickerSelect from 'react-native-picker-select';
 import AgentsHeader from '../Header/AgentsHeader'
+import { CirclePlus, ImageMinus, ImagePlus } from 'lucide-react-native'
 
 const { width, height } = Dimensions.get("window")
 
@@ -251,7 +252,7 @@ const EditProfilesByAgent = ({ navigation, route }) => {
                         <Text style={styles.profiletext}>EDIT PROFILE</Text>
                     </View>
 
-                    <View>
+                    <View style={styles.contentContainers}>
                         <Text style={styles.subheading}>Personal Information</Text>
                         <View style={styles.subcontainer}>
                             <TouchableOpacity style={styles.circlebody} onPress={changeProfileImage}>
@@ -266,21 +267,21 @@ const EditProfilesByAgent = ({ navigation, route }) => {
                                                 <View style={styles.emptyview} />
                                             )
                                     }
-                                    <Icon name="add-circle" size={40} color="#e4bd9e" style={styles.photoicon} />
+                                    <CirclePlus strokeWidth={1} size={37} color={'#7b2a38'} fill={'#f5f5f5'} style={styles.photoicon}/>
                                 </View>
                             </TouchableOpacity>
 
                             <View style={styles.imagecontrols}>
                                 <View style={styles.addimagebox}>
                                     <TouchableOpacity style={styles.addimagecontainer} onPress={addImages}>
-                                        <MIcon name="add-photo-alternate" size={24} color="#7b2a38" />
+                                        <ImagePlus size={20} strokeWidth={1} color={"#7b2a38"}/>
                                         <Text style={styles.addimagetext}>Add your Images</Text>
                                     </TouchableOpacity>
                                 </View>
 
                                 <View style={styles.deleteimagebox}>
                                     <TouchableOpacity style={styles.deleteimagecontainer} onPress={() => deleteProfileImage()}>
-                                        <MIcon name="delete" size={24} color="#7b2a38" />
+                                        <ImageMinus size={20} strokeWidth={1} color={"#7b2a38"}/>
                                         <Text style={styles.deleteimage}>Delete image</Text>
                                     </TouchableOpacity>
                                 </View>
@@ -403,7 +404,7 @@ const EditProfilesByAgent = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View>
+                    <View style={styles.contentContainers}>
                         <Text style={styles.subheading}>Contact Information</Text>
                         <View style={styles.subcontainer}>
                             <View style={styles.phonenobody}>
@@ -454,7 +455,7 @@ const EditProfilesByAgent = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View>
+                    <View style={styles.contentContainers}>
                         <Text style={styles.subheading}>Family Background</Text>
                         <View style={styles.subcontainer}>
                             <View>
@@ -549,7 +550,7 @@ const EditProfilesByAgent = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View>
+                    <View style={styles.contentContainers}>
                         <Text style={styles.subheading}>Education & Career</Text>
                         <View style={styles.subcontainer}>
                             <View>
@@ -621,7 +622,7 @@ const EditProfilesByAgent = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View>
+                    <View style={styles.contentContainers}>
                         <Text style={styles.subheading}>Lifestyle & Preferences</Text>
                         <View style={styles.subcontainer}>
                             <View>
@@ -705,7 +706,7 @@ const EditProfilesByAgent = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View>
+                    <View style={styles.contentContainers}>
                         <Text style={styles.subheading}>Partner Preferences</Text>
                         <View style={styles.subcontainer}>
 
@@ -805,9 +806,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         flex: 1,
         gap: width / 30,
-        paddingLeft: width / 20,
-        paddingRight: width / 20,
-        paddingBottom: width / 30,
+        paddingBottom: width / 20,
     },
     activityContainer: {
         backgroundColor: '#f5f5f5',
@@ -823,7 +822,6 @@ const styles = StyleSheet.create({
     },
     profiletext: {
         fontSize: 25,
-        fontWeight: 'bold',
         color: '#792A38',
     },
     label: {
@@ -867,7 +865,6 @@ const styles = StyleSheet.create({
     subheading: {
         fontSize: 19,
         color: '#792A38',
-        fontWeight: 'bold'
     },
     subcontainer: {
         marginTop: width / 30,
@@ -915,6 +912,10 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: '#7b2a38',
         padding: width / 30,
+        marginLeft: width / 20,
+        marginRight: width / 20,
+        marginTop: width / 20,
+        elevation: 5
     },
     creattext: {
         color: 'white',
@@ -963,5 +964,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#EBC7B1',
     },
-
+    contentContainers: {
+        elevation: 10,
+        backgroundColor: 'white',
+        paddingLeft: width / 20,
+        paddingRight: width / 20,
+        paddingVertical: width / 20,
+        borderRadius: 12,
+        marginLeft: width / 20,
+        marginRight: width / 20,
+    }
 })

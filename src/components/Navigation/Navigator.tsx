@@ -78,10 +78,10 @@ const Navigator = () => {
       <Stack.Navigator
         initialRouteName={getInitialRouteName()}
         screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Auth" component={AuthNavigation} />
-        <Stack.Screen name="Layout" component={Layout} />
-        <Stack.Screen name="AgentsLayout" component={AgentsLayout} />
-        <Stack.Screen name="Steps" component={Steps} />
+        <Stack.Screen name="Auth" component={AuthNavigation} options={{ presentation: 'transparentModal' }}/>
+        <Stack.Screen name="Layout" component={Layout} options={{ presentation: 'transparentModal' }}/>
+        <Stack.Screen name="AgentsLayout" component={AgentsLayout} options={{ presentation: 'transparentModal' }}/>
+        <Stack.Screen name="Steps" component={Steps} options={{ presentation: 'transparentModal' }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
