@@ -16,6 +16,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import { ChevronLeft } from 'lucide-react-native';
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -225,7 +226,7 @@ const ProfileDetails: React.FC = ({ navigation }) => {
                 </View>
             </View>
             <View style={loading ? styles.loadingContainer : null}>
-                {loading && <ActivityIndicator size="large" color="#a4737b" />}
+                {loading && <Loader/>}
             </View>
             </ScrollView>
         </SafeAreaView>

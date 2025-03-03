@@ -12,6 +12,7 @@ import auth, { connectAuthEmulator } from '@react-native-firebase/auth'
 
 import { navigate, navigationRef, resetNavigation } from './Navigation';
 import { getUserCategoryFromToken } from '../../utils';
+import Loader from '../Loader/Loader';
 
 const Stack = createStackNavigator();
 
@@ -67,8 +68,7 @@ const Navigator = () => {
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#E4BD9E" />
-        <Text style={{ color: '#7b2a38', fontWeight: 'bold' }}>Loading...</Text>
+        <Loader/>
       </View>
     );
   }

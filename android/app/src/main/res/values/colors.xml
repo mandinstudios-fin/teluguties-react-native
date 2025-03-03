@@ -1,4 +1,5 @@
 <resources>
     <color name="splash_background">#7b2a38</color> <!-- Optional, status bar color -->
-    <color name="primary_dark">#7b2a38</color>
+    <color name="primary_dark">#ffffff</color>
+    <color name="nav_bar_dark">#000000</color>
 </resources>

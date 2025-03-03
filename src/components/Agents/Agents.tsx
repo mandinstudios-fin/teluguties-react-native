@@ -11,6 +11,7 @@ import React, {useEffect, useState} from 'react';
 import ProfileGrid from '../Profiles/ProfileGrid';
 import useFirestore from '../../hooks/useFirestore';
 import useAgent from '../../hooks/useAgent';
+import Loader from '../Loader/Loader';
 
 const Agents = ({navigation}) => {
   const [data, setData] = useState<any>([]);
@@ -18,14 +19,15 @@ const Agents = ({navigation}) => {
   const {getAgentsData} = useAgent();
 
   useEffect(() => {
-    const agentData = async () => {
-       const unsubscribe =   getAgentsData(setData);
-       return () => unsubscribe()
-    }
-    agentData();
-    console.log(data)
-
-  },[])
+    setLoading(true);
+  
+    const unsubscribe = getAgentsData((fetchedData) => {
+      setData(fetchedData);
+      setLoading(false); // Ensure loading is disabled after data is set
+    });
+  
+    return () => unsubscribe();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -42,7 +44,7 @@ const Agents = ({navigation}) => {
         </View>
       </ScrollView>
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+        {loading && <Loader/>}
       </View>
     </SafeAreaView>
   );

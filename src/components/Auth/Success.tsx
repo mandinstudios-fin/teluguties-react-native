@@ -51,7 +51,7 @@ const Success = ({ navigation, route }) => {
                 "AgentsLayout"
               : "Layout"
         );
-      }, 600);
+      }, 600); 
     }
 
     return () => {

@@ -23,6 +23,7 @@ import Header from '../Header/Header';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useFirestore from '../../hooks/useFirestore';
+import Loader from '../Loader/Loader';
 
 const Stack = createStackNavigator();
 const { width } = Dimensions.get('window');
@@ -38,8 +39,10 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     const homeData =async () => {
+      setLoading(true)
         const data = await getHomeData();
         setData(data);
+        setLoading(false)
     } 
 
     homeData();
@@ -79,7 +82,7 @@ const Home = ({ navigation }) => {
         </View>
       </ScrollView>
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+        {loading && <Loader/>}
       </View>
     </SafeAreaView>
   );

@@ -29,14 +29,17 @@ const Slider = ({images}) => {
         horizontal
         onScroll={onScrollChange}
         showsHorizontalScrollIndicator={false}
-        style={{ width, height, backgroundColor: "#E4BD9E" }}
+        style={{ width, height, backgroundColor: "#fff" }}
+        contentContainerStyle={{ paddingHorizontal: 15, }}
       >
         {images.map((image, index) => (
-          <Image
+          <View key={index} style={{ width: width - 30,  }}>
+            <Image
             key={index}
             source={{ uri: image }}
-            style={{ width, height, resizeMode: "cover" }}
+            style={{  width: "100%", height, resizeMode: "cover",borderRadius: 10  }}
           />
+          </View>
         ))}
       </ScrollView>
       <View style={styles.pagination}>

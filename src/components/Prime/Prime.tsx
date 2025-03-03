@@ -16,6 +16,7 @@ import React, { useEffect, useState } from 'react';
 import firestore, { Timestamp } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { compareDate, formatDate, getTodaysDate, parseDate } from '../../utils';
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -178,7 +179,7 @@ const Prime = ({ navigation }) => {
         </View>
       </ScrollView>
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+        {loading && <Loader />}
       </View>
     </SafeAreaView>
   );

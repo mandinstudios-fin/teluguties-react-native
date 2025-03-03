@@ -187,7 +187,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personalInformation: { ...prevData.personalInformation, age : value },
+              personalInformation: { ...prevData.personalInformation, age: value },
             }))
           }
         />
@@ -720,7 +720,7 @@ const ContactVerification = ({
       if (!userSnapshot.empty || !agentSnapshot.empty) {
         return true;
       }
-      return false; 
+      return false;
     } catch (error) {
       console.error("Error checking phone number:", error);
       return false;
@@ -806,15 +806,13 @@ const ContactVerification = ({
     });
   };
 
-
-
   return (
     <View style={styles.stepContainer}>
       <Text style={styles.header}>Contact & Verification</Text>
 
       <View style={styles.inputcontainer}>
         <View style={styles.phonenobody}>
-          
+
           <View style={styles.phonenomain}>
             <TextInput
               style={styles.phoneno}
@@ -838,6 +836,22 @@ const ContactVerification = ({
             }))
           }
         />
+
+        <TextInput
+          style={styles.phoneno}
+          placeholder="Instagram Id"
+          placeholderTextColor="#EBC7B1"
+          value={formData?.contactInformation?.instagramId || ''}
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              contactInformation: { ...prevData.contactInformation, instagramId: value },
+            }))
+          }
+        />
+
+
+
         <View style={styles.profileimageupload}>
           <Text style={styles.profiletext}>Profile pics</Text>
           <TouchableOpacity onPress={openImagePicker}>
@@ -892,6 +906,7 @@ const Steps = (
       email: "",
       kycDetails: "",
       phone: "",
+      instagramId: "",
       profilePicture: ""
     },
     educationAndCareer: {
@@ -1001,7 +1016,7 @@ const Steps = (
 
       console.log(updatedData)
 
-      await userRef.set(updatedData, { merge: true }); 
+      await userRef.set(updatedData, { merge: true });
     } catch (error) {
 
     }

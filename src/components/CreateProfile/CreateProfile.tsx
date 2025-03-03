@@ -13,6 +13,7 @@ import useUpdateUserDetails from '../../hooks/useUpdateUserDetails'
 import RNPickerSelect from 'react-native-picker-select';
 import DrawerSceneWrapper from '../Navigation/draw'
 import { BadgePlus, CirclePlus, ImageMinus, ImagePlus } from 'lucide-react-native'
+import Loader from '../Loader/Loader'
 
 const { width, height } = Dimensions.get("window")
 
@@ -313,6 +314,18 @@ const CreateProfile = ({ navigation }) => {
                                     value={userData?.contactInformation.email ?? ""}
                                     editable={!firestoreData?.contactInformation?.email}
                                     onChangeText={(value) => handleInputChange('contactInformation', 'email', value)}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.label}>Instagram ID</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Instagram Id"
+                                    placeholderTextColor="#EBC7B1"
+                                    value={userData?.contactInformation.instagramId ?? ""}
+                                    editable={!firestoreData?.contactInformation?.instagramId}
+                                    onChangeText={(value) => handleInputChange('contactInformation', 'instagramId', value)}
                                 />
                             </View>
 
@@ -661,7 +674,7 @@ const CreateProfile = ({ navigation }) => {
                 </View>
             </ScrollView>
             <View style={uploading ? styles.loadingContainer : null}>
-                {uploading && <ActivityIndicator size="large" color="#a4737b" />}
+                {uploading && <Loader />}
             </View>
         </SafeAreaView>
         </DrawerSceneWrapper>

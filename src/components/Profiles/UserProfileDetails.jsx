@@ -1,4 +1,4 @@
-import { Dimensions, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, ActivityIndicator, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, Linking, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import Slider from './Slider';
@@ -8,7 +8,9 @@ import useFirestore from '../../hooks/useFirestore';
 import useAgent from '../../hooks/useAgent';
 import auth from '@react-native-firebase/auth';
 import DetailsCard from './DetailsCard';
-import { ArrowLeft, ChevronLeft, ChevronRight, Heart, Instagram } from 'lucide-react-native';
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, Instagram, MessageCircle } from 'lucide-react-native';
+import Loader from '../Loader/Loader';
+import useToastHook from '../../utils/useToastHook';
 
 const { width, height, fontScale } = Dimensions.get("window")
 
@@ -26,6 +28,7 @@ const UserProfileDetails = ({ route, navigation }) => {
   const [status, setStatus] = useState(null);
   const state = useNavigationState(state => state);
   const [loading, setLoading] = useState(false);
+  const { successToast, errorToast } = useToastHook();
   const {
     requestData,
     fetchRequestDetails,
@@ -35,7 +38,7 @@ const UserProfileDetails = ({ route, navigation }) => {
   } = useFirestore();
   const { getAgentsCurrentDetails, acceptAssignRequest, rejectAssignRequest } = useAgent();
   const { profilePicture, ...filteredContactInfo } = user?.contactInformation || {};
-  
+
   // First useEffect - fetch request details
   useEffect(() => {
     if (user?.id) {
@@ -105,13 +108,45 @@ const UserProfileDetails = ({ route, navigation }) => {
     }
   };
 
+  const checkWhatsAppAccount = (phoneNumber) => {
+    const whatsappUrl = `https://wa.me/${phoneNumber}`;
+
+    Linking.canOpenURL(whatsappUrl)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(whatsappUrl);
+        } else {
+          errorToast("The user doesn't have a WhatsApp account.");
+        }
+      })
+      .catch((err) => console.error("Error checking WhatsApp:", err));
+  };
+
+  const openInstagram = () => {
+    if (user?.contactInformation?.instagramId) {
+      const appUrl = `instagram://user?username=${user?.contactInformation?.instagramId}`; // Opens in Instagram App
+      const webUrl = `https://www.instagram.com/${user?.contactInformation?.instagramId}/`; // Opens in Browser
+
+      Linking.canOpenURL(appUrl)
+        .then((supported) => {
+          if (supported) {
+            return Linking.openURL(appUrl);
+          } else {
+            return Linking.openURL(webUrl);
+          }
+        })
+        .catch((err) => console.error("Error opening Instagram:", err));
+    }
+  };
+
+
   return (
     <SafeAreaView style={styles.safearea}>
 
       <View style={styles.headerbox}>
-        <TouchableOpacity onPress={() => navigation.goBack()}><ArrowLeft strokeWidth={1} size={23} /></TouchableOpacity>
+        <TouchableOpacity style={styles.iconcontainer} onPress={() => navigation.goBack()}><ArrowLeft strokeWidth={1} size={23} color={'#7b2a38'} /></TouchableOpacity>
         <Text style={styles.headertext}>Profile Details</Text>
-        <TouchableOpacity onPress={() => makeAMatch(user.id)}><Heart strokeWidth={1} size={23} /></TouchableOpacity>
+        <TouchableOpacity style={styles.iconcontainer} onPress={() => makeAMatch(user.id)}><Heart strokeWidth={1} size={23} color={'#7b2a38'} /></TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollview}>
         <View style={styles.main}>
@@ -119,14 +154,17 @@ const UserProfileDetails = ({ route, navigation }) => {
           <View style={styles.userdetails}>
             <View style={styles.name}>
               <Text style={styles.username}>{user?.personalInformation?.firstName} <Text style={styles.userage}>{user?.personal_info?.age ? user.personal_info.age : user?.personal_info?.date_of_birth ? getUsersAge(user.personal_info.date_of_birth) : null}</Text></Text>
-              
-            </View>
-            <View>
-              <Text style={styles.namesubdata}>
-                {user?.personalInformation?.height ? `${user.personalInformation.height}` : ''}
-                {user?.religious_cultural?.religion ? ` ${user.religious_cultural.religion}` : ''}
-                {user?.professional_details?.occupation ? `  ${user.professional_details.occupation}` : ''}
-              </Text>
+              <View style={styles.icons}>
+                <TouchableOpacity
+                  style={styles.iconcontainer}
+                  onPress={() => checkWhatsAppAccount(user?.contactInformation?.phone)} // Replace with dynamic user number
+                >
+                  <MessageCircle strokeWidth={1} size={23} color={'green'} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconcontainer} onPress={openInstagram}>
+                  <Instagram strokeWidth={1} size={23} color={"#7b2a38"} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
@@ -195,26 +233,25 @@ const UserProfileDetails = ({ route, navigation }) => {
 
                 {/* CASE 3: If both agent is NOT assigned and no match is pending → Show both "Assign Agent" & "Make a Match" */}
                 {!isAgentAssigned && !isProfileInMatches && (
-                  <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 3 }}>
-                    <View style={styles.shortlistbox}>
-                      <TouchableOpacity
-                        style={styles.shortlist}
-                        onPress={() =>
-                          navigation.navigate('AssignAgentForMatch', {
-                            profile_a_id: currentUser?.uid,
-                            profile_b_id: user?.id
-                          })
-                        }
-                      >
-                        <Text style={styles.shortlisttext}>Assign Agent</Text>
-                      </TouchableOpacity>
-                    </View>
+                  <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: width/5, paddingHorizontal: 10 }}>
+                    <TouchableOpacity
+                      style={styles.shortlist}
+                      onPress={() =>
+                        navigation.navigate('AssignAgentForMatch', {
+                          profile_a_id: currentUser?.uid,
+                          profile_b_id: user?.id
+                        })
+                      }
+                    >
+                      <Text style={styles.shortlisttext}>Assign Agent</Text>
+                    </TouchableOpacity>
 
-                    <View style={styles.matchbox}>
-                      <TouchableOpacity style={styles.match} onPress={() => makeAMatch(user.id)}>
-                        <Text style={styles.matchtext}>Make a Match</Text>
-                      </TouchableOpacity>
-                    </View>
+
+
+                    <TouchableOpacity style={styles.match} onPress={() => makeAMatch(user.id)}>
+                      <Text style={styles.matchtext}>Make a Match</Text>
+                    </TouchableOpacity>
+
                   </View>
                 )}
               </View>
@@ -254,7 +291,7 @@ const UserProfileDetails = ({ route, navigation }) => {
               </View>
             ) : null)}
 
-          <View style={styles.prevnextbox}>
+          {/* <View style={styles.prevnextbox}>
             {index > 0 && <TouchableOpacity style={styles.button} onPress={goToPrevious} disabled={index === 0}>
               <ChevronLeft strokeWidth={1} color={'white'} />
               <Text style={styles.buttontext}>Previous</Text>
@@ -264,13 +301,35 @@ const UserProfileDetails = ({ route, navigation }) => {
               <Text style={styles.buttontext}>Next</Text>
               <ChevronRight strokeWidth={1} color={'white'} />
             </TouchableOpacity>}
+          </View> */}
+
+          <View style={styles.prevnextbox}>
+            {/* Previous Button (Always Visible, but Disabled at index 0) */}
+            <TouchableOpacity
+              style={[styles.button, index === 0 && styles.disabledButton]}
+              onPress={goToPrevious}
+              disabled={index === 0}
+            >
+              <ChevronLeft strokeWidth={1} color={'white'} />
+              <Text style={styles.buttontext}>Previous</Text>
+            </TouchableOpacity>
+
+            {/* Next Button (Always Visible, but Disabled at the Last Index) */}
+            <TouchableOpacity
+              style={[styles.button, index === profiles.length - 1 && styles.disabledButton]}
+              onPress={goToNext}
+              disabled={index === profiles.length - 1}
+            >
+              <Text style={styles.buttontext}>Next</Text>
+              <ChevronRight strokeWidth={1} color={'white'} />
+            </TouchableOpacity>
           </View>
 
 
         </View>
       </ScrollView>
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+        {loading && <Loader />}
       </View>
     </SafeAreaView>
   )
@@ -288,7 +347,12 @@ const styles = StyleSheet.create({
   },
   main: {
     flexGrow: 1,
-    paddingBottom: width / 20
+    paddingBottom: width / 20,
+  },
+  iconcontainer: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 100,
+    padding: 8,
   },
   headerbox: {
     display: 'flex',
@@ -296,16 +360,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 18,
     paddingHorizontal: 10,
-    borderBottomWidth:1,
+    borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    alignItems: 'center'
   },
   headertext: {
-    color: '#000',
-    fontSize: 15,
-    fontWeight: '500'
+    color: '#7b2a38',
+    fontSize: 16,
+    fontWeight: '700'
   },
   userdetails: {
-    paddingHorizontal: width / 40,
   },
   imagecontainer: {
     width: width,
@@ -339,6 +403,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingLeft: width / 20,
     paddingTop: width / 20,
+    justifyContent: 'space-between',
+    paddingRight: width / 20,
+
 
   },
   username: {
@@ -355,16 +422,27 @@ const styles = StyleSheet.create({
     padding: 0,
     fontSize: fontScale * 20
   },
+  nameiconcontainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icons: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 15,
+
+  },
   namesubdata: {
     color: '#7b2a50',
     fontSize: fontScale * 16,
     paddingLeft: width / 20,
   },
   userdetailsmain: {
-    paddingHorizontal: 20,
     marginTop: width / 30,
     width: '100%',
-    gap: 15
+    gap: 15,
+    paddingHorizontal: 12,
   },
   detailscontainer: {
     display: 'flex',
@@ -416,34 +494,31 @@ const styles = StyleSheet.create({
   },
   shortmatchbox: {
     marginTop: 20,
-    paddingHorizontal: width * 0.05,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    display:'flex',
+    alignItems:'center',
+    justifyContent:'center'
   },
   shortlist: {
-    paddingHorizontal: width * 0.1,
-    paddingVertical: width * 0.04,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
     backgroundColor: '#7b2a38',
     borderRadius: 5,
-    marginHorizontal: 'auto'
   },
   shortlisttext: {
     fontWeight: 'bold',
     color: 'white',
-    fontSize: 15,
+    fontSize: 13,
   },
   match: {
-    paddingHorizontal: width * 0.1,
-    paddingVertical: width * 0.04,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
     backgroundColor: '#7b2a38',
     borderRadius: 5,
   },
   matchtext: {
     fontWeight: 'bold',
     color: 'white',
-    fontSize: 15,
+    fontSize: 13,
   },
   contactmain: {
     marginTop: 20,
@@ -473,10 +548,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   shortlistbox: {
-    marginHorizontal: 'auto'
   },
   matchbox: {
-    marginHorizontal: 'auto'
   },
 
   prevnextbox: {
@@ -502,6 +575,10 @@ const styles = StyleSheet.create({
   buttontext: {
     textAlign: 'center',
     color: 'white',
+  },
+
+  disabledButton: {
+    opacity: 0.5, // Make disabled buttons look faded
   },
 
 });
