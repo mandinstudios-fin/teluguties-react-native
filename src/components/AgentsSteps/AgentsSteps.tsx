@@ -8,6 +8,7 @@ import useToastHook from '../../utils/useToastHook';
 import storage from '@react-native-firebase/storage';
 import useAgent from '../../hooks/useAgent';
 import { isValidAadhaar } from "aadhaar-validator-ts";
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -229,7 +230,7 @@ const AgentsSteps = ({ navigation }) => {
                     </View>
                 </View>
                 <View style={uploading ? styles.loadingContainer : null}>
-                    {uploading && <ActivityIndicator size="large" color="#a4737b" />}
+                    {uploading && <Loader/>}
                 </View>
             </ScrollView>
         </SafeAreaView>

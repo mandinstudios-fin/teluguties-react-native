@@ -23,6 +23,7 @@ import FIcon from 'react-native-vector-icons/Fontisto';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import useUpdateUserDetails from '../../hooks/useUpdateUserDetails';
 import { Camera } from 'lucide-react-native';
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -1121,7 +1122,7 @@ const Steps = (
           )}
         </View>
         <View style={uploading ? styles.loadingContainer : null}>
-          {uploading && <ActivityIndicator size="large" color="#a4737b" />}
+          {uploading && <Loader />}
         </View>
       </ScrollView>
     </SafeAreaView>

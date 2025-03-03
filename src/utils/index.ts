@@ -180,7 +180,7 @@ export const getUserCategory = async () => {
         .get();
 
       if (docSnapshot.exists) {
-        console.log(collection);
+        console.log(collection, 'collection')
         return collection;
       }
     }
@@ -191,7 +191,6 @@ export const getUserCategory = async () => {
 }
 
 export const getUserDetailsByCategory = async (category) => {
-  console.log(category)
   try {
     const currentUser = auth().currentUser;
     if (!currentUser) {
@@ -230,7 +229,6 @@ export const getUserCategoryFromToken = async (token) => {
         .get();
 
       if (docSnapshot.exists) {
-        console.log(collection);
         return collection;
       }
     }

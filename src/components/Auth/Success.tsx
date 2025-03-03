@@ -22,53 +22,45 @@ const { width, height } = Dimensions.get('window');
 const Success = ({ navigation, route }) => {
   const { isRegistration, updatedFormData } = route.params;
   const [category, setCategory] = useState('');
-  const currentUser = auth().currentUser;
+  const [isReady, setIsReady] = useState(false);
   const animationRef = useRef(null);
 
   useEffect(() => {
     const handleGetUserCategory = async () => {
       const categoryLocal = await getUserCategory();
-      setCategory(categoryLocal)
+      setCategory(categoryLocal);
+      setIsReady(true);
     }
 
     handleGetUserCategory()
-  }, [category])
+  }, [])
 
   useEffect(() => {
+    if(!isReady) return
+
+
+
     let timeoutId;
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
 
-    if (isRegistration !== undefined) {
-      timeoutId = setTimeout(() => {
-        // navigation.replace(isRegistration && updatedFormData.category === 'individual' ? "Steps" : "AgentsSteps");
+    timeoutId = setTimeout(() => {
+      const destination = isRegistration
+        ? updatedFormData.category === "individual"
+          ? "Steps"
+          : "AgentsSteps"
+        : category === 'agents'
+          ? "AgentsLayout"
+          : "Layout";
 
-        navigation.replace(
-          isRegistration
-            ? updatedFormData.category === "individual"
-              ? "Steps"
-              : "AgentsSteps"
-            : category === 'agents' ?
-                "AgentsLayout"
-              : "Layout"
-        );
-      }, 600); 
-    }
+      console.log("Navigating to:", destination); // Debug log
+      navigation.replace(destination);
+    }, 600);
 
     return () => {
       clearTimeout(timeoutId);
       backHandler.remove();
     };
-  }, [navigation, isRegistration, category]);
-
-  const saveUserToAsyncStorage = () => {
-    const user = auth().currentUser;
-
-    AsyncStorage.setItem('userToken', user?.uid);
-  };
-
-  useEffect(() => {
-    saveUserToAsyncStorage();
-  }, [])
+  }, [isRegistration, category, isReady]);
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -172,6 +164,6 @@ const styles = StyleSheet.create({
   footertext: {
     textAlign: 'center',
     color: 'black',
-    fontSize: 12 
+    fontSize: 12
   },
 });

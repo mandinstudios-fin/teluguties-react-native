@@ -19,6 +19,8 @@ import messaging from '@react-native-firebase/messaging';
 import useAuth from '../../hooks/useAuth';
 import { removeListener, startOtpListener } from 'react-native-otp-verify';
 import { calculateAge, getUsersAge } from '../../utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -134,9 +136,6 @@ const Otp = ({ navigation, route }) => {
       } catch (error) {
       }
     }
-
-
-
   };
 
   const confirmOtp = async (otp) => {
@@ -154,6 +153,10 @@ const Otp = ({ navigation, route }) => {
         return;
       }
       setLoading(false);
+
+      const user = auth().currentUser;
+      AsyncStorage.setItem('userToken', user?.uid);
+
       navigation.replace("Success", { isRegistration, updatedFormData });
 
     }
@@ -230,7 +233,7 @@ const Otp = ({ navigation, route }) => {
       </View>
 
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+        {loading && <Loader/>}
       </View>
     </SafeAreaView>
   );

@@ -17,9 +17,20 @@ export const icons = {
     AgentsEarn: (props) => <HandCoins strokeWidth={1} {...props} />,
 };
 
+const HIDDEN_TAB_SCREENS = [
+    'UserProfileDetails',
+    'AgentsProfileDetails'
+  ];
+
 const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
     const [dimensions, setDimensions] = useState({ height: 60, width: 100 });
     const buttonWidth = dimensions.width / state.routes.length;
+
+    const currentRoute = state.routes[state.index];
+    const focusedRoute = getFocusedRouteNameFromRoute(currentRoute);
+    
+    // Check if tab bar should be hidden
+    const shouldHideTabBar = HIDDEN_TAB_SCREENS.includes(focusedRoute);
 
     const onTabBarLayout = (e: LayoutChangeEvent) => {
         setDimensions({
@@ -27,12 +38,6 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
             width: e.nativeEvent.layout.width,
         });
     };
-
-    const currentRoute = state.routes[state.index];
-    console.log(state.routeNames)
-    if (currentRoute.params?.hideTabBar) {
-        return null; // Hide the tab bar
-      }
 
     const tabPositionX = useSharedValue(buttonWidth * state.index);
 
@@ -48,6 +53,10 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
     const animatedStyle = useAnimatedStyle(() => {
         return { transform: [{ translateX: tabPositionX.value }] };
     });
+
+    if (shouldHideTabBar) {
+        return null;
+    }
 
     return (
         <View style={styles.tabBar} onLayout={onTabBarLayout}>

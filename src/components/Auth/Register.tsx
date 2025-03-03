@@ -17,6 +17,7 @@ import { Picker } from '@react-native-picker/picker';
 import phoneCodesData from '../../assets/CountryCodes.json';
 import firestore from '@react-native-firebase/firestore';
 import { Calendar } from "react-native-calendars";
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -268,7 +269,7 @@ const Register = ({ navigation }) => {
       </ScrollView>
 
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+        {loading && <Loader/>}
       </View>
     </SafeAreaView>
   );

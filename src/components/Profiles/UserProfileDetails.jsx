@@ -19,6 +19,16 @@ const UserProfileDetails = ({ route, navigation }) => {
   const { profiles, index } = route.params;
   const user = profiles[index];
 
+  useEffect(() => {
+    // Hide the tab bar when this screen is focused
+    navigation.setOptions({ tabBarStyle: { display: "none" } });
+
+    return () => {
+      // Restore tab bar when leaving the screen
+      navigation.setOptions({ tabBarStyle: undefined });
+    };
+  }, [navigation]);
+
   const images = (user && user.contactInformation?.profilePicture && user.images && user.images.length > 0)
     ? [user.contactInformation?.profilePicture, ...user.images]
     : (user && user.contactInformation?.profilePicture ? [user.contactInformation?.profilePicture] : []);
