@@ -1,18 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import AIcon from 'react-native-vector-icons/AntDesign';
-import MIcon from 'react-native-vector-icons/MaterialIcons';
-import IIcon from 'react-native-vector-icons/Ionicons';
-import MCIcon from 'react-native-vector-icons/MaterialIcons';
-import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView, Animated, Easing, Modal } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView, Animated, Easing, Modal, Image, TouchableOpacity } from 'react-native';
 import HelpCenter from '../HelpCenter/HelpCenter';
-import Steps from '../Steps/Steps'
-import Chat from '../Chat/Chat';
-import Home from '../Home/Home';
-import Inbox from '../Inbox/Inbox';
-import Matches from '../Matches/Matches';
-import Prime from '../Prime/Prime';
 import { enableScreens } from 'react-native-screens';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList, useDrawerStatus } from '@react-navigation/drawer';
 import CreateProfile from '../CreateProfile/CreateProfile';
@@ -40,7 +29,6 @@ const { height } = Dimensions.get('window');
 
 const BottomTabs = () => {
   return (
-    <DrawerSceneWrapper>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -81,115 +69,191 @@ const BottomTabs = () => {
           }}
         />
       </Tab.Navigator>
-    </DrawerSceneWrapper>
   );
 };
 
 const Layout = ({ navigation }) => {
-  const { successToast, errorToast } = useToastHook();
-  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const { successToast, errorToast } = useToastHook()
 
   const CustomDrawerContent = (props) => {
+    const [logoutModalVisible, setLogoutModalVisible] = useState(false)
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false)
+    const [userProfile, setUserProfile] = useState({
+      name: "John Doe",
+      email: "john.doe@example.com",
+      photoURL: "https://placeholder.svg?height=80&width=80",
+    })
+
+    // Fetch user profile on component mount
+    useEffect(() => {
+      const fetchUserProfile = async () => {
+        const userId = auth().currentUser?.uid
+        if (userId) {
+          try {
+            const userDoc = await firestore().collection("profiles").doc(userId).get()
+            if (userDoc.exists) {
+              setUserProfile({
+                name: userDoc.data()?.personalInformation?.firstName ,
+                email: userDoc.data()?.contactInformation.phone,
+                photoURL: userDoc.data()?.contactInformation?.profilePicture || "https://placeholder.svg?height=80&width=80",
+              })
+            }
+          } catch (error) {
+            console.log("Error fetching user profile:", error)
+          }
+        }
+      }
+
+      fetchUserProfile()
+    }, [])
+
     const handleLogout = async () => {
-      setLogoutModalVisible(true); // Show modal
-
-      await AsyncStorage.removeItem('userToken');
-      successToast('Logout Successful');
-
+      setLogoutModalVisible(true) // Show modal
+      await AsyncStorage.removeItem("userToken")
+      successToast("Logout Successful")
       setTimeout(() => {
-        setLogoutModalVisible(false);
-        navigation.replace('Auth');
-      }, 1200);
-    };
+        setLogoutModalVisible(false)
+        props.navigation.replace("Auth")
+      }, 1200)
+    }
 
     const handleDeleteAccount = async () => {
-      setDeleteModalVisible(true);
-      const userId = auth().currentUser?.uid;
+      setDeleteModalVisible(true)
+      const userId = auth().currentUser?.uid
       try {
-        const userRef = firestore().collection('profiles').doc(userId);
-        await userRef.delete();
-
-        const tempUserRef = firestore().collection('temp_profiles').doc(userId);
-        await tempUserRef.delete();
-
-        const requestsRef = firestore().collection('requests').where('fromUid', '==', userId);
-        const requestsSnapshot = await requestsRef.get();
+        const userRef = firestore().collection("profiles").doc(userId)
+        await userRef.delete()
+        const tempUserRef = firestore().collection("temp_profiles").doc(userId)
+        await tempUserRef.delete()
+        const requestsRef = firestore().collection("requests").where("fromUid", "==", userId)
+        const requestsSnapshot = await requestsRef.get()
         requestsSnapshot.forEach(async (doc) => {
-          await doc.ref.delete();
-        });
-
-        const queriesRef = firestore().collection('queries').where('userId', '==', userId);
-        const queriesSnapshot = await queriesRef.get();
+          await doc.ref.delete()
+        })
+        const queriesRef = firestore().collection("queries").where("userId", "==", userId)
+        const queriesSnapshot = await queriesRef.get()
         queriesSnapshot.forEach(async (doc) => {
-          await doc.ref.delete();
-        });
-
-        await AsyncStorage.removeItem('userToken');
-        successToast('Account Deleted Successfully');
-        navigation.replace('Auth');
+          await doc.ref.delete()
+        })
+        await AsyncStorage.removeItem("userToken")
+        successToast("Account Deleted Successfully")
+        props.navigation.replace("Auth")
       } catch (error) {
-        console.log(error);
-        errorToast('Something Went Wrong');
+        console.log(error)
+        errorToast("Something Went Wrong")
       }
-      setDeleteModalVisible(false);
-    };
+      setDeleteModalVisible(false)
+    }
 
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <DrawerContentScrollView {...props}>
+      <SafeAreaView style={styles.container}>
+        {/* Profile Section */}
+        <View style={styles.profileContainer}>
+          <View style={styles.profileImageContainer}>
+            <Image
+              source={{ uri: userProfile.photoURL }}
+              style={styles.profileImage}
+            />
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{userProfile.name}</Text>
+            <Text style={styles.profileEmail}>{userProfile.email}</Text>
+          </View>
+          <TouchableOpacity style={styles.editProfileButton} onPress={() => props.navigation.navigate("Edit Profile")}>
+            <Pencil size={16} color="#E9BA9B" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Drawer Items */}
+        <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContent}>
           <DrawerItemList {...props} />
+
           <DrawerItem
             label="Logout"
             onPress={handleLogout}
-            labelStyle={{ color: '#fff', fontWeight: '500' }}
-            icon={() => <LogOut size={23} strokeWidth={1} color={'#fff'} />}
+            labelStyle={styles.drawerItemLabel}
+            style={styles.drawerItem}
+            icon={() => <LogOut size={23} strokeWidth={1} color={"#fff"} />}
           />
         </DrawerContentScrollView>
-        <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 10 }}>
+
+        {/* Bottom Actions */}
+        <View style={styles.bottomActions}>
           <DrawerItem
             label="Delete Account"
             onPress={handleDeleteAccount}
-            labelStyle={{ color: '#d3d3d3', fontWeight: '500' }}
-            icon={() => <Animated.View>
-              <Trash2 size={23} strokeWidth={1} color={'#d3d3d3'} />
-            </Animated.View>}
+            labelStyle={styles.deleteButtonText}
+            style={styles.deleteButton}
+            icon={() => (
+              <Animated.View>
+                <Trash2 size={23} strokeWidth={1} color={"#D3D3D3"} />
+              </Animated.View>
+            )}
           />
         </View>
+
+        {/* Modals */}
         <Modal visible={logoutModalVisible} transparent animationType="fade">
           <View style={styles.overlay}>
             <View style={styles.modalContainer}>
-              <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/logout.json')} autoPlay loop={false} resizeMode='cover' style={styles.lottie} /></Animated.View>
+              <Animated.View style={styles.lottieContainer}>
+                <LottieView
+                  source={require("../../assets/animations/logout.json")}
+                  autoPlay
+                  loop={false}
+                  resizeMode="cover"
+                  style={styles.lottie}
+                />
+              </Animated.View>
+              <Text style={styles.modalText}>Logging out...</Text>
             </View>
           </View>
         </Modal>
 
         <Modal visible={deleteModalVisible} transparent animationType="fade">
           <View style={styles.overlay}>
-            <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/logout.json')} autoPlay loop={false} resizeMode='cover' style={styles.lottie} /></Animated.View>
+            <Animated.View style={styles.lottieContainer}>
+              <LottieView
+                source={require("../../assets/animations/logout.json")}
+                autoPlay
+                loop={false}
+                resizeMode="cover"
+                style={styles.lottie}
+              />
+              <Text style={styles.modalText}>Deleting account...</Text>
+            </Animated.View>
           </View>
         </Modal>
-      </SafeAreaView >
-    );
-  };
+      </SafeAreaView>
+    )
+  }
 
   return (
     <Drawer.Navigator
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: '#7b2a38',
-          width: '61%'
+          backgroundColor: "#7B2A38",
+          width: "100%",
+          borderTopRightRadius: 15,
+          borderBottomRightRadius: 15,
         },
+        drawerPosition: "right",
         drawerLabelStyle: {
-          color: '#561825',
-          fontWeight: '500',
+          color: "#fff",
+          fontWeight: "500",
+          marginLeft: -15,
         },
         sceneContainerStyle: {
-          backgroundColor: 'white',
+          backgroundColor: "white",
         },
-        drawerActiveTintColor: '#E9BA9B',
-        drawerInactiveTintColor: '#000',
+        drawerActiveTintColor: "#E9BA9B",
+        drawerInactiveTintColor: "#fff",
+        drawerActiveBackgroundColor: "rgba(233, 186, 155, 0.15)",
+        swipeEnabled: true,
+        swipeEdgeWidth: 50,
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
@@ -206,45 +270,143 @@ const Layout = ({ navigation }) => {
         name="Edit Profile"
         component={CreateProfile}
         options={{
-          drawerIcon: ({ focused, size }) => <Pencil size={23} strokeWidth={1} color={'#fff'} />,
-          drawerLabelStyle: { color: '#fff' }
+          drawerIcon: ({ focused, size }) => <Pencil size={23} strokeWidth={1} color={"#fff"} />,
+          drawerLabelStyle: { color: "#fff" },
         }}
       />
       <Drawer.Screen
         name="Help Center"
         component={HelpCenter}
         options={{
-          drawerIcon: ({ focused, size }) => <PhoneOutgoing size={23} strokeWidth={1} color={'#fff'} />,
-          drawerLabelStyle: { color: '#fff' }
+          drawerIcon: ({ focused, size }) => <PhoneOutgoing size={23} strokeWidth={1} color={"#fff"} />,
+          drawerLabelStyle: { color: "#fff" },
         }}
       />
     </Drawer.Navigator>
-  );
-};
-
+  )
+}
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#7B2A38",
+    width: '100%'
+  },
+  profileContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    paddingTop: 30,
+  },
+  profileImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#E9BA9B20",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+    borderWidth: 1,
+    borderColor: "rgba(233, 186, 155, 0.3)",
+  },
+  profileImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: "#E9BA9B",
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  profileEmail: {
+    color: "#E9BA9B",
+    fontSize: 14,
+    opacity: 0.8,
+  },
+  editProfileButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(233, 186, 155, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    marginHorizontal: 20,
+    marginBottom: 15,
+  },
+  drawerContent: {
+    paddingTop: 10,
+  },
+  drawerItem: {
+    borderRadius: 8,
+    marginVertical: 4,
+  },
+  drawerItemLabel: {
+    color: "#fff",
+    fontWeight: "500",
+    fontSize: 14,
+  },
+  bottomActions: {
+    padding: 10,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
+    marginTop: "auto",
+  },
+  deleteButton: {
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 0, 0, 0.1)",
+  },
+  deleteButtonText: {
+    color: "#D3D3D3",
+    fontWeight: "500",
+    fontSize: 14,
+  },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContainer: {
-    width: 300,
+    width: width * 0.8,
+    maxWidth: 300,
+    backgroundColor: "#fff",
+    borderRadius: 20,
     padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  lottiecontainer: {
-    height: 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
+  lottieContainer: {
+    width: 120,
+    height: 120,
+    justifyContent: "center",
+    alignItems: "center",
   },
   lottie: {
-    height: width / 2.5,
-    width: width / 10,
+    width: "100%",
+    height: "100%",
+  },
+  modalText: {
+    fontSize: 18,
+    color: "#333",
+    fontWeight: "500",
+    textAlign: "center",
+    marginTop: 10,
   },
 });
 

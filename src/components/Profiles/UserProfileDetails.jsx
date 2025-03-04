@@ -16,8 +16,8 @@ const { width, height, fontScale } = Dimensions.get("window")
 
 const UserProfileDetails = ({ route, navigation }) => {
   const currentUser = auth().currentUser;
-  const { profiles, index } = route.params;
-  const user = profiles[index];
+  const { profiles, index, user: userMain } = route.params;
+  const user = profiles?.[index] || userMain;
 
   useEffect(() => {
     // Hide the tab bar when this screen is focused
@@ -149,6 +149,8 @@ const UserProfileDetails = ({ route, navigation }) => {
     }
   };
 
+  console.log(routeName)
+
 
   return (
     <SafeAreaView style={styles.safearea}>
@@ -243,7 +245,7 @@ const UserProfileDetails = ({ route, navigation }) => {
 
                 {/* CASE 3: If both agent is NOT assigned and no match is pending → Show both "Assign Agent" & "Make a Match" */}
                 {!isAgentAssigned && !isProfileInMatches && (
-                  <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: width/5, paddingHorizontal: 10 }}>
+                  <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: width / 5, paddingHorizontal: 10 }}>
                     <TouchableOpacity
                       style={styles.shortlist}
                       onPress={() =>
@@ -280,7 +282,7 @@ const UserProfileDetails = ({ route, navigation }) => {
                     <Text style={styles.shortlisttext}>Rejected</Text>
                   </TouchableOpacity>
                 ) : (
-                  <>
+                  <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: width / 5, paddingHorizontal: 10 }}>
                     <View style={styles.shortlistbox}>
                       <TouchableOpacity
                         style={styles.shortlist}
@@ -296,24 +298,12 @@ const UserProfileDetails = ({ route, navigation }) => {
                         <Text style={styles.shortlisttext}>Reject</Text>
                       </TouchableOpacity>
                     </View>
-                  </>
+                  </View>
                 )}
               </View>
             ) : null)}
 
-          {/* <View style={styles.prevnextbox}>
-            {index > 0 && <TouchableOpacity style={styles.button} onPress={goToPrevious} disabled={index === 0}>
-              <ChevronLeft strokeWidth={1} color={'white'} />
-              <Text style={styles.buttontext}>Previous</Text>
-            </TouchableOpacity>}
-
-            {index < profiles.length - 1 && <TouchableOpacity style={styles.button} onPress={goToNext} disabled={index === profiles.length - 1}>
-              <Text style={styles.buttontext}>Next</Text>
-              <ChevronRight strokeWidth={1} color={'white'} />
-            </TouchableOpacity>}
-          </View> */}
-
-          <View style={styles.prevnextbox}>
+          {routeName !== 'AgentsAssign' &&  <View style={styles.prevnextbox}>
             {/* Previous Button (Always Visible, but Disabled at index 0) */}
             <TouchableOpacity
               style={[styles.button, index === 0 && styles.disabledButton]}
@@ -326,14 +316,14 @@ const UserProfileDetails = ({ route, navigation }) => {
 
             {/* Next Button (Always Visible, but Disabled at the Last Index) */}
             <TouchableOpacity
-              style={[styles.button, index === profiles.length - 1 && styles.disabledButton]}
+              style={[styles.button, index === profiles?.length - 1 && styles.disabledButton]}
               onPress={goToNext}
-              disabled={index === profiles.length - 1}
+              disabled={index === profiles?.length - 1}
             >
               <Text style={styles.buttontext}>Next</Text>
               <ChevronRight strokeWidth={1} color={'white'} />
             </TouchableOpacity>
-          </View>
+          </View>}
 
 
         </View>
@@ -504,9 +494,9 @@ const styles = StyleSheet.create({
   },
   shortmatchbox: {
     marginTop: 20,
-    display:'flex',
-    alignItems:'center',
-    justifyContent:'center'
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   shortlist: {
     paddingHorizontal: 18,

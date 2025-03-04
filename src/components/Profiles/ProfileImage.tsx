@@ -47,7 +47,7 @@ const ProfileImage = ({ user, navigation, profiles }) => {
   const handleProfile = () => {
     addToRecelyViewed();
     const index = profiles.findIndex(profile => profile.id === user.id);
-    navigation.navigate("UserProfileDetails", { navigation, profiles, index });
+    navigation.navigate("UserProfileDetails", { navigation, profiles, index }); 
   }
 
   return (

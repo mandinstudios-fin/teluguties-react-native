@@ -271,7 +271,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
                     }
                 />
 
-                
+
 
                 <TextInput
                     style={styles.input}
@@ -859,12 +859,12 @@ const ContactVerification = ({
 
         updateFormData(prevData => {
             let currentPhone = prevData?.contactInformation?.phone || "";
-        
+
             // Ensure phone is a string and doesn't already have +91
             if (typeof currentPhone === "string" && !currentPhone.startsWith("+91")) {
                 currentPhone = `+91${currentPhone}`;
             }
-        
+
             return {
                 ...prevData,
                 contactInformation: {
@@ -958,7 +958,7 @@ const ContactVerification = ({
 
             <View style={styles.inputcontainer}>
                 <View style={styles.phonenobody}>
-                    
+
                     <View style={styles.phonenomain}>
                         <TextInput
                             style={styles.phoneno}
@@ -985,6 +985,19 @@ const ContactVerification = ({
                         updateFormData(prevData => ({
                             ...prevData,
                             contactInformation: { ...prevData.contactInformation, email: value },
+                        }))
+                    }
+                />
+
+                <TextInput
+                    style={styles.phoneno}
+                    placeholder="Instagram Id"
+                    placeholderTextColor="#EBC7B1"
+                    value={formData?.contactInformation?.instagramId || ''}
+                    onChangeText={value =>
+                        updateFormData(prevData => ({
+                            ...prevData,
+                            contactInformation: { ...prevData.contactInformation, instagramId: value },
                         }))
                     }
                 />
@@ -1042,7 +1055,8 @@ const AgentsUploadProfiles = (
             email: "",
             kycDetails: "",
             phone: "",
-            profilePicture: ""
+            profilePicture: "",
+            instagramId: "",
         },
         educationAndCareer: {
             aboutOccupation: "",

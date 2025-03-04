@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header'
 import { getFirstName } from '../../utils';
 import useFirestore from '../../hooks/useFirestore';
+import Loader from '../Loader/Loader';
 
 const { height, width } = Dimensions.get('window');
 
@@ -53,7 +54,7 @@ const UserNotifications = ({ navigation }) => {
                 </View>
             </ScrollView>
             <View style={loading ? styles.loadingContainer : null}>
-                {loading && <ActivityIndicator size="large" color="#a4737b" />}
+                {loading && <Loader />}
             </View>
         </SafeAreaView>
     )

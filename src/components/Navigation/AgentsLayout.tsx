@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert, SafeAreaView, Image, TouchableOpacity } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,10 +10,11 @@ import useToastHook from '../../utils/useToastHook';
 import AgentsHomeStack from '../AgentsHome/AgentsHomeStack';
 import AgentsAssignStack from '../AgentsAssign/AgentsAssignStack';
 import AgentsEarn from '../AgentsEarn/AgentsEarn';
-import { HandCoins, House, LayoutDashboard, LogOut, PhoneOutgoing, Trash } from 'lucide-react-native'
+import { HandCoins, House, LayoutDashboard, LogOut, Phone, PhoneOutgoing, Trash } from 'lucide-react-native'
 import TabBar from './TabBar';
 import DrawerSceneWrapper from './draw';
 import AgentsHelpCenter from '../HelpCenter/AgentsHelpCenter';
+import LinearGradient from 'react-native-linear-gradient';
 
 
 const Tab = createBottomTabNavigator();
@@ -24,49 +25,49 @@ const { height } = Dimensions.get('window');
 
 const AgentsBottomTabs = () => {
   return (
-    <DrawerSceneWrapper>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: { backgroundColor: '#D9D9D9', height: height / 16 },
-          tabBarActiveTintColor: 'black',
-          tabBarLabelStyle: { fontWeight: 'bold', fontSize: 15 },
-        }}
-        tabBar={props => <TabBar {...props} />}
-      >
-        <Tab.Screen
-          name="AgentsHomeStack"
-          component={AgentsHomeStack}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <House size={23} strokeWidth={1} />
-            ),
-            title: 'Home',
-          }}
-        />
 
-        <Tab.Screen
-          name="AgentsAssignStack"
-          component={AgentsAssignStack}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <LayoutDashboard size={23} strokeWidth={1} />
-            ),
-            title: 'Dashboard',
-          }}
-        />
-        <Tab.Screen
-          name="AgentsEarn"
-          component={AgentsEarn}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <HandCoins size={23} strokeWidth={1} />
-            ),
-            title: 'Earn',
-          }}
-        />
-      </Tab.Navigator>
-    </DrawerSceneWrapper>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: '#D9D9D9', height: height / 16 },
+        tabBarActiveTintColor: 'black',
+        tabBarLabelStyle: { fontWeight: 'bold', fontSize: 15 },
+      }}
+      tabBar={props => <TabBar {...props} />}
+    >
+      <Tab.Screen
+        name="AgentsHomeStack"
+        component={AgentsHomeStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <House size={23} strokeWidth={1} />
+          ),
+          title: 'Home',
+        }}
+      />
+
+      <Tab.Screen
+        name="AgentsAssignStack"
+        component={AgentsAssignStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <LayoutDashboard size={23} strokeWidth={1} />
+          ),
+          title: 'Dashboard',
+        }}
+      />
+      <Tab.Screen
+        name="AgentsEarn"
+        component={AgentsEarn}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <HandCoins size={23} strokeWidth={1} />
+          ),
+          title: 'Earn',
+        }}
+      />
+    </Tab.Navigator>
+
 
   );
 };
@@ -74,6 +75,20 @@ const AgentsBottomTabs = () => {
 const AgentsLayout = ({ navigation }) => {
   const { successToast, errorToast } = useToastHook();
   const CustomDrawerContent = (props) => {
+    const currentUser = auth().currentUser;
+    const [agentData, setAgentData] = useState();
+
+    useEffect(() => {
+      const getAgentData = async () => {
+        const userDoc = await firestore().collection('agents').doc(currentUser?.uid).get();
+        const userDataFirestore = userDoc.data();
+
+        setAgentData(userDataFirestore)
+      }
+
+      getAgentData();
+    }, [])
+
     const handleLogout = async () => {
       await AsyncStorage.removeItem('userToken');
       successToast('Logout Succcessful');
@@ -84,7 +99,7 @@ const AgentsLayout = ({ navigation }) => {
     const handleDeleteAccount = async () => {
       const userId = auth().currentUser?.uid;
       try {
-        const userRef = firestore().collection('profiles').doc(userId);
+        const userRef = firestore().collection('agents').doc(userId);
         await userRef.delete();
 
         const requestsRef = firestore().collection('requests').where('fromUid', '==', userId);
@@ -111,25 +126,60 @@ const AgentsLayout = ({ navigation }) => {
 
 
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <DrawerContentScrollView {...props}>
-          <DrawerItemList {...props} />
-          <DrawerItem
-            label="Logout"
-            onPress={handleLogout}
-            labelStyle={{ color: '#fff', fontWeight: '500' }}
-            icon={() => <LogOut size={23} strokeWidth={1} color={'#fff'} />}
-          />
-        </DrawerContentScrollView>
-        <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 10 }}>
-          <DrawerItem
-            label="Delete Account"
-            onPress={handleDeleteAccount}
-            labelStyle={{ color: '#d3d3d3', fontWeight: '500' }}
-            icon={() => <Trash size={23} strokeWidth={1} color={'#d3d3d3'} />}
-          />
+      <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={['#e8c1c7', '#c27983', '#7b2a38']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.profileContainer}>
+          <View style={styles.profileImageContainer}>
+            <Image 
+              source={{ 
+                uri: agentData?.profilepic || 
+                'https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg' 
+              }} 
+              style={styles.profileImage} 
+            />
+          </View>
+          <Text style={styles.userName}>{agentData?.fullname || 'User Name'}</Text>
+          
+          <View style={styles.infoRow}>
+            <Phone size={16} color="#fff" />
+            <Text style={styles.userInfo}>{agentData?.phonenumber || 'Phone Number'}</Text>
+          </View>
         </View>
-      </SafeAreaView>
+      </LinearGradient>
+
+      <DrawerContentScrollView 
+        {...props}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <DrawerItemList 
+          {...props} 
+          activeTintColor="#4c669f"
+          activeBackgroundColor="rgba(76, 102, 159, 0.1)"
+          inactiveTintColor="#333"
+          itemStyle={styles.drawerItem}
+          labelStyle={styles.drawerLabel}
+        />
+        
+        <TouchableOpacity 
+          style={styles.logoutButton} 
+          onPress={handleLogout}
+        >
+          <LogOut size={20} color="#7b2a38" strokeWidth={1} />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </DrawerContentScrollView>
+      
+      <TouchableOpacity 
+        style={styles.deleteButton} 
+        onPress={handleDeleteAccount}
+      >
+        <Trash size={18} color="#ff6b6b" strokeWidth={1} />
+        <Text style={styles.deleteText}>Delete Account</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
     );
   };
 
@@ -139,8 +189,9 @@ const AgentsLayout = ({ navigation }) => {
         headerShown: false,
         drawerStyle: {
           backgroundColor: '#7b2a38',
-          width: '61%'
+          width: '100%'
         },
+        drawerPosition: 'right',
         drawerLabelStyle: {
           color: '#561825',
           fontWeight: '500',
@@ -165,9 +216,10 @@ const AgentsLayout = ({ navigation }) => {
 
       <Drawer.Screen name="Help Center" component={AgentsHelpCenter} options={{
         drawerIcon: ({ focused, size }) => (
-          <PhoneOutgoing size={23} strokeWidth={1} color={'#fff'} />
+          <PhoneOutgoing size={20} strokeWidth={1} color={'#7b2a38'} />
         ),
-        drawerLabelStyle: { color: '#fff' }
+        drawerLabelStyle: { color: '#7b2a38', fontSize: 14 },
+        drawerItemStyle: { backgroundColor: '#f5f5f5', borderRadius: 8, },
       }} />
 
 
@@ -175,6 +227,98 @@ const AgentsLayout = ({ navigation }) => {
   );
 };
 
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  headerGradient: {
+    paddingVertical: 30,
+    paddingHorizontal: 16,
+    borderBottomRightRadius: 30,
+    borderTopLeftRadius: 30,
+  },
+  profileContainer: {
+    alignItems: 'center',
+  },
+  profileImageContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  userInfo: {
+    fontSize: 14,
+    color: '#fff',
+    marginLeft: 6,
+  },
+  scrollViewContent: {
+    paddingTop: 20,
+  },
+  drawerItem: {
+    borderRadius: 10,
+    marginHorizontal: 10,
+    marginVertical: 4,
+  },
+  drawerLabel: {
+    fontWeight: '500',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: '#f5f5f5',
+  },
+  logoutText: {
+    marginLeft: 26,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#7b2a38',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+  },
+  deleteText: {
+    marginLeft: 16,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#ff6b6b',
+  },
+});
 
 export default AgentsLayout;

@@ -7,6 +7,7 @@ import useAgent from '../../hooks/useAgent';
 import { getFirstName } from '../../utils';
 import { ArrowUpFromLine, ArrowUpRight, ChevronRight, UserCheck, UserPen, UserX } from 'lucide-react-native';
 import AgentsHeader from '../Header/AgentsHeader';
+import Loader from '../Loader/Loader';
 
 const { height, width } = Dimensions.get('window');
 
@@ -177,7 +178,7 @@ const AgentsAssign = ({ navigation }) => {
                 </View>
             </ScrollView>
             <View style={loading ? styles.loadingContainer : null}>
-                {loading && <ActivityIndicator size="large" color="#a4737b" />}
+                {loading && <Loader/>}
             </View>
         </SafeAreaView>
     )

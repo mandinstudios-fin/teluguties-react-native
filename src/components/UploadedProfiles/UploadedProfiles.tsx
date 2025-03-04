@@ -18,6 +18,7 @@ import firestore from '@react-native-firebase/firestore';
 import useFirestore from '../../hooks/useFirestore';
 import useAgent from '../../hooks/useAgent';
 import AgentsHeader from '../Header/AgentsHeader';
+import Loader from '../Loader/Loader';
 
 const {width, height, fontScale} = Dimensions.get('window');
 
@@ -74,7 +75,7 @@ const UploadedProfiles = ({navigation}) => {
         </View>
       </ScrollView>
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <ActivityIndicator size="large" color="#a4737b" />}
+        {loading && <Loader/>}
       </View>
     </SafeAreaView>
   );

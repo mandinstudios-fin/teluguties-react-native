@@ -2,8 +2,8 @@ import { ActivityIndicator, Image, SafeAreaView, ScrollView, StyleSheet, Text, T
 import React, { useEffect, useState } from 'react'
 import Header from '../Header/Header';
 import useAgent from '../../hooks/useAgent';
-import FIcon from 'react-native-vector-icons/Feather';
 import useFirestore from '../../hooks/useFirestore';
+import { Send } from 'lucide-react-native';
 
 const AssignAgentForMatch = ({ navigation, route }) => {
     const { profile_a_id, profile_b_id } = route.params
@@ -43,7 +43,7 @@ const AssignAgentForMatch = ({ navigation, route }) => {
                                             </View>
                                         </View>
                                         <TouchableOpacity onPress={() => sendMatchingRequestToAgent(profile_a_id, profile_b_id, agent.id)}>
-                                            <FIcon name='send' size={25} color={'#000'} />
+                                        <Send strokeWidth={1} />
                                         </TouchableOpacity>
                                     </View>
                                 ))}
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     },
 
     maincontent: {
-        paddingHorizontal: 10,
+        paddingHorizontal: 0,
         marginTop: 20
     },
 
@@ -82,22 +82,22 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        backgroundColor: '#e4d7cf',
         height: 'auto',
         padding: 17,
         borderRadius: 25
     },
 
     imagetextview: {
-        backgroundColor: '#e3ccc1',
-        borderRadius: 25,
+        backgroundColor: '#fbf1ec',
+        borderRadius: 12,
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        height: 50,
+        height: 60,
         paddingHorizontal: 15,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        paddingVertical:10,
     },
     imagetextviewchild: {
         display: 'flex',
@@ -132,7 +132,6 @@ const styles = StyleSheet.create({
         color: '#000',
         alignItems: 'center',
         fontSize: 25,
-        fontWeight: 'bold',
         textAlign: 'center',
     },
     loadingContainer: {

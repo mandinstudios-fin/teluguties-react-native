@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import { ChevronLeft } from 'lucide-react-native';
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -207,7 +208,7 @@ const ProfileDetailsAgents: React.FC = ({ navigation }) => {
             </View>
             </ScrollView>
             <View style={loading ? styles.loadingContainer : null}>
-                {loading && <ActivityIndicator size="large" color="#a4737b" />}
+                {loading && <Loader/>}
             </View>
         </SafeAreaView>
     );
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#BE7356',
+        backgroundColor: '#7b2a38',
         paddingVertical: width / 40,
     },
     headertext: {

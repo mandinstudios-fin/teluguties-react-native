@@ -21,6 +21,7 @@ import {
 import Header from '../Header/Header';
 import useAgent from '../../hooks/useAgent';
 import AgentsHeader from '../Header/AgentsHeader';
+import Loader from '../Loader/Loader';
   
   const Stack = createStackNavigator();
   const { width } = Dimensions.get('window');
@@ -34,9 +35,11 @@ import AgentsHeader from '../Header/AgentsHeader';
     const [loading, setLoading] = useState(false);
     const {getProfilesData} = useAgent()
   
-    useEffect(() => {
+    useEffect(() => { 
       const homeData =async () => {
+          setLoading(true)
           const unsubscribe = getProfilesData(setData);
+          setLoading(false)
           return () => unsubscribe && unsubscribe(); 
       } 
   
@@ -68,7 +71,7 @@ import AgentsHeader from '../Header/AgentsHeader';
           </View>
         </ScrollView>
         <View style={loading ? styles.loadingContainer : null}>
-          {loading && <ActivityIndicator size="large" color="#a4737b" />}
+          {loading && <Loader />}
         </View>
       </SafeAreaView>
     );
