@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import auth from '@react-native-firebase/auth';
+import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -88,7 +89,7 @@ const Category = ({ navigation, route }) => {
                 <Text style={styles.buttontext}>Create</Text>
             </TouchableOpacity>
             <View style={uploading ? styles.loadingContainer : null}>
-                {uploading && <ActivityIndicator size="large" color="#a4737b" />}
+                {uploading && <Loader />}
             </View>
         </View>
     );
@@ -115,7 +116,6 @@ const styles = StyleSheet.create({
     },
     header: {
         fontSize: 28,
-        fontWeight: 'bold',
         color: 'black',
         textAlign: 'center',
         marginTop: height * 0.1,

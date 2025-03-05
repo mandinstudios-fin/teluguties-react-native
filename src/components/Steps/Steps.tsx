@@ -17,6 +17,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import FIcon from 'react-native-vector-icons/Fontisto';
@@ -24,8 +25,29 @@ import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import useUpdateUserDetails from '../../hooks/useUpdateUserDetails';
 import { Camera } from 'lucide-react-native';
 import Loader from '../Loader/Loader';
+import { Calendar } from 'react-native-calendars';
 
 const { width, height } = Dimensions.get('window');
+
+const calculateAge = (dob) => {
+  // Split the date string into day, month, and year
+  const [day, month, year] = dob.split("/").map(Number);
+
+  // Create a Date object (month is zero-based in JS, so subtract 1)
+  const birthDate = new Date(year, month - 1, day);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
+
+  // Adjust age if the birthday hasn't occurred yet this year
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
+  }
+
+  return age;
+};
 
 // Step Components
 const GenderSelection = ({ formData, updateFormData, nextStep }) => (
@@ -101,6 +123,23 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
 
 const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToast, errorToast }) => {
 
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [formattedDate, setFormattedDate] = useState("");
+
+  const getYearList = () => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 100 }, (_, i) => currentYear - i); // Last 100 years
+  };
+
+  const formatDate = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    return `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
+  };
+  
+
   const handleNextStep = () => {
     if (!formData?.personalInformation.firstName || !formData?.personalInformation.lastName) {
       errorToast("Name Required");
@@ -111,6 +150,11 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
       errorToast("Location Required");
       return
     }
+
+    updateFormData(prevData => ({
+      ...prevData,
+      personalInformation: { ...prevData.personalInformation, age: calculateAge(formData?.personalInformation?.dateOfBirth) },
+    }))
 
     nextStep();
   }
@@ -146,13 +190,88 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
           }
         />
 
-        <TextInput
-          style={styles.input}
-          placeholder="DOB (YYYY/MM/DD)"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.personalInformation.dateOfBirth || ''}
-          onChangeText={(value) => updateFormData(prevData => ({ ...prevData, personalInformation: { ...prevData.personalInformation, dateOfBirth: value } }))}
-        />
+        <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.7}>
+          <TextInput
+            style={styles.input}
+            placeholder="Choose Date Of Birth"
+            placeholderTextColor="#EBC7B1"
+            value={formData?.personalInformation?.dateOfBirth}
+            editable={false}
+          />
+        </TouchableOpacity>
+
+        <Modal visible={modalVisible} animationType="fade" transparent>
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+            <View style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, width: 320, elevation: 5 }}>
+              <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "center", color: "#444" }}>
+                Select Date of Birth
+              </Text>
+
+              {/* Custom Year Picker */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
+                {getYearList().map((year) => (
+                  <TouchableOpacity
+                    key={year}
+                    onPress={() => setSelectedYear(year)}
+                    style={{
+                      padding: 10,
+                      backgroundColor: selectedYear === year ? "#007AFF" : "#f1f1f1",
+                      borderRadius: 5,
+                      marginHorizontal: 5,
+                    }}
+                  >
+                    <Text style={{ color: selectedYear === year ? "#fff" : "#333", fontSize: 16 }}>{year}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              {/* Calendar */}
+              <Calendar
+                key={selectedYear} // Forces re-render when year changes
+                current={`${selectedYear}-01-01`}
+                onDayPress={(day) => {
+                  const newFormattedDate = formatDate(day.dateString);
+                  updateFormData(prevData => ({
+                    ...prevData,
+                    personalInformation: { ...prevData.personalInformation, dateOfBirth: newFormattedDate },
+                  }))
+                
+                  setModalVisible(false);
+                }}
+                markedDates={{
+                  [selectedDate]: { selected: true, marked: true, selectedColor: "#007AFF" },
+                }}
+                maxDate={new Date().toISOString().split("T")[0]} // Prevents future dates
+                theme={{
+                  todayTextColor: "#007AFF",
+                  arrowColor: "#007AFF",
+                }}
+              />
+
+              {/* Buttons Row */}
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 15 }}>
+                {/* Cancel Button */}
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 10 }}>
+                  <Text style={{ color: "red", fontSize: 16 }}>Cancel</Text>
+                </TouchableOpacity>
+
+                {/* Clear Date Button */}
+                {selectedDate && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedDate("");
+                      setFormattedDate("");
+                      setModalVisible(false);
+                    }}
+                    style={{ padding: 10 }}
+                  >
+                    <Text style={{ color: "#007AFF", fontSize: 16 }}>Clear</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         <TextInput
           style={styles.input}
@@ -176,19 +295,6 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
             updateFormData(prevData => ({
               ...prevData,
               personalInformation: { ...prevData.personalInformation, motherTongue: value },
-            }))
-          }
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Age"
-          placeholderTextColor="#EBC7B1"
-          value={formData?.personalInformation?.age || ''}
-          onChangeText={value =>
-            updateFormData(prevData => ({
-              ...prevData,
-              personalInformation: { ...prevData.personalInformation, age: value },
             }))
           }
         />
@@ -706,6 +812,7 @@ const ContactVerification = ({
 
     getData();
   }, [])
+
 
   const checkAadharExists = async () => {
     try {

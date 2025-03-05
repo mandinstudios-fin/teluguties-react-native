@@ -21,15 +21,8 @@ import Loader from '../Loader/Loader';
 
 const { width, height } = Dimensions.get('window');
 
-const formatDate = (dateString) => {
-  const [year, month, day] = dateString.split("-");
-  return `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
-};
 
-const getYearList = () => {
-  const currentYear = new Date().getFullYear();
-  return Array.from({ length: 100 }, (_, i) => currentYear - i); // Last 100 years
-};
+
 
 const Register = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
@@ -112,7 +105,7 @@ const Register = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safearea}>
-      <ScrollView style={styles.main}>
+      <ScrollView style={styles.main} contentContainerStyle={styles.scrollContainer}>
         <View style={styles.logo}>
           <Image
             style={styles.image}
@@ -120,112 +113,24 @@ const Register = ({ navigation }) => {
           />
         </View>
 
-        <View style={styles.logoinbody}>
-          <Image
-            style={styles.loginimage}
-            source={require('../../assets/sss.webp')}
-          />
-        </View>
+
 
         <View style={styles.bottomformcontainer}>
           <View style={styles.bottomformbody}>
             <View style={styles.welcometextbody}>
               <Text style={styles.welcometext}>CREATE ACCOUNT</Text>
             </View>
-            <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.7}>
-              <TextInput
-                style={styles.name}
-                placeholder="Choose Date Of Birth"
-                placeholderTextColor="#BE7356"
-                value={formData.dob }
-                editable={false}
-              />
-            </TouchableOpacity>
-
-            <Modal visible={modalVisible} animationType="fade" transparent>
-              <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
-                <View style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, width: 320, elevation: 5 }}>
-                  <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "center", color: "#444" }}>
-                    Select Date of Birth
-                  </Text>
-
-                  {/* Custom Year Picker */}
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
-                    {getYearList().map((year) => (
-                      <TouchableOpacity
-                        key={year}
-                        onPress={() => setSelectedYear(year)}
-                        style={{
-                          padding: 10,
-                          backgroundColor: selectedYear === year ? "#007AFF" : "#f1f1f1",
-                          borderRadius: 5,
-                          marginHorizontal: 5,
-                        }}
-                      >
-                        <Text style={{ color: selectedYear === year ? "#fff" : "#333", fontSize: 16 }}>{year}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-
-                  {/* Calendar */}
-                  <Calendar
-                    key={selectedYear} // Forces re-render when year changes
-                    current={`${selectedYear}-01-01`}
-                    onDayPress={(day) => {
-                      const newFormattedDate = formatDate(day.dateString); 
-                      handleInputChange('dob', newFormattedDate);
-                      setModalVisible(false);
-                    }}
-                    markedDates={{
-                      [selectedDate]: { selected: true, marked: true, selectedColor: "#007AFF" },
-                    }}
-                    maxDate={new Date().toISOString().split("T")[0]} // Prevents future dates
-                    theme={{
-                      todayTextColor: "#007AFF",
-                      arrowColor: "#007AFF",
-                    }}
-                  />
-
-                  {/* Buttons Row */}
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 15 }}>
-                    {/* Cancel Button */}
-                    <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 10 }}>
-                      <Text style={{ color: "red", fontSize: 16 }}>Cancel</Text>
-                    </TouchableOpacity>
-
-                    {/* Clear Date Button */}
-                    {selectedDate && (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setSelectedDate("");
-                          setFormattedDate("");
-                          setModalVisible(false);
-                        }}
-                        style={{ padding: 10 }}
-                      >
-                        <Text style={{ color: "#007AFF", fontSize: 16 }}>Clear</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              </View>
-            </Modal>
             <View style={styles.phonenobody}>
               <View style={styles.phonecode}>
-                <Picker
-                  selectedValue={formData.selectedCode}
-                  style={styles.picker}
-                  onValueChange={itemValue =>
-                    handleInputChange('selectedCode', itemValue)
-                  }>
-                  {phoneCodesData.map(({ name, dial_code, code }) => (
-                    <Picker.Item
-                      key={code}
-                      label={`${name} (${dial_code})`}
-                      value={dial_code}
-                    />
-                  ))}
-                </Picker>
+                <TextInput
+                  style={styles.phoneno}
+                  placeholder="+91"
+                  placeholderTextColor="#BE7356"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  editable={false}
+                />
+
               </View>
               <View style={styles.phonenomain}>
                 <TextInput
@@ -241,24 +146,12 @@ const Register = ({ navigation }) => {
                 />
               </View>
             </View>
-            {/* <View style={styles.gender}>
-                <Picker
-                  selectedValue={formData.gender}
-                  style={styles.picker}
-                  onValueChange={itemValue =>
-                    handleInputChange('gender', itemValue)
-                  }>
-                  <Picker.Item label={`Male`} value={`Male`} />
-                  <Picker.Item label={`Female`} value={`Female`} />
-                </Picker>
-              </View> */}
-            <TouchableOpacity style={styles.otpbox} onPress={handleRegister}>
-              <Text style={styles.otp}>Send OTP</Text>
-            </TouchableOpacity>
           </View>
         </View>
-
         <View style={styles.footerbody}>
+          <TouchableOpacity style={styles.otpbox} onPress={handleRegister}>
+            <Text style={styles.otp}>Send OTP</Text>
+          </TouchableOpacity>
           <View style={styles.footer}>
             <Text style={styles.footertext}>
               please review the terms and conditions before you proceed.
@@ -267,9 +160,8 @@ const Register = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <Loader/>}
+        {loading && <Loader />}
       </View>
     </SafeAreaView>
   );
@@ -284,6 +176,10 @@ const styles = StyleSheet.create({
   },
   main: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1, // Ensures content expands inside ScrollView
+    justifyContent: 'space-between', // Push content to full height
   },
   logo: {
     marginTop: width / 20,
@@ -307,7 +203,6 @@ const styles = StyleSheet.create({
   },
   bottomformcontainer: {
     marginTop: width / 40,
-    backgroundColor: 'white',
     padding: width / 30,
     borderRadius: 20,
     paddingVertical: width / 20,
@@ -337,9 +232,8 @@ const styles = StyleSheet.create({
     gap: width / 30,
   },
   phonecode: {
-    width: '30%',
+    width: '20%',
     borderColor: '#EBC7B1',
-    borderWidth: 1,
     borderRadius: 12,
     color: '#EBC7B1',
   },
@@ -364,9 +258,11 @@ const styles = StyleSheet.create({
     paddingLeft: width / 40,
   },
   otpbox: {
-    borderRadius: 5,
+    borderRadius: 12,
     backgroundColor: '#BE7356',
     padding: width / 30,
+    marginHorizontal: 10,
+    marginVertical: 10
   },
   otp: {
     color: 'white',
@@ -381,6 +277,7 @@ const styles = StyleSheet.create({
   footertext: {
     textAlign: 'center',
     color: '#000',
+    fontSize: 12
   },
   loadingContainer: {
     position: 'absolute',

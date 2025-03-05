@@ -4,6 +4,7 @@ import Header from '../Header/Header'
 import useAgent from '../../hooks/useAgent';
 import { getFirstName } from '../../utils';
 import AgentsHeader from '../Header/AgentsHeader';
+import Loader from '../Loader/Loader';
 
 const LIGHT_BG = '#fbf1ec'
 
@@ -13,14 +14,16 @@ const AllAssignedUser = ({ navigation }) => {
     const { getMatchingRequestData } = useAgent();
 
     useEffect(() => {
-            const fetchData = async () => {
-                setLoading(true);
-                await getMatchingRequestData(setAssignedData); // Ensure data is fully fetched
-                setLoading(false);
-            };
-    
-            fetchData();
-        }, []);
+        const fetchData = async () => {
+            setLoading(true);
+            await getMatchingRequestData(setAssignedData); // Ensure data is fully fetched
+            setLoading(false);
+        };
+
+        fetchData();
+    }, []);
+
+    console.log(assignedData)
 
     return (
         <SafeAreaView style={styles.safearea}>
@@ -34,21 +37,62 @@ const AllAssignedUser = ({ navigation }) => {
                     <View style={styles.maincontent}>
 
                         <View style={styles.imagecontainer}>
-                            {assignedData.map((user) => (
-                                <TouchableOpacity onPress={() => navigation.navigate("UserProfileDetails", { user })} key={user.id} style={styles.imagetextview}>
-                                    <Text style={styles.detailtext}>{getFirstName(user?.personal_info?.name)} wants to connect with you!</Text>
-                                    <View style={styles.imagebox}>
-                                        <Image source={require('../../assets/users.png')} style={styles.usersimage} />
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
+                            {assignedData.length > 0 && (
+                                <View style={styles.imagecontainer}>
+                                    {assignedData.slice(0, 3).map((user, index) => {
+                                        const isPair = user?.userADetails || user?.userBDetails;
+
+                                        if (isPair) {
+                                            // Handling paired users
+                                            const { userADetails, userBDetails } = user || {};
+                                            const firstNameA = userADetails?.personalInformation?.firstName || "Someone";
+                                            const firstNameB = userBDetails?.personalInformation?.firstName || "Someone else";
+
+                                            console.log(userBDetails)
+
+                                            return (
+                                                <TouchableOpacity
+                                                    onPress={() => navigation.navigate("UserProfileDetails", { user: userADetails, userB: user?.userBDetails})}
+                                                    key={userADetails?.id || userBDetails?.id || index} // Unique key
+                                                    style={styles.imagetextview}
+                                                >
+                                                    <Text style={styles.detailtext}>
+                                                        {firstNameA} and {firstNameB} want to connect with you!
+                                                    </Text>
+                                                    <View style={styles.imagebox}>
+                                                        <Image source={require("../../assets/users.png")} style={styles.usersimage} />
+                                                    </View>
+                                                </TouchableOpacity>
+                                            );
+                                        } else {
+                                            // Handling single user
+                                            const firstName = user?.personalInformation?.firstName || "Someone";
+
+                                            return (
+                                                <TouchableOpacity
+                                                    onPress={() => navigation.navigate("UserProfileDetails", { user })}
+                                                    key={user?.id || index} // Unique key
+                                                    style={styles.imagetextview}
+                                                >
+                                                    <Text style={styles.detailtext}>
+                                                        {firstName} wants to connect with you!
+                                                    </Text>
+                                                    <View style={styles.imagebox}>
+                                                        <Image source={require("../../assets/users.png")} style={styles.usersimage} />
+                                                    </View>
+                                                </TouchableOpacity>
+                                            );
+                                        }
+                                    })}
+                                </View>
+                            )}
                         </View>
 
                     </View>
                 </View>
             </ScrollView>
             <View style={loading ? styles.loadingContainer : null}>
-                {loading && <ActivityIndicator size="large" color="#a4737b" />}
+                {loading && <Loader />}
             </View>
         </SafeAreaView>
     )
@@ -78,25 +122,25 @@ const styles = StyleSheet.create({
         fontSize: 25,
         textAlign: 'center',
     },
-    
+
     assignedbox: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
-    
+
     uploadtext: {
         color: 'black',
         fontSize: 20,
         fontWeight: 'bold',
     },
-    
+
 
     viewalltext: {
         color: 'gray',
         fontSize: 14,
     },
-    
+
     imagecontainer: {
         display: 'flex',
         flexDirection: 'column',
@@ -113,13 +157,13 @@ const styles = StyleSheet.create({
         height: 65,
         paddingLeft: 15,
     },
-    
+
     detailtext: {
         color: 'black',
         fontSize: 12,
         width: '80%',
     },
-    
+
     imagebox: {
         width: '20%',
         height: '100%',
@@ -127,7 +171,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    
+
     usersimage: {
         width: '50%',
         resizeMode: 'contain'

@@ -8,12 +8,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
-  ActivityIndicator,
 } from 'react-native';
 import React, { useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
-import phoneCodesData from '../../assets/CountryCodes.json';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Loader from '../Loader/Loader';
@@ -39,9 +35,9 @@ const Login = ({ navigation }) => {
         .get();
 
       if (!userSnapshot.empty || !agentSnapshot.empty) {
-        return true; 
+        return true;
       }
-      return false; 
+      return false;
     } catch (error) {
       console.error("Error checking phone number:", error);
       return false;
@@ -70,7 +66,7 @@ const Login = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safearea}>
-      <ScrollView style={styles.main}>
+      <ScrollView style={styles.main} contentContainerStyle={styles.scrollContainer}>
         <View style={styles.logo}>
           <Image
             style={styles.image}
@@ -78,67 +74,63 @@ const Login = ({ navigation }) => {
           />
         </View>
 
-        <View style={styles.logoinbody}>
-          <Image
-            style={styles.loginimage}
-            source={require('../../assets/couple.jpg')}
-          />
-        </View>
 
-        <View style={styles.bottomformcontainer}>
-          <View style={styles.bottomformbody}>
-            <View>
-              <Text style={styles.account}>LOGIN ACCOUNT</Text>
-            </View>
 
-            {/* <View style={styles.numbercontainer}>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <View style={styles.bottomformcontainer}>
+            <View style={styles.bottomformbody}>
+              <View>
+                <Text style={styles.account}>LOGIN ACCOUNT</Text>
+              </View>
+
+              {/* <View style={styles.numbercontainer}>
               <View style={styles.numberbody}>
                 <Text style={styles.number}>Phone Number</Text>
               </View>
             </View> */}
 
-            <View style={styles.phonenobody}>
-              <View style={styles.phonecode}>
-                <Picker
-                  selectedValue={selectedCode}
-                  style={styles.picker}
-                  onValueChange={itemValue => setSelectedCode(itemValue)}>
-                  {phoneCodesData.map(({ name, dial_code, code }) => (
-                    <Picker.Item
-                      key={code}
-                      label={`${name} (${dial_code})`}
-                      value={dial_code}
-                    />
-                  ))}
-                </Picker>
+              <View style={styles.phonenobody}>
+                <View style={styles.phonecode}>
+                  <TextInput
+                    style={styles.phoneno}
+                    placeholder="+91"
+                    placeholderTextColor="#BE7356"
+                    keyboardType="phone-pad"
+                    maxLength={10}
+                    editable={false}
+                  />
+                </View>
+                <View style={styles.phonenomain}>
+                  <TextInput
+                    style={styles.phoneno}
+                    placeholder="Enter Phone Number"
+                    placeholderTextColor="#BE7356"
+                    keyboardType="number-pad"
+                    maxLength={10}
+                    onChangeText={setPhoneNumber}
+                    value={phoneNumber}></TextInput>
+                </View>
               </View>
-              <View style={styles.phonenomain}>
-                <TextInput
-                  style={styles.phoneno}
-                  keyboardType="number-pad"
-                  maxLength={10}
-                  onChangeText={setPhoneNumber}
-                  value={phoneNumber}></TextInput>
-              </View>
-            </View>
-            <View>
-              <TouchableOpacity style={styles.otpbox} onPress={handleLogin}>
-                <Text style={styles.otp}>Send OTP</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.createbody}>
-              <View style={styles.create}>
-                <Text style={styles.donthave}>Don't have account?</Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Register')}>
-                  <Text style={styles.createtext}>Create Account</Text>
-                </TouchableOpacity>
+
+              <View style={styles.createbody}>
+                <View style={styles.create}>
+                  <Text style={styles.donthave}>Don't have account?</Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Register')}>
+                    <Text style={styles.createtext}>Create Account</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
         </View>
 
         <View style={styles.footerbody}>
+          <View>
+            <TouchableOpacity style={styles.otpbox} onPress={handleLogin}>
+              <Text style={styles.otp}>Send OTP</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.footer}>
             <Text style={styles.footertext}>
               please review the terms and conditions before you proceed.
@@ -150,7 +142,7 @@ const Login = ({ navigation }) => {
       </ScrollView>
 
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <Loader/>}
+        {loading && <Loader />}
       </View>
     </SafeAreaView>
   );
@@ -164,7 +156,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   main: {
-    flex: 1,
+    flexGrow: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1, // Ensures content expands inside ScrollView
+    justifyContent: 'space-between', // Push content to full height
   },
   logo: {
     marginTop: width / 20,
@@ -189,11 +185,10 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   bottomformcontainer: {
-    marginTop: width / 40,
-    backgroundColor: 'white',
     padding: width / 30,
     borderRadius: 20,
     paddingVertical: width / 20,
+    marginVertical: 'auto'
   },
   bottomformbody: {
     display: 'flex',
@@ -231,9 +226,8 @@ const styles = StyleSheet.create({
     color: '#BE7356',
   },
   phonecode: {
-    width: '30%',
+    width: '20%',
     borderColor: '#EBC7B1',
-    borderWidth: 1,
     borderRadius: 12,
     color: '#EBC7B1',
   },
@@ -252,6 +246,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#BE7356',
     padding: width / 30,
+    marginHorizontal: 10,
+    marginVertical: 10
   },
   otp: {
     color: 'white',
@@ -269,17 +265,17 @@ const styles = StyleSheet.create({
   },
   createtext: {
     color: '#A4737B',
-    fontWeight:'800'
+    fontWeight: '800'
   },
   footerbody: {
     paddingVertical: width / 40,
-    marginTop:width/15
+    marginTop: width / 15
   },
   footer: {},
   footertext: {
     textAlign: 'center',
     color: 'black',
-    fontSize:12
+    fontSize: 12
   },
   loadingContainer: {
     position: 'absolute',

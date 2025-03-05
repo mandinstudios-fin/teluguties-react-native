@@ -79,7 +79,7 @@ const AgentsAssign = ({ navigation }) => {
 
                                             return (
                                                 <TouchableOpacity
-                                                    onPress={() => navigation.navigate("UserProfileDetails", { user: userADetails })}
+                                                    onPress={() => navigation.navigate("UserProfileDetails", { user: userADetails, userB: user?.userBDetails })}
                                                     key={userADetails?.id || userBDetails?.id || index} // Unique key
                                                     style={styles.imagetextview}
                                                 >

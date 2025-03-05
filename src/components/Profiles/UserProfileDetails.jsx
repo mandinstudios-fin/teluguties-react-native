@@ -16,7 +16,7 @@ const { width, height, fontScale } = Dimensions.get("window")
 
 const UserProfileDetails = ({ route, navigation }) => {
   const currentUser = auth().currentUser;
-  const { profiles, index, user: userMain } = route.params;
+  const { profiles, index, user: userMain, userB } = route.params;
   const user = profiles?.[index] || userMain;
 
   useEffect(() => {
@@ -32,6 +32,13 @@ const UserProfileDetails = ({ route, navigation }) => {
   const images = (user && user.contactInformation?.profilePicture && user.images && user.images.length > 0)
     ? [user.contactInformation?.profilePicture, ...user.images]
     : (user && user.contactInformation?.profilePicture ? [user.contactInformation?.profilePicture] : []);
+
+  const images2 = (userB && userB.contactInformation?.profilePicture && userB.images && userB.images.length > 0)
+    ? [userB.contactInformation?.profilePicture, ...userB.images]
+    : (userB && userB.contactInformation?.profilePicture ? [userB.contactInformation?.profilePicture] : []);
+
+
+
   const [routeName, setRouteName] = useState();
   const [isAgentAssigned, setIsAgentAssigned] = useState();
   const [isProfileInMatches, setIsProfileInMatches] = useState();
@@ -149,7 +156,7 @@ const UserProfileDetails = ({ route, navigation }) => {
     }
   };
 
-  console.log(routeName)
+  console.log(userB)
 
 
   return (
@@ -209,6 +216,20 @@ const UserProfileDetails = ({ route, navigation }) => {
               </View>
             }
           </View>
+
+          {userB && <View >
+            <Slider images={images2} />
+            <View style={styles.userdetailsmain2}>
+              <DetailsCard title='Personal Information' data={userB?.personalInformation} />
+              {/* <DetailsCard title='Family Details' data={user?.familyInformation} />
+            <DetailsCard title='Education & Profession' data={user?.educationAndCareer} />
+            <DetailsCard title='Marital Preferences & Lifestyle' data={user?.lifestyleAndInterests} />
+            <DetailsCard title='Partner Preferences' data={user?.partnerPreferences} />
+            <DetailsCard title='Contact & Verification' data={filteredContactInfo} /> */}
+            </View>
+
+
+          </View>}
 
           {routeName &&
             (routeName === 'Shortlist' || routeName === 'Matches' ? (
@@ -303,7 +324,7 @@ const UserProfileDetails = ({ route, navigation }) => {
               </View>
             ) : null)}
 
-          {routeName !== 'AgentsAssign' &&  <View style={styles.prevnextbox}>
+          {routeName !== 'AgentsAssign' && routeName !== 'AllAssignedUser' && <View style={styles.prevnextbox}>
             {/* Previous Button (Always Visible, but Disabled at index 0) */}
             <TouchableOpacity
               style={[styles.button, index === 0 && styles.disabledButton]}
@@ -439,6 +460,12 @@ const styles = StyleSheet.create({
     paddingLeft: width / 20,
   },
   userdetailsmain: {
+    marginTop: width / 30,
+    width: '100%',
+    gap: 15,
+    paddingHorizontal: 12,
+  },
+  userdetailsmain2:{
     marginTop: width / 30,
     width: '100%',
     gap: 15,

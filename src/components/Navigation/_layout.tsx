@@ -13,7 +13,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import AgentsStack from '../Agents/AgentsStack';
-import { BadgeIndianRupee, Handshake, Heart, House, LogOut, Pencil, PhoneOutgoing, Trash, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, BadgeIndianRupee, Handshake, Heart, House, LogOut, Pencil, PhoneOutgoing, Trash, Trash2 } from 'lucide-react-native';
 import TabBar from './TabBar';
 import DrawerSceneWrapper from './draw';
 import LottieView from 'lottie-react-native';
@@ -29,46 +29,46 @@ const { height } = Dimensions.get('window');
 
 const BottomTabs = () => {
   return (
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+      tabBar={props => <TabBar {...props} />}
+    >
+      <Tab.Screen
+        name="HomeStack"
+        component={HomeStack}
+        options={{
+
+          title: 'Home',
         }}
-        tabBar={props => <TabBar {...props} />}
-      >
-        <Tab.Screen
-          name="HomeStack"
-          component={HomeStack}
-          options={{
+      />
 
-            title: 'Home',
-          }}
-        />
+      <Tab.Screen
+        name="MatchesStack"
+        component={MatchesStack}
+        options={{
 
-        <Tab.Screen
-          name="MatchesStack"
-          component={MatchesStack}
-          options={{
+          title: 'Matches',
+        }}
+      />
+      <Tab.Screen
+        name="PrimeStack"
+        component={PrimeStack}
+        options={{
 
-            title: 'Matches',
-          }}
-        />
-        <Tab.Screen
-          name="PrimeStack"
-          component={PrimeStack}
-          options={{
+          title: 'Packages',
+        }}
+      />
+      <Tab.Screen
+        name="AgentsStack"
+        component={AgentsStack}
+        options={{
 
-            title: 'Packages',
-          }}
-        />
-        <Tab.Screen
-          name="AgentsStack"
-          component={AgentsStack}
-          options={{
-
-            title: 'Agent',
-          }}
-        />
-      </Tab.Navigator>
+          title: 'Agent',
+        }}
+      />
+    </Tab.Navigator>
   );
 };
 
@@ -93,7 +93,7 @@ const Layout = ({ navigation }) => {
             const userDoc = await firestore().collection("profiles").doc(userId).get()
             if (userDoc.exists) {
               setUserProfile({
-                name: userDoc.data()?.personalInformation?.firstName ,
+                name: userDoc.data()?.personalInformation?.firstName,
                 email: userDoc.data()?.contactInformation.phone,
                 photoURL: userDoc.data()?.contactInformation?.profilePicture || "https://placeholder.svg?height=80&width=80",
               })
@@ -148,7 +148,18 @@ const Layout = ({ navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         {/* Profile Section */}
+
+        <View style={styles.backButtonContainer}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => props.navigation.goBack()}
+          >
+            <ArrowLeft size={24} color="#E9BA9B" />
+          </TouchableOpacity>
+        </View>
         <View style={styles.profileContainer}>
+          {/* Back Arrow */}
+
           <View style={styles.profileImageContainer}>
             <Image
               source={{ uri: userProfile.photoURL }}
@@ -291,12 +302,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#7B2A38",
     width: '100%'
   },
+  backButtonContainer: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    padding: 10
+  },
+  backButton: {
+    zIndex: 10, // Ensure it's above other elements
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    padding: 8,
+    borderRadius: 20,
+  },
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    paddingTop: 30,
   },
+
   profileImageContainer: {
     width: 60,
     height: 60,
