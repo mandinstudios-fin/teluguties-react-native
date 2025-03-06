@@ -75,7 +75,7 @@ const AgentsSuccess = ({ navigation }) => {
                 <View style={styles.maincontent}>
                 <View style={styles.verifiedcontainer}>
                     <View>
-                        <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/success.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
+                        <Animated.View style={styles.lottiecontainer}><LottieView source={require('../../assets/animations/agents.json')} autoPlay loop resizeMode='cover' style={styles.lottie} /></Animated.View>
                         <View style={styles.textcontainer}>
                             <Text style={styles.text}>
                                 Agent Registration has been successfully completed.
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     lottie: {
-        height: width / 3,
+        height: width / 2.5,
         width: width / 10,
     },
     verifiedtext: {

@@ -13,12 +13,16 @@ import {
   Alert,
 } from 'react-native';
 import Signature from "react-native-signature-canvas";
+import useToastHook from '../../utils/useToastHook';
 
 const TermsAndConditionsScreen = ({ handleStep }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const signatureRef = useRef(null);
   const [signature, setSignature] = useState('');
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+
+  const { errorToast } = useToastHook();
+  const today = new Date().toLocaleDateString('en-GB');
 
   const handleScroll = ({ nativeEvent }) => {
     const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
@@ -49,49 +53,97 @@ const TermsAndConditionsScreen = ({ handleStep }) => {
         onScroll={handleScroll}
         scrollEventThrottle={400}
       >
-        <Text style={styles.termsText}>
-          Effective Date: [Insert Date]{'\n\n'}
-          Welcome to TeluguTies, a matrimonial platform designed to facilitate matchmaking between individuals through agents (brokers) and direct users. By registering as an agent on our platform, you agree to comply with the following terms and conditions. Please read them carefully before proceeding.{'\n\n'}
+      <Text style={styles.subHeading}>Effective Date: {today}</Text>
+      <Text style={styles.paragraph}>
+        Welcome to TeluguTies, a matrimonial platform designed to facilitate matchmaking between individuals through agents (brokers) and direct users. By registering as an agent on our platform, you agree to comply with the following terms and conditions. Please read them carefully before proceeding.
+      </Text>
+      
+      <Text style={styles.sectionHeading}>1. Agent Registration and Eligibility</Text>
+      <Text style={styles.subSection}>1.1 Eligibility Criteria:</Text>
+      <Text style={styles.paragraph}>
+        - Only individuals or entities with valid identification documents (e.g., Aadhaar Card, PAN Card, or any government-issued ID) can register as agents.
+        - Agents must be at least 18 years of age and legally capable of entering into a binding agreement under Indian law.
+        - Agents must provide accurate and complete information during registration, including their name, contact details, experience in matchmaking, and area of operation.
+      </Text>
+      
+      <Text style={styles.subSection}>1.2 Unique Agent Code:</Text>
+      <Text style={styles.paragraph}>
+        - Upon successful registration, each agent will be assigned a unique Agent Code, which will be used to map profiles and track commissions.
+        - The Agent Code is non-transferable and must not be shared with unauthorized individuals or entities.
+      </Text>
+      
+      <Text style={styles.subSection}>1.3 Verification Process:</Text>
+      <Text style={styles.paragraph}>
+        - The platform reserves the right to verify the credentials of agents through background checks, document verification, or interviews.
+        - Failure to meet the verification criteria may result in rejection of the application or suspension of the account.
+      </Text>
 
-          <Text style={styles.sectionTitle}>1. Agent Registration and Eligibility{'\n'}</Text>
-          <Text style={styles.subsectionTitle}>1.1 Eligibility Criteria:{'\n'}</Text>
-          • Only individuals or entities with valid identification documents (e.g., Aadhaar Card, PAN Card, or any government-issued ID) can register as agents.{'\n'}
-          • Agents must be at least 18 years of age and legally capable of entering into a binding agreement under Indian law.{'\n'}
-          • Agents must provide accurate and complete information during registration, including their name, contact details, experience in matchmaking, and area of operation.{'\n\n'}
-
-          <Text style={styles.subsectionTitle}>1.2 Unique Agent Code:{'\n'}</Text>
-          • Upon successful registration, each agent will be assigned a unique Agent Code, which will be used to map profiles and track commissions.{'\n'}
-          • The Agent Code is non-transferable and must not be shared with unauthorized individuals or entities.{'\n\n'}
-
-          <Text style={styles.subsectionTitle}>1.3 Verification Process:{'\n'}</Text>
-          • The platform reserves the right to verify the credentials of agents through background checks, document verification, or interviews.{'\n'}
-          • Failure to meet the verification criteria may result in rejection of the application or suspension of the account.{'\n\n'}
-
-          <Text style={styles.sectionTitle}>2. Responsibilities of Agents{'\n'}</Text>
-          <Text style={styles.subsectionTitle}>2.1 Profile Management:{'\n'}</Text>
-          • Agents are responsible for uploading accurate, complete, and truthful profiles of their clients.{'\n'}
-          • Profiles must include all necessary details such as name, age, education, occupation, caste/sub-caste, income, horoscope (if applicable), and family background.{'\n'}
-          • Agents must ensure that all uploaded profiles comply with the platform's content guidelines and do not contain offensive, misleading, or inappropriate information.{'\n\n'}
-
-          <Text style={styles.subsectionTitle}>2.2 Confidentiality:{'\n'}</Text>
-          • Agents must maintain the confidentiality of client information and must not disclose it to third parties without explicit consent.{'\n'}
-          • Any misuse of client data will result in immediate termination of the agent's account and legal action, if necessary.{'\n\n'}
-
-          <Text style={styles.subsectionTitle}>2.3 Ethical Conduct:{'\n'}</Text>
-          • Agents must adhere to ethical practices and avoid engaging in fraudulent activities, misrepresentation, or coercion.{'\n'}
-          • Agents must not charge clients additional fees beyond what is agreed upon with the platform.{'\n\n'}
-
-          <Text style={styles.subsectionTitle}>2.4 Compliance with Laws:{'\n'}</Text>
-          • Agents must comply with all applicable laws, rules, and regulations in India, including but not limited to the Information Technology Act, 2000, and the Consumer Protection Act, 2019.{'\n\n'}
-
-          {/* Additional terms content would continue here */}
-          <Text style={styles.sectionTitle}>9. Governing Law and Jurisdiction{'\n'}</Text>
-          <Text style={styles.subsectionTitle}>9.1 Applicable Law:{'\n'}</Text>
-          • These terms and conditions shall be governed by and construed in accordance with the laws of India.{'\n\n'}
-
-          <Text style={styles.subsectionTitle}>9.2 Jurisdiction:{'\n'}</Text>
-          • Any disputes arising out of or related to these terms shall be subject to the exclusive jurisdiction of the courts in Hyderabad/Telangana.
-        </Text>
+      <Text style={styles.sectionHeading}>2. Responsibilities of Agents</Text>
+      <Text style={styles.subSection}>2.1 Profile Management:</Text>
+      <Text style={styles.paragraph}>
+        - Agents are responsible for uploading accurate, complete, and truthful profiles of their clients.
+        - Profiles must include all necessary details such as name, age, education, occupation, caste/sub-caste, income, horoscope (if applicable), and family background.
+        - Agents must ensure that all uploaded profiles comply with the platform’s content guidelines and do not contain offensive, misleading, or inappropriate information.
+      </Text>
+      
+      <Text style={styles.subSection}>2.2 Confidentiality:</Text>
+      <Text style={styles.paragraph}>
+        - Agents must maintain the confidentiality of client information and must not disclose it to third parties without explicit consent.
+        - Any misuse of client data will result in immediate termination of the agent’s account and legal action, if necessary.
+      </Text>
+      
+      <Text style={styles.subSection}>2.3 Ethical Conduct:</Text>
+      <Text style={styles.paragraph}>
+        - Agents must adhere to ethical practices and avoid engaging in fraudulent activities, misrepresentation, or coercion.
+        - Agents must not charge clients additional fees beyond what is agreed upon with the platform.
+      </Text>
+      
+      <Text style={styles.subSection}>2.4 Compliance with Laws:</Text>
+      <Text style={styles.paragraph}>
+        - Agents must comply with all applicable laws, rules, and regulations in India, including but not limited to the Information Technology Act, 2000, and the Consumer Protection Act, 2019.
+      </Text>
+      
+      <Text style={styles.sectionHeading}>3. Rights and Obligations of the Platform</Text>
+      <Text style={styles.paragraph}>
+        - The platform will charge a percentage-based commission (e.g., 20–30%) from the agent’s earnings for every successful match facilitated through the platform.
+        - Agents must pay the platform fee within the stipulated time frame (e.g., 7 days after receiving payment from clients).
+      </Text>
+      
+      <Text style={styles.sectionHeading}>4. Intellectual Property</Text>
+      <Text style={styles.paragraph}>
+        - All intellectual property rights related to the platform, including its design, logo, features, and content, belong to TeluguTies.
+        - Agents are prohibited from using the platform’s branding, trademarks, or content for personal or commercial purposes without prior written consent.
+      </Text>
+      
+      <Text style={styles.sectionHeading}>5. Payments and Refunds</Text>
+      <Text style={styles.paragraph}>
+        - Agents will receive their earnings (after deducting the platform’s commission) via bank transfer or digital payment methods.
+        - Payments will be processed within 5 business days after confirmation of a successful match.
+      </Text>
+      
+      <Text style={styles.sectionHeading}>6. Limitation of Liability</Text>
+      <Text style={styles.paragraph}>
+        - The platform does not guarantee successful matches or the accuracy of client information provided by agents.
+        - Agents are solely responsible for verifying the authenticity of client details and ensuring compatibility.
+      </Text>
+      
+      <Text style={styles.sectionHeading}>7. Termination</Text>
+      <Text style={styles.paragraph}>
+        - The platform may suspend or terminate an agent’s account immediately if they violate these terms and conditions, engage in fraudulent or unethical activities, or receive multiple complaints from users.
+        - Upon termination, the agent must cease all activities related to the platform and return any confidential information.
+      </Text>
+      
+      <Text style={styles.sectionHeading}>8. Amendments to Terms and Conditions</Text>
+      <Text style={styles.paragraph}>
+        - TeluguTies reserves the right to modify these terms and conditions at any time.
+        - Agents will be notified of changes via email or in-app notifications.
+      </Text>
+      
+      <Text style={styles.sectionHeading}>9. Governing Law and Jurisdiction</Text>
+      <Text style={styles.paragraph}>
+        - These terms and conditions shall be governed by and construed in accordance with the laws of India.
+        - Any disputes arising out of or related to these terms shall be subject to the exclusive jurisdiction of the courts in Hyderabad, Telangana.
+      </Text>
       </ScrollView>
 
       <View style={styles.signatureSection}>
@@ -163,7 +215,7 @@ const TermsAndConditionsScreen = ({ handleStep }) => {
 
       <TouchableOpacity
         style={styles.button2}
-        onPress={() => signature && handleStep()}
+        onPress={() => signature ? handleStep() : errorToast("Please give Signature")}
       >
         <Text style={styles.buttonText2}>Continue</Text>
       </TouchableOpacity>
@@ -197,7 +249,8 @@ const styles = StyleSheet.create({
   termsContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 10
   },
   termsText: {
     fontSize: 14,
@@ -319,6 +372,38 @@ const styles = StyleSheet.create({
     marginHorizontal: 5
   },
   modalButtonText: { color: "white", fontSize: 16 },
+  heading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  subHeading: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+    textAlign: 'center',
+    color: '#000'
+  },
+  sectionHeading: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 15,
+    marginBottom: 5,
+    color: '#000'
+  },
+  subSection: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 10,
+    color: '#000'
+  },
+  paragraph: {
+    fontSize: 14,
+    marginBottom: 10,
+    lineHeight: 20,
+    color: '#000'
+  },
 });
 
 export default TermsAndConditionsScreen;
