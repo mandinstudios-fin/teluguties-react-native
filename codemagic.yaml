@@ -1,0 +1,24 @@
+workflows:
+  react_native_android:
+    name: React Native Android Build
+    max_build_duration: 120
+    environment:
+      node: 18
+      java: 17
+    scripts:
+      - name: Install Dependencies
+        script: |
+          yarn install
+      - name: Grant Gradle Execution Permission
+        script: |
+          chmod +x android/gradlew
+      - name: Build Android APK
+        script: |
+          cd android
+          ./gradlew assembleRelease
+    artifacts:
+      - android/app/build/outputs/apk/release/*.apk
+    publishing:
+      email:
+        recipients:
+          - "pjash777@gmail.com"
