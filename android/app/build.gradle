@@ -87,6 +87,9 @@ tasks.whenTaskAdded { task ->
     if (task.name == "@react-native-firebase_firestore:packageDebugResources") {
         task.dependsOn(":@react-native-firebase_firestore:generateDebugResValues")
     }
+    if (task.name == ":react-native-firebase_firestore:packageReleaseResources") {
+        task.dependsOn(":react-native-firebase_firestore:generateReleaseResValues")
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'
