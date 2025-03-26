@@ -158,4 +158,8 @@ tasks.whenTaskAdded { task ->
     }
 }
 
+tasks.named("checkReleaseAarMetadata") {
+    dependsOn(":@react-native-firebase_firestore:writeReleaseAarMetadata")
+}
+
 apply plugin: 'com.google.gms.google-services'
