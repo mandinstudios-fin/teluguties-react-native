@@ -5,6 +5,17 @@ import api from '../constants/axios';
 const useFirestore2 = () => {
     const uid = auth().currentUser?.uid;
 
+    const createProfile = async (profilesData) => {
+        try {
+            const response = await api.post(API_ENDPOINTS.profilesGetHomeData, profilesData);
+
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching home data:", error);
+            return null;
+        }
+    }
+
     const getHomeData = async () => {
         try {
             const response = await api.get(API_ENDPOINTS.profilesGetHomeData, {
@@ -161,6 +172,7 @@ const useFirestore2 = () => {
     };
 
     return {
+        createProfile,
         getHomeData,
         getHomeData2,
         getNewData,

@@ -21,6 +21,8 @@ import { removeListener, startOtpListener } from 'react-native-otp-verify';
 import { calculateAge, getUsersAge } from '../../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loader from '../Loader/Loader';
+import useFirestore2 from '../../hooks/useFirestore2';
+import useAgent2 from '../../hooks/useAgent2';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,7 +30,8 @@ const Otp = ({ navigation, route }) => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false)
   const { confirmation, isRegistration, updatedFormData, fullPhoneNumber } = route.params
-  const { verifyOtp } = useAuth();
+  const { createProfile } = useFirestore2();
+  const { createAgent } = useAgent2();
 
   const getAndStoreFCMToken = async (userId, category) => {
     try {
@@ -58,81 +61,89 @@ const Otp = ({ navigation, route }) => {
 
     if (updatedFormData.category === 'individual') {
       try {
-        const userData = await firestore().collection('profiles').doc(user.uid).set({
-          personalInformation: {
-            firstName: '',
-            lastName: '',
+        const userData = {
+          uid: auth().currentUser?.uid,
+          personal_information: {
+            first_name: '',
+            last_name: '',
             gender: '',
             age: calculateAge(updatedFormData.dob),
-            dateOfBirth: updatedFormData.dob,
+            date_of_birth: updatedFormData.dob,
             height: '',
-            motherTongue: '',
+            mother_tongue: '',
             location: '',
-            profileType: '',
+            profile_type: '',
           },
-          contactInformation: {
+          contact_information: {
             email: '',
             phone: updatedFormData.selectedCode + updatedFormData.phoneNumber,
-            kycDetails: '',
-            profilePicture: '',
+            kyc_details: '',
+            profile_picture: '',
           },
-          educationAndCareer: {
-            highestQualification: '',
+          education_and_career: {
+            highest_qualification: '',
             occupation: '',
-            workingPlace: '',
-            annualIncome: 0,
-            aboutOccupation: '',
+            working_place: '',
+            annual_income: 0,
+            about_occupation: '',
           },
-          familyInformation: {
-            fatherName: '',
-            fatherOccupation: '',
-            familyType: '',
-            numberOfSiblings: 0,
-            nativePlace: '',
-            aboutFamily: '',
+          family_information: {
+            father_name: '',
+            father_occupation: '',
+            family_type: '',
+            number_of_siblings: 0,
+            native_place: '',
+            about_family: '',
           },
-          lifestyleAndInterests: {
-            maritalStatus: '',
-            drinkingHabits: '',
+          lifestyle_and_interests: {
+            marital_status: '',
+            drinking_habits: '',
             interests: [],
-            aboutLifestyle: '',
+            about_lifestyle: '',
           },
-          partnerPreferences: {
-            aboutPreferences: '',
-            ageRange: '',
-            heightRange: '',
-            preferredCity: '',
+          partner_preferences: {
+            about_preferences: '',
+            age_range: '',
+            height_range: '',
+            preferred_city: '',
             religion: [],
           },
           metadata: {
-            createdAt: firestore.FieldValue.serverTimestamp(),
-            updatedAt: firestore.FieldValue.serverTimestamp(),
-            isVerified: true,
-            agentId: ''
+            created_at: firestore.FieldValue.serverTimestamp(),
+            updated_at: firestore.FieldValue.serverTimestamp(),
+            is_verified: true,
+            agent_id: ''
           },
-        });
+        };
 
-        getAndStoreFCMToken(user?.uid, 'profiles')
+        await createProfile(userData);
+
+        // getAndStoreFCMToken(user?.uid, 'profiles')
 
       } catch (error) {
       }
     }
     else {
       try {
-        const agentData = await firestore().collection('agents').doc(user.uid).set({
-          agent_id: generateAgentID(),
-          fullname: '',
+        const agentData = {
+          uid: String(auth().currentUser?.uid),
+          agent_id: String(generateAgentID()),
+          full_name: '',
           state: '',
           district: '',
-          aadharnumber: '',
-          selectedcode: updatedFormData.selectedCode,
-          phonenumber: updatedFormData.phoneNumber,
-          mailid: '',
-          profilepic: '',
+          aadhar_number: '',
+          selected_code: updatedFormData.selectedCode,
+          phone_number: updatedFormData.phoneNumber,
+          mail_id: '',
+          profile_pic: '',
           date_of_birth: updatedFormData.dob,
-        })
+          requests: [],
+          accepted_requests: [],
+          rejected_requests: [],
+        };
 
-        await getAndStoreFCMToken(user?.uid, 'agents')
+        await createAgent(agentData);
+        //await getAndStoreFCMToken(user?.uid, 'agents')
       } catch (error) {
       }
     }
@@ -167,7 +178,7 @@ const Otp = ({ navigation, route }) => {
   };
 
   const generateAgentID = () => {
-    const randomNumbers = Math.floor(10000000 + Math.random() * 90000000); // Generate 8 random digits
+    const randomNumbers = Math.floor(10000000 + Math.random() * 90000000);
     return `TT${randomNumbers}`;
   }
 
@@ -233,7 +244,7 @@ const Otp = ({ navigation, route }) => {
       </View>
 
       <View style={loading ? styles.loadingContainer : null}>
-        {loading && <Loader/>}
+        {loading && <Loader />}
       </View>
     </SafeAreaView>
   );

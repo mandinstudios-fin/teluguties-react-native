@@ -46,12 +46,12 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async () => {
     const fullPhoneNumber = selectedCode + phoneNumber;
-    const phoneExists = await checkPhoneNumberExists(selectedCode, phoneNumber);
+    // const phoneExists = await checkPhoneNumberExists(selectedCode, phoneNumber);
 
-    if (!phoneExists) {
-      navigation.navigate("Register");
-      return;
-    }
+    // if (!phoneExists) {
+    //   navigation.navigate("Register");
+    //   return;
+    // }
 
     setLoading(true);
     try {

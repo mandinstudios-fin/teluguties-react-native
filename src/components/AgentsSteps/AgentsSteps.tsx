@@ -25,6 +25,7 @@ import Loader from "../Loader/Loader";
 import TermsAndConditionsScreen from "./TermsAndConditionsScreen";
 import { Camera } from "lucide-react-native";
 import { Calendar } from "react-native-calendars";
+import useAgent2 from "../../hooks/useAgent2";
 
 const { width } = Dimensions.get("window");
 
@@ -47,20 +48,21 @@ const AgentsSteps = ({ navigation }) => {
   };
 
   const [agentFormData, setAgentFormData] = useState({
-    fullname: "",
+    uid: "",
+    full_name: "",
     state: "",
     district: "",
-    aadharnumber: "",
-    selectedcode: "",
-    phonenumber: "",
-    mailid: "",
-    profilepic: "",
+    aadhar_number: "",
+    selected_code: "",
+    phone_number: "",
+    mail_id: "",
+    profile_pic: "",
     date_of_birth: "",
   });
 
   const [uploading, setUploading] = useState();
   const { successToast, errorToast } = useToastHook();
-  const { getAgentsDetails } = useAgent();
+  const { getAgentsDetails, agentsPartialUpdateAgentProfile } = useAgent2();
 
   useEffect(() => {
     getAgentsDetails(setAgentFormData);
@@ -79,12 +81,12 @@ const AgentsSteps = ({ navigation }) => {
       return;
     }
 
-    if (!agentFormData.aadharnumber) {
+    if (!agentFormData.aadhar_number) {
       errorToast("Enter Aadhar Number");
       return;
     }
 
-    if (!isValidAadhaar(agentFormData.aadharnumber)) {
+    if (!isValidAadhaar(agentFormData.aadhar_number)) {
       errorToast("Invalid Aadhar Number...");
       return;
     }
@@ -92,9 +94,7 @@ const AgentsSteps = ({ navigation }) => {
     setUploading(true);
 
     try {
-      await firestore().collection("agents").doc(currentUser.uid).set({
-        ...agentFormData,
-      });
+      await agentsPartialUpdateAgentProfile(agentFormData);
       successToast("Data Updated");
       navigation.replace("AgentsSuccess")
     } catch (error) {
@@ -196,8 +196,8 @@ const AgentsSteps = ({ navigation }) => {
                   style={styles.input}
                   placeholder="Full Name"
                   placeholderTextColor="#EBC7B1"
-                  value={agentFormData.fullname}
-                  onChangeText={(value) => handleChange("fullname", value)}
+                  value={agentFormData.full_name}
+                  onChangeText={(value) => handleChange("full_name", value)}
                 />
 
                 <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.7}>
@@ -303,8 +303,8 @@ const AgentsSteps = ({ navigation }) => {
                   placeholder="Aadhar Number"
                   placeholderTextColor="#EBC7B1"
                   keyboardType="numeric"
-                  value={agentFormData.aadharnumber}
-                  onChangeText={(value) => handleChange("aadharnumber", value)}
+                  value={agentFormData.aadhar_number}
+                  onChangeText={(value) => handleChange("aadhar_number", value)}
                 />
 
                 <TextInput
@@ -312,13 +312,13 @@ const AgentsSteps = ({ navigation }) => {
                   placeholder="Email ID"
                   placeholderTextColor="#EBC7B1"
                   keyboardType="email-address"
-                  value={agentFormData.mailid}
-                  onChangeText={(value) => handleChange("mailid", value)}
+                  value={agentFormData.mail_id}
+                  onChangeText={(value) => handleChange("mail_id", value)}
                 />
 
                 <View style={styles.profileimageupload}>
                   <Text style={styles.profiletext}>Profile pics</Text>
-                  <TouchableOpacity onPress={openImagePicker}>
+                  <TouchableOpacity >
                     <Camera strokeWidth={1} color="#EBC7B1" />
                   </TouchableOpacity>
                 </View>

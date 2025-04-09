@@ -5,13 +5,35 @@ import api from '../constants/axios';
 const useAgent2 = () => {
     const uid = auth().currentUser?.uid;
 
+    const createAgent = async (agentsData) => {
+        try {
+            const response = await api.post(API_ENDPOINTS.agentsCreateAgent, agentsData);
+
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching home data:", error);
+            return null;
+        }
+    };
+
+    const agentsPartialUpdateAgentProfile = async (agentsData) => {
+        try {
+            const response = await api.patch(API_ENDPOINTS.agentsPartialUpdateAgentProfile, { uid, ...agentsData });
+
+        } catch (error) {
+            console.error("Error fetching home data:", error);
+            return null;
+        }
+    };
+
+
     const getAgentsDetails = async (setAgentFormData) => {
         try {
             const response = await api.get(API_ENDPOINTS.agentsGetAgentDetails, {
                 params: { uid },
             });
 
-            return response.data;
+            setAgentFormData(response.data)
         } catch (error) {
             console.error("Error fetching home data:", error);
             return null;
@@ -122,7 +144,7 @@ const useAgent2 = () => {
         }
     };
 
-    return { getAgentsDetails, getAgentsCurrentDetails, getAgentsData, getProfilesData, getMatchingRequestData, getProfilesUploadedByAgent, acceptAssignRequest, rejectAssignRequest, getAgentsAcceptedProfiles }
+    return { createAgent, agentsPartialUpdateAgentProfile, getAgentsDetails, getAgentsCurrentDetails, getAgentsData, getProfilesData, getMatchingRequestData, getProfilesUploadedByAgent, acceptAssignRequest, rejectAssignRequest, getAgentsAcceptedProfiles }
 }
 
 export default useAgent2

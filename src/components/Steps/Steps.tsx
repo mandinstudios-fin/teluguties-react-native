@@ -1062,7 +1062,6 @@ const Steps = (
       preferredCity: "",
       religion: [],
     },
-
     personalInformation: {
       age: 0,
       dateOfBirth: "",

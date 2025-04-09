@@ -1,8 +1,7 @@
 export const BACKEND_URL = `http://192.168.1.13:8000`;
 
 export const API_ENDPOINTS = {
-    profilesLogin: `/profiles/login/`,
-    profilesRegister: `/profiles/register/`,
+    profilesCreateProfile: `/profiles/create_profiles`,
     profilesGetHomeData: `/profiles/get_home_data/`,
     profilesGetHomeData2: `/profiles/get_home_data2/`,
     profilesGetNewData: `/profiles/get_new_data/`,
@@ -23,8 +22,8 @@ export const API_ENDPOINTS = {
     profilesDeleteAllImages: `/profiles/delete_all_images/`,
     profilesSayHello: `/profiles/say_hello/`,
 
-    agentsLogin: `/agents/login/`,
-    agentsRegister: `/agents/register/`,
+    agentsCreateAgent: `/agents/create_agents/`,
+    agentsPartialUpdateAgentProfile: `/agents/partial_update_agent_profile/`,
     agentsGetAgentDetails: `/agents/get_agent_details/`,
     agentsGetAgentCurrentDetails: `/agents/get_agent_current_details/`,
     agentsGetAllAgents: `/agents/get_all_agents/`,
