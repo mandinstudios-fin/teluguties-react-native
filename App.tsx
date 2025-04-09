@@ -8,6 +8,7 @@ import Navigator from './src/components/Navigation/Navigator';
 import { ToastProvider } from 'react-native-toast-notifications';
 import Icon from 'react-native-vector-icons/Entypo'
 import { refreshFCMTokenIfNeeded, requestUserMessagingPermission } from './src/utils';
+import api from './src/constants/axios';
 
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
@@ -39,6 +40,60 @@ const DangerIcon = () => {
 const App = () => {
   const [loading, setLoading] = useState(true);
 
+  const data = {
+    personalInformation: {
+      firstName: '',
+      lastName: '',
+      gender: '',
+      age: '',
+      dateOfBirth: '',
+      height: '',
+      motherTongue: '',
+      location: '',
+      profileType: '',
+    },
+    contactInformation: {
+      email: '',
+      phone: '',
+      kycDetails: '',
+      profilePicture: '',
+    },
+    educationAndCareer: {
+      highestQualification: '',
+      occupation: '',
+      workingPlace: '',
+      annualIncome: 0,
+      aboutOccupation: '',
+    },
+    familyInformation: {
+      fatherName: '',
+      fatherOccupation: '',
+      familyType: '',
+      numberOfSiblings: 0,
+      nativePlace: '',
+      aboutFamily: '',
+    },
+    lifestyleAndInterests: {
+      maritalStatus: '',
+      drinkingHabits: '',
+      interests: [],
+      aboutLifestyle: '',
+    },
+    partnerPreferences: {
+      aboutPreferences: '',
+      ageRange: '',
+      heightRange: '',
+      preferredCity: '',
+      religion: [],
+    },
+    metadata: {
+      createdAt: '',
+      updatedAt: '',
+      isVerified: true,
+      agentId: ''
+    },
+  }
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -67,6 +122,26 @@ const App = () => {
     } else {
       firebase.app();
     }
+  }, []);
+
+  // useEffect(() => {
+  //   api.get('/profiles/say_hello/')
+  //     .then((response) => {
+  //       console.log(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error.message);
+  //     });
+  // }, [])
+
+  useEffect(() => {
+    api.post('/profiles/say_hello/', data)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error.message);
+      });
   }, []);
 
   if (loading) {

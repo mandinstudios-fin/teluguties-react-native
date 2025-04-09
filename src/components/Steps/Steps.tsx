@@ -138,7 +138,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
     const [year, month, day] = dateString.split("-");
     return `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
   };
-  
+
 
   const handleNextStep = () => {
     if (!formData?.personalInformation.firstName || !formData?.personalInformation.lastName) {
@@ -235,7 +235,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
                     ...prevData,
                     personalInformation: { ...prevData.personalInformation, dateOfBirth: newFormattedDate },
                   }))
-                
+
                   setModalVisible(false);
                 }}
                 markedDates={{
@@ -670,7 +670,18 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
   </View>
 );
 
-const PartnerPreferences = ({ formData, updateFormData, nextStep, prevStep }) => (
+const PartnerPreferences = ({ formData, updateFormData, nextStep, prevStep }) => {
+  const { errorToast } = useToastHook();
+
+  const handleNextStep = () => {
+    if (formData?.partnerPreferences?.religion.length === 0) {
+      errorToast("Religion Required");
+      return;
+    }
+
+    nextStep();
+  };
+
   <View style={styles.stepContainer}>
     <Text style={styles.header}>Partner Preferences</Text>
 
@@ -783,13 +794,13 @@ const PartnerPreferences = ({ formData, updateFormData, nextStep, prevStep }) =>
         <TouchableOpacity onPress={prevStep} style={styles.button}>
           <Text style={styles.buttontext}>Previous</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={nextStep} style={styles.button}>
+        <TouchableOpacity onPress={handleNextStep} style={styles.button}>
           <Text style={styles.buttontext}>Next</Text>
         </TouchableOpacity>
       </View>
     </View>
   </View>
-);
+};
 
 const ContactVerification = ({
   formData,

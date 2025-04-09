@@ -37,7 +37,7 @@ const AgentsAcceptedProfiles = ({ navigation }) => {
                         <Text style={styles.assigntext}>Accepted Profiles</Text>
                     </View>
 
-                    
+
                     <View style={styles.maincontent}>
                     {acceptedData.length > 0 &&
                         <View style={styles.imagecontainer}>

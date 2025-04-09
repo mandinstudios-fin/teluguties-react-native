@@ -562,7 +562,6 @@ const useFirestore = () => {
           }
     }
 
-
     return {
         getHomeData,
         getNewData,

@@ -44,8 +44,8 @@ const AgentsProfileDetails = ({ route, navigation }) => {
                 </View>
             </ScrollView>
         </SafeAreaView>
-    )
-}
+    );
+};
 
 export default AgentsProfileDetails
 

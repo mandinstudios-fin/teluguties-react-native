@@ -36,9 +36,7 @@ const Success = ({ navigation, route }) => {
   }, [])
 
   useEffect(() => {
-    if(!isReady) return
-
-
+    if (!isReady) return;
 
     let timeoutId;
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
