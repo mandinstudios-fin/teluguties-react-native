@@ -26,6 +26,11 @@ import useUpdateUserDetails from '../../hooks/useUpdateUserDetails';
 import { Camera } from 'lucide-react-native';
 import Loader from '../Loader/Loader';
 import { Calendar } from 'react-native-calendars';
+import { Profile } from '../../types';
+import useUpdateUserDetails2 from '../../hooks/useUpdateUserDetails2';
+import { API_ENDPOINTS } from '../../constants';
+import api from '../../constants/axios';
+import { camelToSnakeCase, getChangedFieldsWithOriginalValues } from '../../utils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -60,18 +65,18 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
         <TouchableOpacity
           style={[
             styles.genderButton,
-            formData.personalInformation.gender === 'Male' &&
+            formData?.personalInformation?.gender === 'Male' &&
             styles.selectedGenderButton,
           ]}
           onPress={() => {
             updateFormData(prevData => ({
               ...prevData,
-              personalInformation: { ...prevData.personalInformation, gender: 'Male' },
+              personalInformation: { ...prevData?.personalInformation, gender: 'Male' },
             }))
 
             updateFormData(prevData => ({
               ...prevData,
-              profileType: 'Groom',
+              personalInformation: { ...prevData?.personalInformation, profileType: 'Groom' },
             }))
           }
           }>
@@ -86,18 +91,18 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
         <TouchableOpacity
           style={[
             styles.genderButton,
-            formData.personalInformation.gender === 'Female' &&
+            formData?.personalInformation?.gender === 'Female' &&
             styles.selectedGenderButton,
           ]}
           onPress={() => {
             updateFormData(prevData => ({
               ...prevData,
-              personalInformation: { ...prevData.personalInformation, gender: 'Female' },
+              personalInformation: { ...prevData?.personalInformation, gender: 'Female' },
             }))
 
             updateFormData(prevData => ({
               ...prevData,
-              profileType: 'Bride',
+              personalInformation: { ...prevData?.personalInformation, profileType: 'Bride' },
             }))
           }
           }>
@@ -113,9 +118,9 @@ const GenderSelection = ({ formData, updateFormData, nextStep }) => (
       onPress={nextStep}
       style={[
         styles.button,
-        { opacity: formData.personalInformation.gender ? 1 : 0.5 },
+        { opacity: formData?.personalInformation?.gender ? 1 : 0.5 },
       ]}
-      disabled={!formData.personalInformation.gender}>
+      disabled={!formData?.personalInformation?.gender}>
       <Text style={styles.buttontext}>Create</Text>
     </TouchableOpacity>
   </View>
@@ -141,7 +146,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
 
 
   const handleNextStep = () => {
-    if (!formData?.personalInformation.firstName || !formData?.personalInformation.lastName) {
+    if (!formData?.personalInformation?.firstName || !formData?.personalInformation?.lastName) {
       errorToast("Name Required");
       return
     }
@@ -151,9 +156,14 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
       return
     }
 
+    if (!formData?.personalInformation?.dateOfBirth) {
+      errorToast("DOB Required");
+      return;
+    }
+
     updateFormData(prevData => ({
       ...prevData,
-      personalInformation: { ...prevData.personalInformation, age: calculateAge(formData?.personalInformation?.dateOfBirth) },
+      personalInformation: { ...prevData?.personalInformation, age: calculateAge(formData?.personalInformation?.dateOfBirth) },
     }))
 
     nextStep();
@@ -168,11 +178,11 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
           style={styles.input}
           placeholder="First Name"
           placeholderTextColor="#EBC7B1"
-          value={formData?.personalInformation.firstName || ''}
+          value={formData?.personalInformation?.firstName || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personalInformation: { ...prevData.personalInformation, firstName: value },
+              personalInformation: { ...prevData?.personalInformation, firstName: value },
             }))
           }
         />
@@ -181,11 +191,11 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
           style={styles.input}
           placeholder="Last Name"
           placeholderTextColor="#EBC7B1"
-          value={formData?.personalInformation.lastName || ''}
+          value={formData?.personalInformation?.lastName || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personalInformation: { ...prevData.personalInformation, lastName: value },
+              personalInformation: { ...prevData?.personalInformation, lastName: value },
             }))
           }
         />
@@ -233,7 +243,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
                   const newFormattedDate = formatDate(day.dateString);
                   updateFormData(prevData => ({
                     ...prevData,
-                    personalInformation: { ...prevData.personalInformation, dateOfBirth: newFormattedDate },
+                    personalInformation: { ...prevData?.personalInformation, dateOfBirth: newFormattedDate },
                   }))
 
                   setModalVisible(false);
@@ -277,11 +287,11 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
           style={styles.input}
           placeholder="Height"
           placeholderTextColor="#EBC7B1"
-          value={formData?.personalInformation.height || ''}
+          value={formData?.personalInformation?.height || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personalInformation: { ...prevData.personalInformation, height: value },
+              personalInformation: { ...prevData?.personalInformation, height: value },
             }))
           }
         />
@@ -294,7 +304,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              personalInformation: { ...prevData.personalInformation, motherTongue: value },
+              personalInformation: { ...prevData?.personalInformation, motherTongue: value },
             }))
           }
         />
@@ -308,7 +318,7 @@ const PersonalInfo = ({ formData, updateFormData, nextStep, prevStep, successToa
             updateFormData(prevData => ({
               ...prevData,
               personalInformation: {
-                ...prevData.personalInformation,
+                ...prevData?.personalInformation,
                 location: value,
               },
             }))
@@ -343,7 +353,7 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
           updateFormData(prevData => ({
             ...prevData,
             familyInformation: {
-              ...prevData.familyInformation,
+              ...prevData?.familyInformation,
               fatherName: value,
             },
           }))
@@ -359,7 +369,7 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
           updateFormData(prevData => ({
             ...prevData,
             familyInformation: {
-              ...prevData.familyInformation,
+              ...prevData?.familyInformation,
               fatherOccupation: value,
             },
           }))
@@ -371,7 +381,7 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
           onValueChange={value =>
             updateFormData(prevData => ({
               ...prevData,
-              familyInformation: { ...prevData.familyInformation, familyType: value },
+              familyInformation: { ...prevData?.familyInformation, familyType: value },
             }))
           }
           useNativeAndroidPickerStyle={false}
@@ -402,7 +412,7 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
           updateFormData(prevData => ({
             ...prevData,
             familyInformation: {
-              ...prevData.familyInformation,
+              ...prevData?.familyInformation,
               numberOfSiblings: value,
             },
           }))
@@ -418,7 +428,7 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
           updateFormData(prevData => ({
             ...prevData,
             familyInformation: {
-              ...prevData.familyInformation,
+              ...prevData?.familyInformation,
               nativePlace: value,
             },
           }))
@@ -434,7 +444,7 @@ const FamilyDetails = ({ formData, updateFormData, nextStep, prevStep }) => (
           updateFormData(prevData => ({
             ...prevData,
             familyInformation: {
-              ...prevData.familyInformation,
+              ...prevData?.familyInformation,
               aboutFamily: value,
             },
           }))
@@ -467,7 +477,7 @@ const EducationProfession = ({
           onValueChange={(value) =>
             updateFormData((prevData) => ({
               ...prevData,
-              educationAndCareer: { ...prevData.educationAndCareer, highestQualification: value },
+              educationAndCareer: { ...prevData?.educationAndCareer, highestQualification: value },
             }))
           }
           useNativeAndroidPickerStyle={false}
@@ -499,7 +509,7 @@ const EducationProfession = ({
           updateFormData(prevData => ({
             ...prevData,
             educationAndCareer: {
-              ...prevData.educationAndCareer,
+              ...prevData?.educationAndCareer,
               occupation: value,
             },
           }))
@@ -515,7 +525,7 @@ const EducationProfession = ({
           updateFormData(prevData => ({
             ...prevData,
             educationAndCareer: {
-              ...prevData.educationAndCareer,
+              ...prevData?.educationAndCareer,
               workingPlace: value,
             },
           }))
@@ -531,7 +541,7 @@ const EducationProfession = ({
           updateFormData(prevData => ({
             ...prevData,
             educationAndCareer: {
-              ...prevData.educationAndCareer,
+              ...prevData?.educationAndCareer,
               annualIncome: value,
             },
           }))
@@ -546,7 +556,7 @@ const EducationProfession = ({
         onChangeText={value =>
           updateFormData(prevData => ({
             ...prevData,
-            educationAndCareer: { ...prevData.educationAndCareer, aboutOccupation: value },
+            educationAndCareer: { ...prevData?.educationAndCareer, aboutOccupation: value },
           }))
         }
       />
@@ -573,7 +583,7 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
           onValueChange={value =>
             updateFormData(prevData => ({
               ...prevData,
-              lifestyleAndInterests: { ...prevData.lifestyleAndInterests, maritalStatus: value },
+              lifestyleAndInterests: { ...prevData?.lifestyleAndInterests, maritalStatus: value },
             }))
           }
           useNativeAndroidPickerStyle={false}
@@ -601,7 +611,7 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
             updateFormData((prevData) => ({
               ...prevData,
               lifestyleAndInterests: {
-                ...prevData.lifestyleAndInterests,
+                ...prevData?.lifestyleAndInterests,
                 drinkingHabits: value,
               },
             }))
@@ -629,12 +639,12 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
         style={styles.input}
         placeholder="Intrests"
         placeholderTextColor="#EBC7B1"
-        value={formData?.lifestyleAndInterests.interests?.join(', ') || ''}
+        value={formData?.lifestyleAndInterests?.interests?.join(', ') || ''}
         onChangeText={value => {
           updateFormData(prevData => ({
             ...prevData,
             lifestyleAndInterests: {
-              ...prevData.lifestyleAndInterests,
+              ...prevData?.lifestyleAndInterests,
               interests: value.split(',').map(item => item.trim()),
             },
           }))
@@ -646,12 +656,12 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
         multiline={true}
         placeholder="About Lifestyle"
         placeholderTextColor="#EBC7B1"
-        value={formData?.lifestyleAndInterests.aboutLifestyle || ''}
+        value={formData?.lifestyleAndInterests?.aboutLifestyle || ''}
         onChangeText={value => {
           updateFormData(prevData => ({
             ...prevData,
             lifestyleAndInterests: {
-              ...prevData.lifestyleAndInterests,
+              ...prevData?.lifestyleAndInterests,
               aboutLifestyle: value,
             },
           }))
@@ -673,74 +683,81 @@ const MaritalLifestyle = ({ formData, updateFormData, nextStep, prevStep }) => (
 const PartnerPreferences = ({ formData, updateFormData, nextStep, prevStep }) => {
   const { errorToast } = useToastHook();
 
+  useEffect(() => {
+    console.log('Partner Preferences')
+  })
+
   const handleNextStep = () => {
-    if (formData?.partnerPreferences?.religion.length === 0) {
-      errorToast("Religion Required");
-      return;
-    }
+
+
+    // if (formData?.partnerPreferences?.religion.length === 0) {
+    //   errorToast("Religion Required");
+    //   return;
+    // }
 
     nextStep();
   };
 
-  <View style={styles.stepContainer}>
-    <Text style={styles.header}>Partner Preferences</Text>
+  return (
+    <View style={styles.stepContainer}>
+      <Text style={styles.header}>Partner Preferences</Text>
 
-    <View style={styles.inputcontainer}>
-      <TextInput
-        style={styles.input}
-        placeholder="Age Range"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.partnerPreferences?.ageRange || ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            partnerPreferences: {
-              ...prevData.partnerPreferences,
-              ageRange: value,
-            },
-          }))
-        }
-      />
+      <View style={styles.inputcontainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Age Range"
+          placeholderTextColor="#EBC7B1"
+          value={
+            formData?.partnerPreferences?.ageRange || ''
+          }
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              partnerPreferences: {
+                ...prevData?.partnerPreferences,
+                ageRange: value,
+              },
+            }))
+          }
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Height Range"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.partnerPreferences?.heightRange || ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            partnerPreferences: {
-              ...prevData.partnerPreferences,
-              heightRange: value,
-            },
-          }))
-        }
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Height Range"
+          placeholderTextColor="#EBC7B1"
+          value={
+            formData?.partnerPreferences?.heightRange || ''
+          }
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              partnerPreferences: {
+                ...prevData?.partnerPreferences,
+                heightRange: value,
+              },
+            }))
+          }
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Preferred City"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.partnerPreferences?.preferredCity || ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            partnerPreferences: {
-              ...prevData.partnerPreferences,
-              preferredCity: value,
-            },
-          }))
-        }
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Preferred City"
+          placeholderTextColor="#EBC7B1"
+          value={
+            formData?.partnerPreferences?.preferredCity || ''
+          }
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              partnerPreferences: {
+                ...prevData?.partnerPreferences,
+                preferredCity: value,
+              },
+            }))
+          }
+        />
 
-      <View style={styles.pickerinput}>
+        {/* <View style={styles.pickerinput}>
         <RNPickerSelect
           onValueChange={value =>
             updateFormData(prevData => ({
@@ -771,35 +788,36 @@ const PartnerPreferences = ({ formData, updateFormData, nextStep, prevStep }) =>
             { label: 'Other', value: 'Other', color: 'white' },
           ]}
         />
-      </View>
-      <TextInput
-        style={styles.aboutinput}
-        placeholder="About Partner Preferences"
-        placeholderTextColor="#EBC7B1"
-        value={
-          formData?.partnerPreferences?.aboutPreferences || ''
-        }
-        onChangeText={value =>
-          updateFormData(prevData => ({
-            ...prevData,
-            partnerPreferences: {
-              ...prevData.partnerPreferences,
-              aboutPreferences: value,
-            },
-          }))
-        }
-      />
+      </View> */}
+        <TextInput
+          style={styles.aboutinput}
+          placeholder="About Partner Preferences"
+          placeholderTextColor="#EBC7B1"
+          value={
+            formData?.partnerPreferences?.aboutPreferences || ''
+          }
+          onChangeText={value =>
+            updateFormData(prevData => ({
+              ...prevData,
+              partnerPreferences: {
+                ...prevData?.partnerPreferences,
+                aboutPreferences: value,
+              },
+            }))
+          }
+        />
 
-      <View style={styles.prevnextbox}>
-        <TouchableOpacity onPress={prevStep} style={styles.button}>
-          <Text style={styles.buttontext}>Previous</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleNextStep} style={styles.button}>
-          <Text style={styles.buttontext}>Next</Text>
-        </TouchableOpacity>
+        <View style={styles.prevnextbox}>
+          <TouchableOpacity onPress={prevStep} style={styles.button}>
+            <Text style={styles.buttontext}>Previous</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleNextStep} style={styles.button}>
+            <Text style={styles.buttontext}>Next</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
-  </View>
+  )
 };
 
 const ContactVerification = ({
@@ -813,7 +831,7 @@ const ContactVerification = ({
   const [data, setData] = useState({});
   const currentUser = auth().currentUser;
   const { successToast, errorToast } = useToastHook();
-  const { getUserDetails } = useUpdateUserDetails();
+  const { getUserDetails } = useUpdateUserDetails2();
 
   useEffect(() => {
     const getData = async () => {
@@ -826,22 +844,14 @@ const ContactVerification = ({
 
 
   const checkAadharExists = async () => {
+    const aadhar_number = formData?.contactInformation?.kycDetails;
+
     try {
-      const userSnapshot = await firestore()
-        .collection('profiles')
-        .where('contactInformation.kycDetails', '==', formData?.contactInformation?.kycDetails)
-        .get();
+      const response = await api.post(API_ENDPOINTS.checkAAdharNumber, { aadhar_number });
 
-      const agentSnapshot = await firestore()
-        .collection('agents')
-        .where('aadharnumber', '==', formData?.contactInformation?.kycDetails)
-
-      if (!userSnapshot.empty || !agentSnapshot.empty) {
-        return true;
-      }
-      return false;
+      return response.data.exists;
     } catch (error) {
-      console.error("Error checking phone number:", error);
+      console.error("Error checking aadhar number:", error);
       return false;
     }
   };
@@ -858,7 +868,7 @@ const ContactVerification = ({
   }
 
 
-  const handleUploadProfilePic = async (imageUri: string) => {
+  const handleUploadProfilePic = async (image) => {
     if (!currentUser) {
       errorToast("User not logged in");
       return;
@@ -867,33 +877,34 @@ const ContactVerification = ({
     setUploading(true);
 
     try {
-      const fileName = imageUri.split('/').pop();
-      const uniqueFileName = `${Date.now()}_${fileName}`;
 
-      // Upload the selected image
-      const reference = storage().ref(`profile-images/${uniqueFileName}`);
-      const task = reference.putFile(imageUri);
+      const myFormdata = new FormData();
 
-      task.on(
-        'state_changed',
-        (snapshot) => {
-          const uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${uploadProgress}% done`);
-        },
-        (error) => {
-          console.error("Upload error", error);
+      myFormdata.append('phone', formData?.contactInformation?.phone);
+      myFormdata.append('profile_picture', {
+        uri: image.uri,
+        type: image.type || 'image/jpeg',
+        name: image.fileName || `profiles_${Date.now()}.jpg`,
+      });
+
+      const response = await api.post(
+        API_ENDPOINTS.profilesUploadProfilePicture,
+        myFormdata,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
       );
 
-      await task;
-      const downloadUrl = await reference.getDownloadURL();
+      const downloadUrl = response?.data?.profile_picture;
 
       console.log(downloadUrl)
 
       updateFormData(prevData => ({
         ...prevData,
         contactInformation: {
-          ...prevData.contactInformation,
+          ...prevData?.contactInformation,
           profilePicture: downloadUrl,
         },
       }))
@@ -919,8 +930,8 @@ const ContactVerification = ({
       if (response.didCancel) {
       } else if (response.error) {
       } else {
-        let imageUri = response.uri || response.assets?.[0]?.uri;
-        handleUploadProfilePic(imageUri);
+        let image = response.assets?.[0];
+        handleUploadProfilePic(image);
       }
     });
   };
@@ -947,11 +958,11 @@ const ContactVerification = ({
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#EBC7B1"
-          value={formData?.contactInformation.email || ''}
+          value={formData?.contactInformation?.email || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              contactInformation: { ...prevData.contactInformation, email: value },
+              contactInformation: { ...prevData?.contactInformation, email: value },
             }))
           }
         />
@@ -964,7 +975,7 @@ const ContactVerification = ({
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              contactInformation: { ...prevData.contactInformation, instagramId: value },
+              contactInformation: { ...prevData?.contactInformation, instagramId: value },
             }))
           }
         />
@@ -985,11 +996,11 @@ const ContactVerification = ({
           style={styles.input}
           placeholder="Aadhar Number"
           placeholderTextColor="#EBC7B1"
-          value={formData?.contactInformation.kycDetails || ''}
+          value={formData?.contactInformation?.kycDetails || ''}
           onChangeText={value =>
             updateFormData(prevData => ({
               ...prevData,
-              contactInformation: { ...prevData.contactInformation, kycDetails: value },
+              contactInformation: { ...prevData?.contactInformation, kycDetails: value },
             }))
           }
         />
@@ -1017,85 +1028,30 @@ const Header = () => (
 const Steps = (
   { navigation }
 ) => {
-  const [data, setData] = useState({});
   const [uploading, setUploading] = useState();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    contactInformation: {
-      email: "",
-      kycDetails: "",
-      phone: "",
-      instagramId: "",
-      profilePicture: ""
-    },
-    educationAndCareer: {
-      aboutOccupation: "",
-      annualIncome: 0,
-      highestQualification: "",
-      occupation: "",
-      workingPlace: ""
-    },
-    familyInformation: {
-      aboutFamily: "",
-      familyType: "",
-      fatherName: "",
-      fatherOccupation: "",
-      nativePlace: "",
-      numberOfSiblings: 0
-    },
-    lifestyleAndInterests: {
-      aboutLifestyle: "",
-      drinkingHabits: "",
-      interests: [],
-      maritalStatus: "",
-    },
-    metadata: {
-      createdAt: firestore.FieldValue.serverTimestamp(),
-      updatedAt: firestore.FieldValue.serverTimestamp(),
-      isVerified: true,
-      agentId: '',
-    },
-    partnerPreferences: {
-      aboutPreferences: "",
-      ageRange: "",
-      heightRange: "",
-      preferredCity: "",
-      religion: [],
-    },
-    personalInformation: {
-      age: 0,
-      dateOfBirth: "",
-      firstName: "",
-      gender: "",
-      height: "",
-      lastName: "",
-      location: "",
-      motherTongue: "",
-    },
-    profileType: "",
-    createdAt: firestore.FieldValue.serverTimestamp(),
-    updatedAt: firestore.FieldValue.serverTimestamp(),
-  });
+  const [formData, setFormData] = useState({});
+  const [copiedFormData, setCopiedFormData] = useState({});
 
-  const currentUser = auth().currentUser;
   const { successToast, errorToast } = useToastHook();
 
-  const { getUserDetails } = useUpdateUserDetails();
+  const { getUserDetails, handleUserUpdate } = useUpdateUserDetails2();
 
   useEffect(() => {
     const getData = async () => {
       const myData = await getUserDetails()
       updateFormData(prevData => ({
         ...prevData,
-        contactInformation: { ...prevData.contactInformation, phone: myData.contactInformation.phone },
+        contactInformation: { ...prevData?.contactInformation, phone: myData?.contactInformation?.phone },
       }))
 
       updateFormData(prevData => ({
         ...prevData,
-        personalInformation: { ...prevData.personalInformation, dateOfBirth: myData.personalInformation.dateOfBirth },
+        personalInformation: { ...prevData?.personalInformation, dateOfBirth: myData?.personalInformation?.dateOfBirth },
       }))
 
-      setData(myData);
+      setFormData(myData);
+      setCopiedFormData(myData)
     }
 
     getData();
@@ -1103,39 +1059,18 @@ const Steps = (
 
   const saveUserData = async () => {
     try {
-      const userRef = firestore().collection('profiles').doc(currentUser?.uid);
+      const changedData = getChangedFieldsWithOriginalValues(formData, copiedFormData)
 
-      const updatedData = {
-        ...formData,
-        updatedAt: firestore.FieldValue.serverTimestamp()
+      const updatedData = camelToSnakeCase(changedData);
+      const dataToSend = {
+        uid: formData?.uid,
+        ...updatedData
       }
+      await handleUserUpdate(dataToSend);
 
-      console.log(updatedData)
-
-      await userRef.update(updatedData);
       successToast("Data Updated");
     } catch (error) {
       errorToast("Something Went Wrong");
-
-    }
-  }
-
-  const saveTempProfile = async () => {
-    try {
-      const userRef = firestore().collection('temp_profiles').doc(currentUser?.uid);
-
-      const updatedData = {
-        personalInformation: {
-          ...formData.personalInformation,
-        },
-        phoneNumber: formData?.contactInformation.phone,
-        updatedAt: firestore.FieldValue.serverTimestamp()
-      }
-
-      console.log(updatedData)
-
-      await userRef.set(updatedData, { merge: true });
-    } catch (error) {
 
     }
   }
@@ -1147,7 +1082,6 @@ const Steps = (
 
   const submitForm = async () => {
     await saveUserData();
-    await saveTempProfile();
 
     navigation.replace('Layout');
   };

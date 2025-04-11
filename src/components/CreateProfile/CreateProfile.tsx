@@ -14,6 +14,8 @@ import RNPickerSelect from 'react-native-picker-select';
 import DrawerSceneWrapper from '../Navigation/draw'
 import { BadgePlus, CirclePlus, ImageMinus, ImagePlus } from 'lucide-react-native'
 import Loader from '../Loader/Loader'
+import useUpdateUserDetails2 from '../../hooks/useUpdateUserDetails2'
+import { camelToSnakeCase, getChangedFieldsWithOriginalValues } from '../../utils'
 
 const { width, height } = Dimensions.get("window")
 
@@ -23,15 +25,42 @@ const CreateProfile = ({ navigation }) => {
     const { successToast, errorToast } = useToastHook();
     const {
         uploading,
+        setUploading,
         getCurrentUserDetails,
         handleUserUpdate,
         handleProfileImages,
-        deleteProfileImage
-    } = useUpdateUserDetails();
+        profilesDeleteAllImages
+    } = useUpdateUserDetails2();
+
+    const handlegetCurrentUserDetails = async () => {
+        const data = await getCurrentUserDetails();
+        setUserData(data);
+        setFirestoreData(data);
+
+    }
 
     useEffect(() => {
-        getCurrentUserDetails(setUserData, setFirestoreData);
+        handlegetCurrentUserDetails();
     }, []);
+
+    const handleUserUpdateMain = async () => {
+        setUploading(true);
+
+        const changedData = getChangedFieldsWithOriginalValues(userData, firestoreData)
+
+        const updatedData = camelToSnakeCase(changedData);
+
+        const dataToSend = {
+            uid: userData?.uid,
+            ...updatedData
+        }
+
+        await handleUserUpdate(dataToSend);
+        await handlegetCurrentUserDetails();
+
+        successToast("Profile Updated.")
+        setUploading(false);
+    }
 
     const handleInputChange = (section: string, parameter: string, value: string, subsection?: string) => {
         setUserData((prev) => {
@@ -76,7 +105,6 @@ const CreateProfile = ({ navigation }) => {
                 task.on('state_changed', (snapshot) => {
                     const uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 }, (error) => {
-                    console.log(error)
                 }, async () => {
                     const downloadUrl = await reference.getDownloadURL();
                     uploadedImageUrls.push(downloadUrl);
@@ -132,7 +160,6 @@ const CreateProfile = ({ navigation }) => {
         launchImageLibrary(options, (response) => {
             if (response.didCancel) {
             } else if (response.errorCode) {
-                console.log(response.errorCode)
             } else {
                 let selectedImages = response.assets || [];
                 // if (selectedImages.length > 5) {
@@ -189,7 +216,7 @@ const CreateProfile = ({ navigation }) => {
                                     </View>
 
                                     <View style={styles.deleteimagebox}>
-                                        <TouchableOpacity style={styles.deleteimagecontainer} onPress={() => deleteProfileImage(userData, setUserData, setFiretoreData)}>
+                                        <TouchableOpacity style={styles.deleteimagecontainer} onPress={() => profilesDeleteAllImages(userData, setUserData, setFiretoreData)}>
                                             <ImageMinus size={20} strokeWidth={1} color={"#7b2a38"} />
                                             <Text style={styles.deleteimage}>Delete image</Text>
                                         </TouchableOpacity>
@@ -591,12 +618,15 @@ const CreateProfile = ({ navigation }) => {
                                         placeholder="Hobbies & Intrests"
                                         placeholderTextColor="#EBC7B1"
                                         value={userData?.lifestyleAndInterests.interests?.join(', ') || ''}
-                                        editable={!firestoreData?.lifestyleAndInterests.interests}
+                                        editable={!firestoreData?.lifestyleAndInterests?.interests?.length}
                                         onChangeText={(value) => {
                                             setUserData(prev => ({
                                                 ...prev,
-                                                hobbies_interests: value.split(',').map(item => item.trim())
-                                            }))
+                                                lifestyleAndInterests: {
+                                                    ...prev.lifestyleAndInterests,
+                                                    interests: value.split(',').map(item => item.trim())
+                                                }
+                                            }));
                                         }}
                                     />
                                 </View>
@@ -677,7 +707,7 @@ const CreateProfile = ({ navigation }) => {
                             </View>
                         </View>
 
-                        <TouchableOpacity style={styles.creat} onPress={() => handleUserUpdate(userData, setUserData, setFirestoreData)}>
+                        <TouchableOpacity style={styles.creat} onPress={handleUserUpdateMain}>
                             <Text style={styles.creattext}>Update Profile</Text>
                         </TouchableOpacity>
                     </View>

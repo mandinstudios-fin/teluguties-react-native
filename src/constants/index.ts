@@ -1,7 +1,9 @@
-export const BACKEND_URL = `http://192.168.1.13:8000`;
+export const BACKEND_URL = `http://192.168.1.14:8000`;
 
 export const API_ENDPOINTS = {
-    profilesCreateProfile: `/profiles/create_profiles`,
+    profilesCreateProfile: `/profiles/create_profiles/`,
+    profilesCheckProfileMailId: `/profiles/check_mail_id/`,
+    profilesDeleteProfile: `/profiles/delete_profile/`,
     profilesGetHomeData: `/profiles/get_home_data/`,
     profilesGetHomeData2: `/profiles/get_home_data2/`,
     profilesGetNewData: `/profiles/get_new_data/`,
@@ -24,6 +26,8 @@ export const API_ENDPOINTS = {
 
     agentsCreateAgent: `/agents/create_agents/`,
     agentsPartialUpdateAgentProfile: `/agents/partial_update_agent_profile/`,
+    agentsCheckAgentMailId: `/agents/check_mail_id/`,
+    agentsDeleteAgent: `/agents/delete_agent/`,
     agentsGetAgentDetails: `/agents/get_agent_details/`,
     agentsGetAgentCurrentDetails: `/agents/get_agent_current_details/`,
     agentsGetAllAgents: `/agents/get_all_agents/`,
@@ -33,4 +37,8 @@ export const API_ENDPOINTS = {
     agentsAcceptAssignRequest: `/agents/accept_assign_request/`,
     agentsRejectAssignRequest: `/agents/reject_assign_request/`,
     agentsGetAcceptedProfiles: `/agents/get_accepted_profiles/`,
+
+    checkPhoneNumber: `/profiles/check_phone_number_exists/`,
+    getCategory: `/profiles/check_uid_origin/`,
+    checkAAdharNumber: `/profiles/check_aadhar_number/`,
 }

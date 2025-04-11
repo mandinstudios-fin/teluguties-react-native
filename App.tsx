@@ -124,25 +124,25 @@ const App = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   api.get('/profiles/say_hello/')
-  //     .then((response) => {
-  //       console.log(response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error.message);
-  //     });
-  // }, [])
-
   useEffect(() => {
-    api.post('/profiles/say_hello/', data)
+    api.get('/profiles/say_hello/')
       .then((response) => {
         console.log(response.data);
       })
       .catch((error) => {
         console.error(error.message);
       });
-  }, []);
+  }, [])
+
+  // useEffect(() => {
+  //   api.post('/profiles/say_hello/', data)
+  //     .then((response) => {
+  //       console.log(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error.message);
+  //     });
+  // }, []);
 
   if (loading) {
     return <SplashScreen />;

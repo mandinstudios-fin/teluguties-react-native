@@ -59,7 +59,10 @@ const Otp = ({ navigation, route }) => {
       return;
     }
 
+    console.log(updatedFormData?.category)
+
     if (updatedFormData.category === 'individual') {
+      console.log('trying')
       try {
         const userData = {
           uid: auth().currentUser?.uid,
@@ -67,7 +70,7 @@ const Otp = ({ navigation, route }) => {
             first_name: '',
             last_name: '',
             gender: '',
-            age: calculateAge(updatedFormData.dob),
+            age: 0,
             date_of_birth: updatedFormData.dob,
             height: '',
             mother_tongue: '',
@@ -109,18 +112,21 @@ const Otp = ({ navigation, route }) => {
             religion: [],
           },
           metadata: {
-            created_at: firestore.FieldValue.serverTimestamp(),
-            updated_at: firestore.FieldValue.serverTimestamp(),
+            created_at: '',
+            updated_at: '',
             is_verified: true,
             agent_id: ''
           },
         };
 
+        console.log('profile creating')
         await createProfile(userData);
+        console.log('profile created')
 
         // getAndStoreFCMToken(user?.uid, 'profiles')
 
       } catch (error) {
+        console.log(error)
       }
     }
     else {
@@ -143,6 +149,7 @@ const Otp = ({ navigation, route }) => {
         };
 
         await createAgent(agentData);
+        console.log('AGent Created')
         //await getAndStoreFCMToken(user?.uid, 'agents')
       } catch (error) {
       }
@@ -157,18 +164,21 @@ const Otp = ({ navigation, route }) => {
 
         if (isRegistration) {
           await updateUserDetails();
+
         }
       } catch (error) {
         setLoading(false);
         Alert.alert("Invalid Otp");
         return;
       }
+
       setLoading(false);
 
       const user = auth().currentUser;
       AsyncStorage.setItem('userToken', user?.uid);
 
       navigation.replace("Success", { isRegistration, updatedFormData });
+
 
     }
   };

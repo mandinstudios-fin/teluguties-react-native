@@ -13,6 +13,9 @@ import React, { useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Loader from '../Loader/Loader';
+import api from '../../constants/axios';
+import { API_ENDPOINTS } from '../../constants';
+import useToastHook from '../../utils/useToastHook';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,24 +23,18 @@ const Login = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [selectedCode, setSelectedCode] = useState('+91');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const { errorToast } = useToastHook();
 
   const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
     try {
-      const userSnapshot = await firestore()
-        .collection('profiles')
-        .where('contactInformation.phone', '==', selectedCode + phoneNumber)
-        .get();
-
-      const agentSnapshot = await firestore()
-        .collection('agents')
-        .where('selectedcode', '==', selectedCode)
-        .where('phonenumber', '==', phoneNumber)
-        .get();
-
-      if (!userSnapshot.empty || !agentSnapshot.empty) {
-        return true;
+      const payload = {
+        selected_code: selectedCode,
+        phone_number: phoneNumber
       }
-      return false;
+
+      const response = await api.post(API_ENDPOINTS.checkPhoneNumber, payload);
+
+      return response.data.exists;
     } catch (error) {
       console.error("Error checking phone number:", error);
       return false;
@@ -45,13 +42,23 @@ const Login = ({ navigation }) => {
   };
 
   const handleLogin = async () => {
-    const fullPhoneNumber = selectedCode + phoneNumber;
-    // const phoneExists = await checkPhoneNumberExists(selectedCode, phoneNumber);
+    if (!phoneNumber) {
+      errorToast("Enter Phone Number");
+      return;
+    }
 
-    // if (!phoneExists) {
-    //   navigation.navigate("Register");
-    //   return;
-    // }
+    if (phoneNumber.length != 10) {
+      errorToast("Phone Number Must be 10 Digit");
+      return;
+    }
+
+    const fullPhoneNumber = selectedCode + phoneNumber;
+    const phoneExists = await checkPhoneNumberExists(selectedCode, phoneNumber);
+
+    if (!phoneExists) {
+      navigation.navigate("Register");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -167,7 +174,6 @@ const styles = StyleSheet.create({
     height: height / 10,
     width: width,
     alignItems: 'center',
-
   },
   image: {
     height: 70,

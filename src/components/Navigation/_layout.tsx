@@ -17,6 +17,8 @@ import { ArrowLeft, BadgeIndianRupee, Handshake, Heart, House, LogOut, Pencil, P
 import TabBar from './TabBar';
 import DrawerSceneWrapper from './draw';
 import LottieView from 'lottie-react-native';
+import useUpdateUserDetails2 from '../../hooks/useUpdateUserDetails2';
+import useFirestore2 from '../../hooks/useFirestore2';
 
 const { width } = Dimensions.get("window");
 
@@ -83,6 +85,8 @@ const Layout = ({ navigation }) => {
       email: "john.doe@example.com",
       photoURL: "https://placeholder.svg?height=80&width=80",
     })
+    const { getUserDetails } = useUpdateUserDetails2();
+    const { deleteProfile } = useFirestore2();
 
     // Fetch user profile on component mount
     useEffect(() => {
@@ -90,12 +94,12 @@ const Layout = ({ navigation }) => {
         const userId = auth().currentUser?.uid
         if (userId) {
           try {
-            const userDoc = await firestore().collection("profiles").doc(userId).get()
-            if (userDoc.exists) {
+            const userData = await getUserDetails();
+            if (userData) {
               setUserProfile({
-                name: userDoc.data()?.personalInformation?.firstName,
-                email: userDoc.data()?.contactInformation.phone,
-                photoURL: userDoc.data()?.contactInformation?.profilePicture || "https://placeholder.svg?height=80&width=80",
+                name: userData?.personalInformation?.firstName,
+                email: userData?.contactInformation.phone,
+                photoURL: userData?.contactInformation?.profilePicture || "https://placeholder.svg?height=80&width=80",
               })
             }
           } catch (error) {
@@ -121,20 +125,8 @@ const Layout = ({ navigation }) => {
       setDeleteModalVisible(true)
       const userId = auth().currentUser?.uid
       try {
-        const userRef = firestore().collection("profiles").doc(userId)
-        await userRef.delete()
-        const tempUserRef = firestore().collection("temp_profiles").doc(userId)
-        await tempUserRef.delete()
-        const requestsRef = firestore().collection("requests").where("fromUid", "==", userId)
-        const requestsSnapshot = await requestsRef.get()
-        requestsSnapshot.forEach(async (doc) => {
-          await doc.ref.delete()
-        })
-        const queriesRef = firestore().collection("queries").where("userId", "==", userId)
-        const queriesSnapshot = await queriesRef.get()
-        queriesSnapshot.forEach(async (doc) => {
-          await doc.ref.delete()
-        })
+        await deleteProfile();
+
         await AsyncStorage.removeItem("userToken")
         successToast("Account Deleted Successfully")
         props.navigation.replace("Auth")

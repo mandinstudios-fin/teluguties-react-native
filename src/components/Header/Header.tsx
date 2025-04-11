@@ -22,7 +22,6 @@ import Animated, {
 const { width, height } = Dimensions.get('window');
 
 const Header = ({ navigation }) => {
-  const [category, setCategory] = useState('profiles');
   const [firestoreData, setFirestoreData] = useState<any>(null);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
@@ -53,15 +52,13 @@ const Header = ({ navigation }) => {
   }));
 
   useEffect(() => {
-    if (category) {
-      const handleUserCategory = async () => {
-        const categoryData = await getUserDetailsByCategory(category);
-        setFirestoreData(categoryData);
-      };
+    const handleUserCategory = async () => {
+      const categoryData = await getUserDetailsByCategory();
+      setFirestoreData(categoryData);
+    };
 
-      handleUserCategory();
-    }
-  }, [category])
+    handleUserCategory();
+  }, []);
 
   return (
     <SafeAreaView>
@@ -87,7 +84,7 @@ const Header = ({ navigation }) => {
           <View style={styles.iconcontainer}>
             <TouchableOpacity onPress={() => navigation.navigate("UserNotifications")}>
               <Animated.View style={animatedStyle}>
-                <BellDot size={25} strokeWidth={1} color={'#7b2a38'}/>
+                <BellDot size={25} strokeWidth={1} color={'#7b2a38'} />
               </Animated.View>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.toggleDrawer()}>

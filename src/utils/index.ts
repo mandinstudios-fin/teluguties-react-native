@@ -3,6 +3,8 @@ import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import { Platform, PermissionsAndroid } from 'react-native';
 import AIcon from 'react-native-vector-icons/AntDesign';
+import api from '../constants/axios';
+import { API_ENDPOINTS } from '../constants';
 
 const FCM_SERVER_KEY = "c4e5433f9d4bff9cab1de709533218061b4cdbab";
 export const notificationBackend = `http://192.168.1.13:5000/`
@@ -171,46 +173,32 @@ export const getUserCategory = async () => {
       return;
     }
 
-    const collections = ["profiles", "agents"];
+    const response = await api.get(API_ENDPOINTS.getCategory, {
+      params: {
+        uid: currentUser.uid,
+      },
+    });
 
-    for (const collection of collections) {
-      const docSnapshot = await firestore()
-        .collection(collection)
-        .doc(currentUser.uid)
-        .get();
-
-      if (docSnapshot.exists) {
-        console.log(collection, 'collection')
-        return collection;
-      }
-    }
-    return null;
+    return response.data.origin;
   } catch (error) {
     console.error("Firestore query error:", error);
+    return null;
   }
 }
 
-export const getUserDetailsByCategory = async (category) => {
+export const getUserDetailsByCategory = async () => {
+  const uid = auth().currentUser?.uid;
   try {
-    const currentUser = auth().currentUser;
-    if (!currentUser) {
-      console.error("User not authenticated");
-      return null;
-    }
+    const response = await api.get(API_ENDPOINTS.profilesGetUserDetails, {
+        params: { uid },
+    });
 
-    const userRef = firestore().collection(category).doc(currentUser.uid);
-    const userDoc = await userRef.get();
-
-    if (!userDoc.exists) {
-      return null;
-    }
-
-    return userDoc.data();
-
-  } catch (error) {
-    console.error(`Error fetching user details from category "${category}":`, error);
+    const updatedData = snakeToCamelCase(response.data)
+    return updatedData;
+} catch (error) {
+    console.error("Error fetching user details:", error);
     return null;
-  }
+}
 }
 
 export const getUserCategoryFromToken = async (token) => {
@@ -220,21 +208,16 @@ export const getUserCategoryFromToken = async (token) => {
       return;
     }
 
-    const collections = ["profiles", "agents"];
+    const response = await api.get(API_ENDPOINTS.getCategory, {
+      params: {
+        uid: token
+      },
+    });
 
-    for (const collection of collections) {
-      const docSnapshot = await firestore()
-        .collection(collection)
-        .doc(token)
-        .get();
-
-      if (docSnapshot.exists) {
-        return collection;
-      }
-    }
-    return null;
+    return response.data.origin;
   } catch (error) {
     console.error("Firestore query error:", error);
+    return null;
   }
 }
 
@@ -333,6 +316,8 @@ export const sendPushNotification = async (userId, title, body) => {
 
 export function calculateAge(dateOfBirth) {
   // Split the date string into day, month, and year
+  if(!dateOfBirth) return 0;
+
   const [day, month, year] = dateOfBirth.split('/').map(Number);
 
   // Create a birthdate object
@@ -353,4 +338,60 @@ export function calculateAge(dateOfBirth) {
   }
 
   return age;
+}
+
+const toCamelCase = (str: string): string =>
+  str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+
+export const snakeToCamelCase = (obj: any): any => {
+  if (Array.isArray(obj)) {
+    return obj.map(snakeToCamelCase);
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc: any, key: string) => {
+      const camelKey = toCamelCase(key);
+      acc[camelKey] = snakeToCamelCase(obj[key]);
+      return acc;
+    }, {});
+  }
+  return obj;
+};
+
+const toSnakeCase = (str: string): string =>
+  str.replace(/([A-Z])/g, '_$1').toLowerCase();
+
+export const camelToSnakeCase = (obj: any): any => {
+  if (Array.isArray(obj)) {
+    return obj.map(camelToSnakeCase);
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc: any, key: string) => {
+      const snakeKey = toSnakeCase(key);
+      acc[snakeKey] = camelToSnakeCase(obj[key]);
+      return acc;
+    }, {});
+  }
+  return obj;
+};
+
+export function getChangedFieldsWithOriginalValues(userData, fireStoreData) {
+  const result = {};
+
+  for (const key in userData) {
+    const userVal = userData[key];
+    const storeVal = fireStoreData ? fireStoreData[key] : undefined;
+
+    if (
+      typeof userVal === 'object' &&
+      userVal !== null &&
+      !Array.isArray(userVal)
+    ) {
+      const nested = getChangedFieldsWithOriginalValues(userVal, storeVal || {});
+      if (Object.keys(nested).length > 0) {
+        result[key] = nested;
+      }
+    } else if (userVal !== storeVal) {
+      result[key] = userVal; // return updated value from userData
+    }
+  }
+
+  return result;
 }

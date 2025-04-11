@@ -1,9 +1,12 @@
 import auth from '@react-native-firebase/auth';
 import api from '../constants/axios';
 import { API_ENDPOINTS } from '../constants';
+import { snakeToCamelCase } from '../utils';
+import { useState } from 'react';
 
 const useUpdateUserDetails2 = () => {
     const uid = auth().currentUser?.uid;
+    const [uploading, setUploading] = useState(false);
 
     const getCurrentUserDetails = async () => {
         try {
@@ -11,7 +14,8 @@ const useUpdateUserDetails2 = () => {
                 params: { uid },
             });
 
-            return response.data;
+            const updatedData = snakeToCamelCase(response.data)
+            return updatedData;
         } catch (error) {
             console.error("Error fetching home data:", error);
             return null;
@@ -24,22 +28,21 @@ const useUpdateUserDetails2 = () => {
                 params: { uid },
             });
 
-            return response.data;
+            const updatedData = snakeToCamelCase(response.data)
+            return updatedData;
         } catch (error) {
-            console.error("Error fetching home data:", error);
+            console.error("Error fetching user details:", error);
             return null;
         }
     };
 
-    const handleUserUpdate = async (userData, setUserData,setFirestoreData) => {
+    const handleUserUpdate = async (userData) => {
         try {
-            const response = await api.patch(API_ENDPOINTS.profilesPartialUpdateUserProfile, {
-                uid, user_data: userData,
-            });
+            const response = await api.patch(API_ENDPOINTS.profilesPartialUpdateUserProfile, userData);
 
             return response.data;
         } catch (error) {
-            console.error("Error fetching home data:", error);
+            console.error("Error updating data:", error);
             return null;
         }
     };
@@ -115,6 +118,8 @@ const useUpdateUserDetails2 = () => {
     };
 
     return {
+        uploading,
+        setUploading,
         getCurrentUserDetails,
         getUserDetails,
         handleUserUpdate,

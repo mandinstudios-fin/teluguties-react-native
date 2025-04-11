@@ -26,6 +26,7 @@ import TermsAndConditionsScreen from "./TermsAndConditionsScreen";
 import { Camera } from "lucide-react-native";
 import { Calendar } from "react-native-calendars";
 import useAgent2 from "../../hooks/useAgent2";
+import { Agent } from "../../types";
 
 const { width } = Dimensions.get("window");
 
@@ -47,19 +48,7 @@ const AgentsSteps = ({ navigation }) => {
     return `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
   };
 
-  const [agentFormData, setAgentFormData] = useState({
-    uid: "",
-    full_name: "",
-    state: "",
-    district: "",
-    aadhar_number: "",
-    selected_code: "",
-    phone_number: "",
-    mail_id: "",
-    profile_pic: "",
-    date_of_birth: "",
-  });
-
+  const [agentFormData, setAgentFormData] = useState<Agent>({});
   const [uploading, setUploading] = useState();
   const { successToast, errorToast } = useToastHook();
   const { getAgentsDetails, agentsPartialUpdateAgentProfile } = useAgent2();
@@ -81,15 +70,15 @@ const AgentsSteps = ({ navigation }) => {
       return;
     }
 
-    if (!agentFormData.aadhar_number) {
-      errorToast("Enter Aadhar Number");
-      return;
-    }
+    // if (!agentFormData.aadhar_number) {
+    //   errorToast("Enter Aadhar Number");
+    //   return;
+    // }
 
-    if (!isValidAadhaar(agentFormData.aadhar_number)) {
-      errorToast("Invalid Aadhar Number...");
-      return;
-    }
+    // if (!isValidAadhaar(agentFormData.aadhar_number)) {
+    //   errorToast("Invalid Aadhar Number...");
+    //   return;
+    // }
 
     setUploading(true);
 
@@ -196,7 +185,7 @@ const AgentsSteps = ({ navigation }) => {
                   style={styles.input}
                   placeholder="Full Name"
                   placeholderTextColor="#EBC7B1"
-                  value={agentFormData.full_name}
+                  value={agentFormData?.full_name}
                   onChangeText={(value) => handleChange("full_name", value)}
                 />
 
@@ -205,7 +194,7 @@ const AgentsSteps = ({ navigation }) => {
                     style={styles.input}
                     placeholder="Choose Date Of Birth"
                     placeholderTextColor="#EBC7B1"
-                    value={agentFormData.date_of_birth}
+                    value={agentFormData?.date_of_birth}
                     editable={false}
                   />
                 </TouchableOpacity>
@@ -285,7 +274,7 @@ const AgentsSteps = ({ navigation }) => {
                   style={styles.input}
                   placeholder="State"
                   placeholderTextColor="#EBC7B1"
-                  value={agentFormData.state}
+                  value={agentFormData?.state}
                   onChangeText={(value) => handleChange("state", value)}
                 />
 
@@ -293,7 +282,7 @@ const AgentsSteps = ({ navigation }) => {
                   style={styles.input}
                   placeholder="District"
                   placeholderTextColor="#EBC7B1"
-                  value={agentFormData.district}
+                  value={agentFormData?.district}
                   onChangeText={(value) => handleChange("district", value)}
                 />
 
@@ -303,7 +292,7 @@ const AgentsSteps = ({ navigation }) => {
                   placeholder="Aadhar Number"
                   placeholderTextColor="#EBC7B1"
                   keyboardType="numeric"
-                  value={agentFormData.aadhar_number}
+                  value={agentFormData?.aadhar_number}
                   onChangeText={(value) => handleChange("aadhar_number", value)}
                 />
 
@@ -312,7 +301,7 @@ const AgentsSteps = ({ navigation }) => {
                   placeholder="Email ID"
                   placeholderTextColor="#EBC7B1"
                   keyboardType="email-address"
-                  value={agentFormData.mail_id}
+                  value={agentFormData?.mail_id}
                   onChangeText={(value) => handleChange("mail_id", value)}
                 />
 

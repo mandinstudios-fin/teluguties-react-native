@@ -18,6 +18,7 @@ import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import { ChevronLeft } from 'lucide-react-native';
 import Loader from '../Loader/Loader';
+import useAgent2 from '../../hooks/useAgent2';
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,6 +27,7 @@ const ProfileDetailsAgents: React.FC = ({ navigation }) => {
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setfirestoreData] = useState<any>();
     const { successToast, errorToast } = useToastHook();
+    const { getAgentsDetails, agentsPartialUpdateAgentProfile, agentsCheckAgentMailId } = useAgent2();
 
     const nameRef = useRef(null);
     const dobRef = useRef(null);
@@ -37,23 +39,10 @@ const ProfileDetailsAgents: React.FC = ({ navigation }) => {
     }
 
     const getCurrentUserDetails = async () => {
-        const currentUser = auth().currentUser;
         setLoading(true);
 
-        if (currentUser) {
-            try {
-                const userDoc = await firestore().collection('agents').doc(currentUser.uid).get();
-
-                if (userDoc.exists) {
-                    const userFirestoreData = userDoc.data();
-                    setUserData(userFirestoreData);
-                    setfirestoreData(userFirestoreData);
-                } else {
-                }
-            } catch (error) {
-            }
-        } else {
-        }
+        await getAgentsDetails(setfirestoreData);
+        await getAgentsDetails(setUserData)
 
         setLoading(false);
     }
@@ -69,9 +58,9 @@ const ProfileDetailsAgents: React.FC = ({ navigation }) => {
     }
 
     const checkEmailValidation = async (email: string) => {
-        const querySnapshot = await firestore().collection('agents').where('mailid', '==', email)
+        const check = await agentsCheckAgentMailId(email);
 
-        if (querySnapshot.empty) {
+        if (check) {
             return true;
         }
 
@@ -81,26 +70,26 @@ const ProfileDetailsAgents: React.FC = ({ navigation }) => {
     const handleUserUpdate = async () => {
         const currentUser = auth().currentUser;
 
-        if (!firestoreData?.mailid && userData?.mailid) {
-            if (!checkEmailValidation(userData?.mailid) && !checkEmail(userData?.mailid)) {
-                Alert.alert("Email already exists or Invalid Email");
+        if (!firestoreData?.mail_id && userData?.mail_id) {
+            const isEmailAvailable = await checkEmailValidation(userData.mail_id);
+            const isEmailValid = checkEmail(userData.mail_id);
+
+            if (!isEmailValid) {
+                errorToast("Invalid Email")
                 return;
             }
-        }
 
-        const updatedData = {
-            ...userData,
-            updatedAt: firestore.FieldValue.serverTimestamp()
+            if (!isEmailAvailable) {
+                errorToast("Email exists")
+                return;
+            }
         }
 
         setLoading(true);
 
         if (currentUser) {
             try {
-                await firestore()
-                    .collection('agents')
-                    .doc(currentUser.uid)
-                    .update(updatedData);
+                await agentsPartialUpdateAgentProfile(userData);
 
                 successToast('Your profile has been updated.');
                 getCurrentUserDetails();
@@ -116,99 +105,99 @@ const ProfileDetailsAgents: React.FC = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
-            <View style={styles.main}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <ChevronLeft size={27} strokeWidth={1} color={'white'} />
-                    </TouchableOpacity>
-                    <View style={styles.headertext}>
-                        <Text style={styles.headertextmain}>Profile</Text>
-                    </View>
-                </View>
-                <View style={styles.logo}>
-                    <Image
-                        style={styles.image}
-                        source={require('../../assets/logo.png')}
-                    />
-                </View>
-
-                <View style={styles.formcontainer}>
-                    <View style={styles.container}>
-                        <View style={styles.profile}>
-                            <Text style={styles.profiletext}>Agent Profile Details</Text>
-                        </View>
-                        <View style={styles.formbody}>
-                            <View>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder={userData?.personal_info?.name ?? "Full Name"}
-                                    placeholderTextColor="#EBC7B1"
-                                    value={userData?.fullname ?? ""}
-                                    onChangeText={(value) => setUserData(prev => ({ ...prev, fullname: value }))}
-                                    editable={!firestoreData?.fullname}
-                                    ref={nameRef}
-                                />
-                            </View>
-                            <View>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder={userData?.agent_id ?? "Agent ID"}
-                                    placeholderTextColor="#EBC7B1"
-                                    value={userData?.agent_id ?? ""}
-                                    editable={false}
-                                />
-                            </View>
-                            <View>
-                                <TextInput
-                                    placeholder={userData?.personal_info?.date_of_birth ?? "DOB"}
-                                    style={styles.input}
-                                    placeholderTextColor="#EBC7B1"
-                                    value={userData?.date_of_birth ?? ""}
-                                    onChangeText={(value) => setUserData(prev => ({ ...prev, date_of_birth: value }))}
-                                    editable={!firestoreData?.date_of_birth}
-                                    ref={dobRef}
-                                />
-                            </View>
-                            <View>
-                                <TextInput
-                                    placeholder={"Email"}
-                                    style={styles.input}
-                                    value={userData?.mailid ?? ""}
-                                    onChangeText={(value) => setUserData(prev => ({ ...prev, mailid: value }))}
-                                    placeholderTextColor="#EBC7B1"
-                                    editable={!firestoreData?.mailid}
-                                    ref={emailRef}
-                                />
-                            </View>
-                            <View style={styles.phonecontainer}>
-                                <View style={styles.code}>
-                                    <TextInput placeholder={userData?.selectedcode} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly />
-                                </View>
-                                <View style={styles.phone}>
-                                    <TextInput placeholder={userData?.phonenumber} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
-                                </View>
-                            </View>
-
-                            <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
-                                <Text style={styles.creattext}>UPDATE</Text>
-                            </TouchableOpacity>
+                <View style={styles.main}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <ChevronLeft size={27} strokeWidth={1} color={'white'} />
+                        </TouchableOpacity>
+                        <View style={styles.headertext}>
+                            <Text style={styles.headertextmain}>Profile</Text>
                         </View>
                     </View>
-                </View>
+                    <View style={styles.logo}>
+                        <Image
+                            style={styles.image}
+                            source={require('../../assets/logo.png')}
+                        />
+                    </View>
 
-                <View style={styles.footerbody}>
-                    <View style={styles.footer}>
-                        <Text style={styles.footertext}>
-                            please review the terms and conditions before you proceed.
-                        </Text>
-                        <Text style={styles.footertext}>24/7 Customer service</Text>
-                        <Text style={styles.footertext}>www.mandinstudios.com</Text>
+                    <View style={styles.formcontainer}>
+                        <View style={styles.container}>
+                            <View style={styles.profile}>
+                                <Text style={styles.profiletext}>Agent Profile Details</Text>
+                            </View>
+                            <View style={styles.formbody}>
+                                <View>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={userData?.personal_info?.name ?? "Full Name"}
+                                        placeholderTextColor="#EBC7B1"
+                                        value={userData?.full_name ?? ""}
+                                        onChangeText={(value) => setUserData(prev => ({ ...prev, fullname: value }))}
+                                        editable={!firestoreData?.fullname}
+                                        ref={nameRef}
+                                    />
+                                </View>
+                                <View>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={userData?.agent_id ?? "Agent ID"}
+                                        placeholderTextColor="#EBC7B1"
+                                        value={userData?.agent_id ?? ""}
+                                        editable={false}
+                                    />
+                                </View>
+                                <View>
+                                    <TextInput
+                                        placeholder={userData?.personal_info?.date_of_birth ?? "DOB"}
+                                        style={styles.input}
+                                        placeholderTextColor="#EBC7B1"
+                                        value={userData?.date_of_birth ?? ""}
+                                        onChangeText={(value) => setUserData(prev => ({ ...prev, date_of_birth: value }))}
+                                        editable={!firestoreData?.date_of_birth}
+                                        ref={dobRef}
+                                    />
+                                </View>
+                                <View>
+                                    <TextInput
+                                        placeholder={"Email"}
+                                        style={styles.input}
+                                        value={userData?.mail_id ?? ""}
+                                        onChangeText={(value) => setUserData(prev => ({ ...prev, mail_id: value }))}
+                                        placeholderTextColor="#EBC7B1"
+                                        editable={!firestoreData?.mail_id}
+                                        ref={emailRef}
+                                    />
+                                </View>
+                                <View style={styles.phonecontainer}>
+                                    <View style={styles.code}>
+                                        <TextInput placeholder={userData?.selected_code} style={styles.number1} placeholderTextColor="#EBC7B1" readOnly />
+                                    </View>
+                                    <View style={styles.phone}>
+                                        <TextInput placeholder={userData?.phone_number} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
+                                    </View>
+                                </View>
+
+                                <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
+                                    <Text style={styles.creattext}>UPDATE</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.footerbody}>
+                        <View style={styles.footer}>
+                            <Text style={styles.footertext}>
+                                please review the terms and conditions before you proceed.
+                            </Text>
+                            <Text style={styles.footertext}>24/7 Customer service</Text>
+                            <Text style={styles.footertext}>www.mandinstudios.com</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
             </ScrollView>
             <View style={loading ? styles.loadingContainer : null}>
-                {loading && <Loader/>}
+                {loading && <Loader />}
             </View>
         </SafeAreaView>
     );
@@ -314,14 +303,14 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: '#7b2a38',
         padding: width / 30,
-        marginTop:width/30,
+        marginTop: width / 30,
     },
     creattext: {
         color: 'white',
         textAlign: 'center',
     },
     footerbody: {
-        marginTop:width/15,
+        marginTop: width / 15,
     },
     footer: {
         textAlign: 'center',
@@ -329,7 +318,7 @@ const styles = StyleSheet.create({
     footertext: {
         textAlign: 'center',
         color: 'black',
-        fontSize:12,
+        fontSize: 12,
     },
     loadingContainer: {
         position: 'absolute',

@@ -4,11 +4,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import AuthNavigation from './AuthNavigation';
 import Layout from './_layout';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActivityIndicator, View, Text } from 'react-native';
+import { View, Text } from 'react-native';
 import Steps from '../Steps/Steps';
 import AgentsLayout from './AgentsLayout';
-import firestore from '@react-native-firebase/firestore';
-import auth, { connectAuthEmulator } from '@react-native-firebase/auth'
 
 import { navigate, navigationRef, resetNavigation } from './Navigation';
 import { getUserCategoryFromToken } from '../../utils';
@@ -21,13 +19,13 @@ const Navigator = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true); // Add a loading state
   const [category, setCategory] = useState('');
 
-  
+
 
   useEffect(() => {
     const checkAuthenticatedUser = async () => {
       try {
         const userToken = await AsyncStorage.getItem('userToken');
-        
+
         if (userToken) {
           try {
             const categoryMain = await getUserCategoryFromToken(userToken);
@@ -57,7 +55,7 @@ const Navigator = () => {
     if (!isAuthenticated) {
       return 'Auth';
     }
-    
+
     if (category === 'profiles') {
       return 'Layout';
     } else {
@@ -68,7 +66,7 @@ const Navigator = () => {
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center' }}>
-        <Loader/>
+        <Loader />
       </View>
     );
   }
@@ -78,10 +76,10 @@ const Navigator = () => {
       <Stack.Navigator
         initialRouteName={getInitialRouteName()}
         screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Auth" component={AuthNavigation} options={{ presentation: 'transparentModal' }}/>
-        <Stack.Screen name="Layout" component={Layout} options={{ presentation: 'transparentModal' }}/>
-        <Stack.Screen name="AgentsLayout" component={AgentsLayout} options={{ presentation: 'transparentModal' }}/>
-        <Stack.Screen name="Steps" component={Steps} options={{ presentation: 'transparentModal' }}/>
+        <Stack.Screen name="Auth" component={AuthNavigation} options={{ presentation: 'transparentModal' }} />
+        <Stack.Screen name="Layout" component={Layout} options={{ presentation: 'transparentModal' }} />
+        <Stack.Screen name="AgentsLayout" component={AgentsLayout} options={{ presentation: 'transparentModal' }} />
+        <Stack.Screen name="Steps" component={Steps} options={{ presentation: 'transparentModal' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

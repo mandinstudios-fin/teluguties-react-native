@@ -7,14 +7,36 @@ const useFirestore2 = () => {
 
     const createProfile = async (profilesData) => {
         try {
-            const response = await api.post(API_ENDPOINTS.profilesGetHomeData, profilesData);
+            const response = await api.post(API_ENDPOINTS.profilesCreateProfile, profilesData);
 
             return response.data;
         } catch (error) {
-            console.error("Error fetching home data:", error);
+            console.error("Error createProfile", error);
             return null;
         }
     }
+
+    const deleteProfile = async () => {
+        try {
+            const response = await api.delete(API_ENDPOINTS.profilesDeleteProfile, { data: { uid } });
+
+            return response.data;
+        } catch (error) {
+            console.error("Error deleteProfile", error);
+            return null;
+        }
+    }
+
+    const profilesCheckProfileMailId = async (mail_id) => {
+        try {
+            await api.post(API_ENDPOINTS.profilesCheckProfileMailId, { mail_id });
+
+            return true;
+        } catch (error) {
+            console.error("Error agentsPartialUpdateAgentProfile", error);
+            return false;
+        }
+    };
 
     const getHomeData = async () => {
         try {
@@ -173,6 +195,8 @@ const useFirestore2 = () => {
 
     return {
         createProfile,
+        deleteProfile,
+        profilesCheckProfileMailId,
         getHomeData,
         getHomeData2,
         getNewData,

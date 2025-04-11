@@ -18,64 +18,36 @@ import phoneCodesData from '../../assets/CountryCodes.json';
 import firestore from '@react-native-firebase/firestore';
 import { Calendar } from "react-native-calendars";
 import Loader from '../Loader/Loader';
+import { API_ENDPOINTS } from '../../constants';
+import api from '../../constants/axios';
+import useToastHook from '../../utils/useToastHook';
 
 const { width, height } = Dimensions.get('window');
 
-
-
-
 const Register = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [formattedDate, setFormattedDate] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    dob: '',
+    dob: null,
     phoneNumber: '',
     selectedCode: '+91',
   });
-
-  console.log(formData)
+  const { errorToast } = useToastHook();
 
   const checkPhoneNumberExists = async (selectedCode: string, phoneNumber: string) => {
     try {
-      const userSnapshot = await firestore()
-        .collection('profiles')
-        .where('contact_info.selected_code', '==', selectedCode)
-        .where('contact_info.phone', '==', phoneNumber)
-        .get();
-
-      const agentSnapshot = await firestore()
-        .collection('agents')
-        .where('selected_code', '==', selectedCode)
-        .where('phone', '==', phoneNumber)
-        .get();
-
-      if (!userSnapshot.empty || !agentSnapshot.empty) {
-        return true; // Phone number exists in either collection
+      const payload = {
+        selected_code: selectedCode,
+        phone_number: phoneNumber
       }
-      return false; // Phone number does not exist
+
+      const response = await api.post(API_ENDPOINTS.checkPhoneNumber, payload);
+
+      return response.data.exists;
     } catch (error) {
       console.error("Error checking phone number:", error);
       return false;
     }
-  };
-
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(false);
-    const formatter = new Intl.DateTimeFormat('en-CA');
-    const formattedDate = formatter.format(currentDate);
-
-    const formattedDateWithSlashes = formattedDate.replace(/-/g, '/');
-
-    setFormData({ ...formData, dob: formattedDateWithSlashes.toString() });
-  };
-
-  const showDatepicker = () => {
-    setShow(true);
   };
 
   const handleInputChange = (name, value) => {
@@ -83,6 +55,16 @@ const Register = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
+    if (!formData?.phoneNumber) {
+      errorToast("Enter Phone Number");
+      return;
+    }
+
+    if (formData?.phoneNumber.length != 10) {
+      errorToast("Phone Number Must be 10 Digit");
+      return;
+    }
+
     setLoading(true)
     const phoneExists = await checkPhoneNumberExists(formData.selectedCode, formData.phoneNumber);
 

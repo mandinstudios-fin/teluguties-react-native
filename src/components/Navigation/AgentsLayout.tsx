@@ -15,6 +15,7 @@ import TabBar from './TabBar';
 import DrawerSceneWrapper from './draw';
 import AgentsHelpCenter from '../HelpCenter/AgentsHelpCenter';
 import LinearGradient from 'react-native-linear-gradient';
+import useAgent2 from '../../hooks/useAgent2';
 
 
 const Tab = createBottomTabNavigator();
@@ -75,15 +76,12 @@ const AgentsBottomTabs = () => {
 const AgentsLayout = ({ navigation }) => {
   const { successToast, errorToast } = useToastHook();
   const CustomDrawerContent = (props) => {
-    const currentUser = auth().currentUser;
     const [agentData, setAgentData] = useState();
+    const { getAgentsDetails, agentsDeleteAgent } = useAgent2();
 
     useEffect(() => {
       const getAgentData = async () => {
-        const userDoc = await firestore().collection('agents').doc(currentUser?.uid).get();
-        const userDataFirestore = userDoc.data();
-
-        setAgentData(userDataFirestore)
+        await getAgentsDetails(setAgentData);
       }
 
       getAgentData();
@@ -99,22 +97,9 @@ const AgentsLayout = ({ navigation }) => {
     const handleDeleteAccount = async () => {
       const userId = auth().currentUser?.uid;
       try {
-        const userRef = firestore().collection('agents').doc(userId);
-        await userRef.delete();
+        await agentsDeleteAgent();
 
-        const requestsRef = firestore().collection('requests').where('fromUid', '==', userId);
-        const requestsSnapshot = await requestsRef.get();
-        requestsSnapshot.forEach(async (doc) => {
-          await doc.ref.delete();
-        });
-
-        const queriesRef = firestore().collection('queries').where('userId', '==', userId);
-        const queriesSnapshot = await queriesRef.get();
-        queriesSnapshot.forEach(async (doc) => {
-          await doc.ref.delete();
-        });
         await AsyncStorage.removeItem('userToken');
-
         successToast(`Account Deleted Successfully`);
 
         navigation.replace('Auth');
@@ -123,7 +108,6 @@ const AgentsLayout = ({ navigation }) => {
         errorToast('Something Went Wrong')
       }
     };
-
 
     return (
       <SafeAreaView style={styles.container}>
@@ -143,17 +127,17 @@ const AgentsLayout = ({ navigation }) => {
             <View style={styles.profileImageContainer}>
               <Image
                 source={{
-                  uri: agentData?.profilepic ||
+                  uri: agentData?.profile_pic ||
                     'https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg'
                 }}
                 style={styles.profileImage}
               />
             </View>
-            <Text style={styles.userName}>{agentData?.fullname || 'User Name'}</Text>
+            <Text style={styles.userName}>{agentData?.full_name || 'User Name'}</Text>
 
             <View style={styles.infoRow}>
               <Phone size={16} color="#fff" />
-              <Text style={styles.userInfo}>{agentData?.phonenumber || 'Phone Number'}</Text>
+              <Text style={styles.userInfo}>{agentData?.phone_number || 'Phone Number'}</Text>
             </View>
           </View>
         </LinearGradient>

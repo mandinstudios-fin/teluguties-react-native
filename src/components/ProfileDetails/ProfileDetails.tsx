@@ -17,6 +17,9 @@ import firestore from '@react-native-firebase/firestore';
 import useToastHook from '../../utils/useToastHook';
 import { ChevronLeft } from 'lucide-react-native';
 import Loader from '../Loader/Loader';
+import useUpdateUserDetails2 from '../../hooks/useUpdateUserDetails2';
+import useFirestore2 from '../../hooks/useFirestore2';
+import { camelToSnakeCase } from '../../utils';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,6 +28,8 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     const [userData, setUserData] = useState<any>();
     const [firestoreData, setfirestoreData] = useState<any>();
     const { successToast, errorToast } = useToastHook();
+    const { getUserDetails, handleUserUpdate } = useUpdateUserDetails2();
+    const { profilesCheckProfileMailId } = useFirestore2();
 
     const nameRef = useRef(null);
     const dobRef = useRef(null);
@@ -36,21 +41,12 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     }
 
     const getCurrentUserDetails = async () => {
-        const currentUser = auth().currentUser;
+        try {
+            const data = await getUserDetails();
+            setUserData(data);
+            setfirestoreData(data);
 
-        if (currentUser) {
-            try {
-                const userDoc = await firestore().collection('profiles').doc(currentUser.uid).get();
-
-                if (userDoc.exists) {
-                    const userFirestoreData = userDoc.data();
-                    setUserData(userFirestoreData);
-                    setfirestoreData(userFirestoreData);
-                } else {
-                }
-            } catch (error) {
-            }
-        } else {
+        } catch (error) {
         }
     }
 
@@ -65,38 +61,40 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     }
 
     const checkEmailValidation = async (email: string) => {
-        const querySnapshot = await firestore().collection('profiles').where('contactInformation.email', '==', email)
+        const check = await profilesCheckProfileMailId(email);
 
-        if (querySnapshot.empty) {
+        if (check) {
             return true;
         }
 
         return false;
     }
 
-    const handleUserUpdate = async () => {
+    const handleUserUpdateMain = async () => {
         const currentUser = auth().currentUser;
 
         if (!firestoreData?.contactInformation?.email && userData?.contactInformation?.email) {
-            if (!checkEmailValidation(userData?.contactInformation?.email) && !checkEmail(userData?.contactInformation?.email)) {
-                Alert.alert("Email already exists or Invalid Email");
+            const isEmailAvailable = await checkEmailValidation(userData?.contactInformation?.email);
+            const isEmailValid = checkEmail(userData?.contactInformation?.email);
+
+            if (!isEmailValid) {
+                errorToast("Invalid Email")
                 return;
             }
-        }
 
-        const updatedData = {
-            ...userData,
-            updatedAt: firestore.FieldValue.serverTimestamp()
+            if (!isEmailAvailable) {
+                errorToast("Email exists")
+                return;
+            }
         }
 
         setLoading(true);
 
         if (currentUser) {
             try {
-                await firestore()
-                    .collection('profiles')
-                    .doc(currentUser.uid)
-                    .update(updatedData);
+                const updatedData = camelToSnakeCase(userData);
+
+                await handleUserUpdate(updatedData);
 
                 successToast('Your profile has been updated.');
                 getCurrentUserDetails();
@@ -136,98 +134,98 @@ const ProfileDetails: React.FC = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safearea}>
             <ScrollView contentContainerStyle={styles.scrollview}>
-            <View style={styles.main}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <ChevronLeft size={27} strokeWidth={1} color={'white'} />
-                    </TouchableOpacity>
-                    <View style={styles.headertext}>
-                        <Text style={styles.headertextmain}>Profile</Text>
-                    </View>
-                </View>
-                <View style={styles.logo}>
-                    <Image
-                        style={styles.image}
-                        source={require('../../assets/logo.png')}
-                    />
-                </View>
-
-                <View style={styles.formcontainer}>
-                    <View style={styles.container}>
-                        <View style={styles.profile}>
-                            <Text style={styles.profiletext}>Profile Details</Text>
+                <View style={styles.main}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <ChevronLeft size={27} strokeWidth={1} color={'white'} />
+                        </TouchableOpacity>
+                        <View style={styles.headertext}>
+                            <Text style={styles.headertextmain}>Profile</Text>
                         </View>
-                        <View style={styles.formbody}>
-                            <View>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder={userData?.personalInformation?.firstName ?? "First Name"}
-                                    placeholderTextColor="#EBC7B1"
-                                    value={userData?.personalInformation?.firstName ?? ""}
-                                    onChangeText={(value) => handleInputChange('personalInformation', 'fullName', value)}
-                                    editable={!firestoreData?.personalInformation?.firstName}
-                                    ref={nameRef}
-                                />
+                    </View>
+                    <View style={styles.logo}>
+                        <Image
+                            style={styles.image}
+                            source={require('../../assets/logo.png')}
+                        />
+                    </View>
+
+                    <View style={styles.formcontainer}>
+                        <View style={styles.container}>
+                            <View style={styles.profile}>
+                                <Text style={styles.profiletext}>Profile Details</Text>
                             </View>
-                            <View>
-                            <TextInput
-                                    style={styles.input}
-                                    placeholder={userData?.personalInformation?.lastName ?? "Last Name"}
-                                    placeholderTextColor="#EBC7B1"
-                                    value={userData?.personalInformation?.lastName ?? ""}
-                                    onChangeText={(value) => handleInputChange('personalInformation', 'lastName', value)}
-                                    editable={!firestoreData?.personalInformation?.lastName}
-                                    ref={nameRef}
-                                />
-                            </View>
-                            <View>
-                                <TextInput
-                                    placeholder={userData?.personalInformation?.dateOfBirth ?? "DOB"}
-                                    style={styles.input}
-                                    placeholderTextColor="#EBC7B1"
-                                    value={userData?.personalInformation?.dateOfBirth ?? ""}
-                                    onChangeText={(value) => handleInputChange('personalInformation', 'dateOfBirth', value)}
-                                    editable={!firestoreData?.personalInformation?.dateOfBirth}
-                                    ref={dobRef}
-                                />
-                            </View>
-                            <View>
-                                <TextInput
-                                    placeholder={"Email"}
-                                    style={styles.input}
-                                    value={userData?.contactInformation?.email ?? ""}
-                                    onChangeText={(value) => handleInputChange('contactInformation', 'email', value)}
-                                    placeholderTextColor="#EBC7B1"
-                                    editable={!firestoreData?.contactInformation?.email}
-                                    ref={emailRef}
-                                />
-                            </View>
-                            <View style={styles.phonecontainer}>
-                                <View style={styles.phone}>
-                                    <TextInput placeholder={userData?.contactInformation?.phone} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
+                            <View style={styles.formbody}>
+                                <View>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={userData?.personalInformation?.firstName ?? "First Name"}
+                                        placeholderTextColor="#EBC7B1"
+                                        value={userData?.personalInformation?.firstName ?? ""}
+                                        onChangeText={(value) => handleInputChange('personalInformation', 'firstName', value)}
+                                        editable={!firestoreData?.personalInformation?.firstName}
+                                        ref={nameRef}
+                                    />
                                 </View>
-                            </View>
+                                <View>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={userData?.personalInformation?.lastName ?? "Last Name"}
+                                        placeholderTextColor="#EBC7B1"
+                                        value={userData?.personalInformation?.lastName ?? ""}
+                                        onChangeText={(value) => handleInputChange('personalInformation', 'lastName', value)}
+                                        editable={!firestoreData?.personalInformation?.lastName}
+                                        ref={nameRef}
+                                    />
+                                </View>
+                                <View>
+                                    <TextInput
+                                        placeholder={userData?.personalInformation?.dateOfBirth ?? "DOB"}
+                                        style={styles.input}
+                                        placeholderTextColor="#EBC7B1"
+                                        value={userData?.personalInformation?.dateOfBirth ?? ""}
+                                        onChangeText={(value) => handleInputChange('personalInformation', 'dateOfBirth', value)}
+                                        editable={!firestoreData?.personalInformation?.dateOfBirth}
+                                        ref={dobRef}
+                                    />
+                                </View>
+                                <View>
+                                    <TextInput
+                                        placeholder={"Email"}
+                                        style={styles.input}
+                                        value={userData?.contactInformation?.email ?? ""}
+                                        onChangeText={(value) => handleInputChange('contactInformation', 'email', value)}
+                                        placeholderTextColor="#EBC7B1"
+                                        editable={!firestoreData?.contactInformation?.email}
+                                        ref={emailRef}
+                                    />
+                                </View>
+                                <View style={styles.phonecontainer}>
+                                    <View style={styles.phone}>
+                                        <TextInput placeholder={userData?.contactInformation?.phone} style={styles.number2} placeholderTextColor="#EBC7B1" readOnly />
+                                    </View>
+                                </View>
 
-                            <TouchableOpacity style={styles.creat} onPress={handleUserUpdate}>
-                                <Text style={styles.creattext}>UPDATE</Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity style={styles.creat} onPress={handleUserUpdateMain}>
+                                    <Text style={styles.creattext}>UPDATE</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.footerbody}>
+                        <View style={styles.footer}>
+                            <Text style={styles.footertext}>
+                                please review the terms and conditions before you proceed.
+                            </Text>
+                            <Text style={styles.footertext}>24/7 Customer service</Text>
+                            <Text style={styles.footertext}>www.mandinstudios.com</Text>
                         </View>
                     </View>
                 </View>
-
-                <View style={styles.footerbody}>
-                    <View style={styles.footer}>
-                        <Text style={styles.footertext}>
-                            please review the terms and conditions before you proceed.
-                        </Text>
-                        <Text style={styles.footertext}>24/7 Customer service</Text>
-                        <Text style={styles.footertext}>www.mandinstudios.com</Text>
-                    </View>
+                <View style={loading ? styles.loadingContainer : null}>
+                    {loading && <Loader />}
                 </View>
-            </View>
-            <View style={loading ? styles.loadingContainer : null}>
-                {loading && <Loader/>}
-            </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -301,7 +299,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         paddingLeft: width / 40,
         color: '#EBC7B1',
-        fontWeight:'bold'
+        fontWeight: 'bold'
     },
     phonecontainer: {
         display: 'flex',
@@ -322,25 +320,25 @@ const styles = StyleSheet.create({
     },
     number1: {
         textAlign: 'center',
-        fontWeight:'bold'
+        fontWeight: 'bold'
     },
     number2: {
         textAlign: 'left',
         paddingLeft: width / 40,
-        fontWeight:'bold',
+        fontWeight: 'bold',
     },
     creat: {
         borderRadius: 12,
         backgroundColor: '#7b2a38',
         padding: width / 30,
-        marginTop:width/30,
+        marginTop: width / 30,
     },
     creattext: {
         color: 'white',
         textAlign: 'center',
     },
     footerbody: {
-        marginTop:width/15
+        marginTop: width / 15
     },
     footer: {
         textAlign: 'center',
@@ -348,7 +346,7 @@ const styles = StyleSheet.create({
     footertext: {
         textAlign: 'center',
         color: 'black',
-        fontSize:12,
+        fontSize: 12,
     },
     loadingContainer: {
         position: 'absolute',
